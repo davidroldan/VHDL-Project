@@ -19,7 +19,7 @@ entity XX is
 		PS2DATA	: inout std_logic;
 		-- Reloj de la FPGA
 		reloj	: in std_logic;
-		-- Reset 
+		-- Reset
 		reset : in std_logic
 	);
 end entity XX;
@@ -63,54 +63,46 @@ architecture AA of XX is
 	signal hayQueContar : std_logic;
 
 begin
-	-- Implementación del contador como registro
-	reg_cont : process (reloj, cont_sig)
+	-- Registros (reloj de la FPGA)
+	fpga_proc : process (reloj, reset, cont_sig, estadc_sig, biestFPGA, hayQueContar)
 	begin
-		if reloj'event and reloj = '1' then
-			cont <= cont_sig;
-		end if;
-	end process reg_cont;
+		if reset = '1' then
+			-- Reinicia el contador
+			cont <= (others => '0');
+	
+			biestFPGA <= '0';
+		elsif reloj'event and reloj = '1' then
+			-- Registros de contador y estado
+			cont	<= cont_sig;
+			estadc	<= estadc_sig;
 
-	-- Implementación del estado como registro
-	reg_estadc : process (reloj, estadc_sig)
-	begin
-		if reloj'event and reloj = '1' then
-			estadc <= estadc_sig;
+			-- Biestable de la FPGA (se invierte cuando cuenta)
+			biestFPGA <= biestFPGA xor hayQueContar;
 		end if;
-	end process reg_estadc;
+	end process fpga_proc;
 
 	-- Reflexión: ¿qué pasa con los biestables de sincronización en el
 	-- primer ciclo en el que interesa leerlos?
-
-	-- Biestable de sincronización por la FPGA (se invierte cada vez que cuenta)
-	reg_biestFPGA : process (reloj, biestFPGA, hayQueContar)
-	begin
-		if reloj'event and reloj = '1' then
-			biestFPGA <= biestFPGA xor hayQueContar;
-		end if;
-	end process reg_biestFPGA;
-
-	-- Biestable de sincronización por el teclado (se invierte en cada ciclo)
-	reg_biestPS2 : process (PS2CLK, biestPS2)
-	begin
-		if PS2CLK'event and PS2CLK = '1' then
-			biestPS2 <= not biestPS2;
-		end if;
-	end process reg_biestPS2;
-
-
-	-- Registro de desplazamiento de la secuencia (con enable a estado = enviando)
+	
 	-- Reflexión: el primer golpe de reloj del teclado no tiene que consumir un
 	-- dígito de la secuencia, ¿no?
-	regd_secuencia : process (PS2CLK, estadc, secuencia, reset)
+	-- Biestable de sincronización por el teclado (se invierte en cada ciclo)
+	ps2_proc : process (PS2CLK, reset, biestPS2)
 	begin
 		if reset = '1' then
-			secuencia <= '0' & x"F8"  & '0' & '1';  ---comentar
-		elsif PS2CLK'event and PS2CLK = '1'and estadc = enviando then
-			secuencia <= secuencia(TAMS-1 downto 1) & '0';	
+			biestPS2 <= '0';
+			
+			secuencia <= '0' & x"F8" & '0' & '1'; --comentar
+			
+		elsif PS2CLK'event and PS2CLK = '1' then
+			biestPS2 <= not biestPS2;
+			
+			-- Registro de desplazamiento de la secuencia (con enable a estado = enviando)
+			if estadc = enviando then
+				secuencia <= secuencia(TAMS-2 downto 0) & '0';
+			end if;
 		end if;
-	end process regd_secuencia;
-
+	end process ps2_proc;
 
 	-- El 'comparando' (el otro término de la comparación) como mux
 	with estadc select
@@ -133,8 +125,7 @@ begin
 	suma <=		cont + (conv_std_logic_vector(0, TAMC-1) & deltac);
 
 	-- El cambio de estado del contador
-	cont_sig <=	(others=>'0') when reset   = '1' else
-			(others=>'0') when iguales = '1' else
+	cont_sig <=	(others=>'0') when iguales = '1' else
 			suma;
 
 	-- Cambio de estado
