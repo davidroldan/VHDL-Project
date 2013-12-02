@@ -99,7 +99,7 @@ begin
 			
 			-- Registro de desplazamiento de la secuencia (con enable a estado = enviando)
 			if estadc = enviando then
-				secuencia <= secuencia(TAMS-2 downto 0) & '0';
+				secuencia <= '0' & secuencia(TAMS-1 downto 1);
 			end if;
 		end if;
 	end process ps2_proc;
@@ -142,7 +142,7 @@ begin
 
 	-- Comunicación de datos con el teclado (se quiere dejar libre cuando no se usa)
 	with estadc_sig select
-		PS2DATA <=	secuencia(TAMS-1)	when enviando,
+		PS2DATA <=	secuencia(0)	when enviando,
 				'Z'		when others;
 
 end architecture AA;
