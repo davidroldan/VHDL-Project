@@ -107,7 +107,7 @@ begin
 							tecla = x"35" or tecla = x"3C" or tecla = x"44" else
 				 '0';
 				 
-	octava <= "010" when tecla = x"1A" or tecla = x"44" else
+	octava <= "010" when tecla = x"42" or tecla = x"44" else
 				 "001";
 	a <= key(8 downto 5);
 	b<= key(4 downto 1);

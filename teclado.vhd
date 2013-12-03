@@ -107,12 +107,12 @@ begin
 		onda => onda
 	);
 	
---	uut : XX port map (
---			PS2DATA => PS2DATA,
---			PS2CLK => PS2CLK,
---			reloj => reloj,
---			reset => reset
---	);
+	uut : XX port map (
+		PS2DATA => PS2DATA,
+		PS2CLK => PS2CLK,
+		reloj => reloj,
+		reset => reset
+	);
 
 end Behavioral;
 
