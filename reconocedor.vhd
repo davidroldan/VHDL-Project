@@ -17,10 +17,10 @@
 -- Additional Comments: 
 --
 ----------------------------------------------------------------------------------
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_unsigned.ALL;
-use IEEE.STD_LOGIC_arith.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
 
 use work.tipos.all;
 
@@ -31,16 +31,20 @@ entity reconocedor is
 		octava : out std_logic_vector(2 downto 0);
 		sharp : out std_logic;
 		onota : out Nota;
+
 		r, t: out std_logic_vector (6 downto 0)
 	);
 end reconocedor;
 
 architecture Behavioral of reconocedor is
-component segments IS
-PORT(
-          aa,bb,cc,dd   : IN std_logic;
-          salida     : OUT std_logic_vector(6 downto 0));
-END component segments;
+	-- Conversor a 7 segmentos
+	component segments is
+		port (
+			entrada	: in std_logic_vector(3 downto 0);
+			salida	: out std_logic_vector(6 downto 0)
+		);
+	end component segments;
+
 	-- Estado para diferenciar pulsación de suelta (acción y efecto de soltar)
 	type Estado is (abajo, arriba, subiendo);
 	
@@ -50,7 +54,6 @@ END component segments;
 	-- Registro de desplazamiento con la última transmisión entrante en reposo
 	signal key : std_logic_vector (10 downto 0);
 	
-	signal a,b : std_logic_vector(3 downto 0);
 	
 	-- Número de bits leídos en una misma transmisión
 	signal bitsleidos : std_logic_vector(9 downto 0);
@@ -109,8 +112,7 @@ begin
 				 
 	octava <= "010" when tecla = x"42" or tecla = x"44" else
 				 "001";
-	a <= key(8 downto 5);
-	b<= key(4 downto 1);
-	u : segments port map(b(3),b(2),b(1),b(0), r);
-	v : segments port map(a(3),a(2),a(1),a(0), t);
+
+	u : segments port map (key(4 downto 1), r);
+	v : segments port map (key(8 downto 5), t);
 end Behavioral;

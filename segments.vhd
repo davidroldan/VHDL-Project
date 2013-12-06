@@ -17,8 +17,8 @@
 -- Additional Comments: 
 --
 ----------------------------------------------------------------------------------
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -29,38 +29,32 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-ENTITY segments IS
-PORT(
-          aa,bb,cc,dd   : IN std_logic;
-          salida     : OUT std_logic_vector(6 downto 0));
-END segments;
+entity segments is
+	port (
+		entrada	: in std_logic_vector(3 downto 0);
+		salida	: out std_logic_vector(6 downto 0)
+	);
+end segments;
 
-ARCHITECTURE comportamental OF segments IS
-SIGNAL pepe : std_logic_VECTOR(3 DOWNTO 0);
-SIGNAL SAL  : std_logic_VECTOR(6 DOWNTO 0);
-BEGIN
-    PROCESS
-        BEGIN
-            pepe <= aa & bb & cc & dd;
-            CASE pepe IS
-                 WHEN "0000" => SAL <="0111111";
-                 WHEN "0001" => SAL <="0000110";
-                 WHEN "0010" => SAL <="1011011";
-                 WHEN "0011" => SAL <="1001111";
-                 WHEN "0100" => SAL <="1100110";
-                 WHEN "0101" => SAL <="1101101";
-                 WHEN "0110" => SAL <="1111101";
-                 WHEN "0111" => SAL <="0000111";
-                 WHEN "1000" => SAL <="1111111";
-                 WHEN "1001" => SAL <="1101111";
-                 WHEN "1010" => SAL <="1110111";
-                 WHEN "1011" => SAL <="1111100";
-                 WHEN "1100" => SAL <="0111001";
-                 WHEN "1101" => SAL <="1011110";
-                 WHEN "1110" => SAL <="1111001";
-                 WHEN "1111" => SAL <="1110001";
-                 WHEN OTHERS => SAL <="0000000";
-             END CASE;
-    END PROCESS;
-salida <= SAL;
-END comportamental; 
+
+architecture comportamental of segments is
+begin
+	with entrada select
+		salida <= 	"0111111"	when "0000",
+				"0000110"	when "0001",
+				"1011011"	when "0010",
+				"1001111"	when "0011",
+				"1100110"	when "0100",
+				"1101101"	when "0101",
+				"1111101"	when "0110",
+				"0000111"	when "0111",
+				"1111111"	when "1000",
+				"1101111"	when "1001",
+				"1110111"	when "1010",
+				"1111100"	when "1011",
+				"0111001"	when "1100",
+				"1011110" 	when "1101",
+				"1111001"	when "1110",
+				"1110001"	when "1111",
+				"0000000"	when others;
+end comportamental;

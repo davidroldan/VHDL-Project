@@ -99,3 +99,12 @@ NET r<3> loc=F2;
 NET r<4> loc=G4;
 NET r<5> loc=G3;
 NET r<6> loc=G1;
+
+# códec de audio (placa extendida)
+	# entradas
+#NET audio-mclk LOC=P11;	# Master Clock
+#NET audio-lrck LOC=R12;  # Input/Output Channel Clock Pin (selector de canal)
+#NET audio-sclk LOC=T12;	# Audio Serial Data Clock Pin
+#NET audio-sdti LOC=M10;	# Entrada conversor digital-analógico
+	# salida
+#NET audio-sdto LOC=K5;		# Salida conversor analógico-digital
