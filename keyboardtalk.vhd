@@ -141,7 +141,7 @@ begin
 				'Z' when others;
 
 	-- Comunicación de datos con el teclado (se quiere dejar libre cuando no se usa)
-	with estadc_sig select
+	with estadc select
 		PS2DATA <=	secuencia(0)	when enviando,
 				'Z'		when others;
 

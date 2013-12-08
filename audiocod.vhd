@@ -19,6 +19,8 @@
 ----------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
 
 use work.tipos.all;
 
@@ -48,13 +50,14 @@ architecture audioAK4565 of audiocod is
 begin
 	-- Contador
 	cnt_proc : process (reloj, reset, cnt)
+	begin
 		if reset = '1' then
 			cnt <= (others => '0');
 
 		elsif reloj'event and reloj='1' then
 			cnt <= cnt + 1;
 		end if;
-	end process cont_proc;
+	end process cnt_proc;
 
 	-- Relojes del códec (ver manual)
 	au_mclk <= cnt(1);
