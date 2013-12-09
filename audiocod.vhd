@@ -29,7 +29,7 @@ entity audiocod is
 		-- Señal digital de entrada
 		onda	: in std_logic;
 		-- Señal de entrada del codec
-		au_stdi	: out std_logic;
+		au_sdti	: out std_logic;
 		-- Reloj maestro
 		au_mclk	: out std_logic;
 		-- Reloj de la entrada
@@ -60,9 +60,9 @@ begin
 	end process cnt_proc;
 
 	-- Relojes del códec (ver manual)
-	au_mclk <= cnt(1);
+	au_mclk <= cnt(0);
 	au_bclk <= cnt(3);
 	au_lrck <= cnt(9);
 
-	au_stdi <= onda;
+	au_sdti <= onda;
 end architecture audioAK4565;

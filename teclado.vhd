@@ -27,6 +27,7 @@ entity teclado is
 		PS2DATA, PS2CLK : inout std_logic;
 		reloj, reset : in std_logic;
 		onda	: out std_logic;
+		au_sdti, au_mclk, au_bclk, au_lrck : out std_logic;
 		r, t: out std_logic_vector (6 downto 0)
 	);
 end teclado;
@@ -35,7 +36,7 @@ architecture Behavioral of teclado is
 	component reconocedor is
 		port(
 			PS2DATA, PS2CLK : in std_logic;
-			reset : std_logic;
+			reset, reloj : std_logic;
 			octava : out std_logic_vector(2 downto 0);
 			sharp : out std_logic;
 			onota : out Nota;
@@ -84,18 +85,31 @@ architecture Behavioral of teclado is
 	signal cableSharp : std_logic;
 	
 	signal cableOctava : std_logic_vector(2 downto 0);
+	
+	signal cableOnda	: std_logic;
 
 begin
 
 	recon : reconocedor port map (
 		PS2DATA => PS2DATA,
 		PS2CLK => PS2CLK,
+		reloj => reloj,
 		reset => reset,
 		octava => cableOctava,
 		sharp => cableSharp,
 		onota => cableNota,
 		r => r,
 		t => t
+	);
+	
+	codec : entity work.audiocod port map (
+		onda	=> cableOnda,
+		au_sdti	=> au_sdti,
+		au_mclk	=> au_mclk,
+		au_bclk	=> au_bclk,
+		au_lrck	=> au_lrck,
+		reloj		=> reloj,
+		reset		=> reset
 	);
 
 	generador : gensonido port map (
@@ -104,7 +118,7 @@ begin
 		octave => cableOctava,
 		reloj => reloj,
 		reset => reset,
-		onda => onda
+		onda => cableOnda
 	);
 	
 	uut : XX port map (
@@ -113,5 +127,7 @@ begin
 		reloj => reloj,
 		reset => reset
 	);
+	
+	onda <= cableOnda;
 
 end Behavioral;

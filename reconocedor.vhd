@@ -27,7 +27,7 @@ use work.tipos.all;
 entity reconocedor is
 	port(
 		PS2DATA, PS2CLK : in std_logic;
-		reset	: in std_logic;
+		reset, reloj	: in std_logic;
 		octava : out std_logic_vector(2 downto 0);
 		sharp : out std_logic;
 		onota : out Nota;
@@ -46,7 +46,7 @@ architecture Behavioral of reconocedor is
 	end component segments;
 
 	-- Estado para diferenciar pulsación de suelta (acción y efecto de soltar)
-	type Estado is (abajo, arriba, subiendo);
+	type Estado is (callado, sonando);
 	
 	-- Estado
 	signal estadoa : Estado;
@@ -54,48 +54,57 @@ architecture Behavioral of reconocedor is
 	-- Registro de desplazamiento con la última transmisión entrante en reposo
 	signal key : std_logic_vector (10 downto 0);
 	
-	
 	-- Número de bits leídos en una misma transmisión
 	signal bitsleidos : std_logic_vector(9 downto 0);
 	
 	-- Última tecla leída
 	signal tecla : std_logic_vector(7 downto 0);
+	
+	-- Contador del tiempe desde la última nota leída
+	signal caducidad : std_logic_vector(23 downto 0);
+	
+	signal ps2clk_ant : std_logic;
 
 begin
-	escucha: process (PS2CLK, PS2DATA)
+	process (reloj, reset, estadoa, caducidad, PS2CLK, PS2DATA, bitsleidos, key)
 	begin
-		pulso_reloj : if reset = '1' then
-				estadoa <= arriba;
+	
+		if reset = '1' then
+			estadoa <= callado;
+			caducidad <= (others => '0');
 			
-			elsif PS2CLK'event and PS2CLK = '0' then
-			key <= PS2DATA & key(10 downto 1);
-			
-			-- Bits leídos en cada secuencia
-			if bitsleidos = 0 then
-				bitsleidos <= "0000000001";
-			else
-				bitsleidos <= bitsleidos(8 downto 0) & '0';
+		elsif reloj'event and reloj = '1' then
+			ps2clk_ant <= PS2CLK;
+		
+			if estadoa = sonando and caducidad = -1 then
+					estadoa <= callado;
 			end if;
 			
-			-- Conteo de pulsaciones y almacenamiento de la tecla leída
-			if bitsleidos = 0 then
-				if x"F0" = key(8 downto 1) then
-				estadoa <= subiendo;
+			if PS2CLK /= ps2clk_ant and PS2CLK = '1' then
+				key <= PS2DATA & key(10 downto 1);
+			
+				-- Bits leídos en cada secuencia
+				if bitsleidos = 0 then
+					bitsleidos <= "0000000001";
 				else
-					if estadoa = subiendo then
-						estadoa <= arriba;
-						
-					else
-						estadoa <= abajo;
-						
-					end if;
+					bitsleidos <= bitsleidos(8 downto 0) & '0';
+				end if;
+				
+				-- Conteo de pulsaciones y almacenamiento de la tecla leída
+				if bitsleidos = 0 then
+							estadoa <= sonando;
 				end if;
 			end if;
-
-		end if pulso_reloj;
-	end process escucha;
+		end if;
+	end process;
+	
+	caducidad <=	(others => '0') when estadoa = callado else
+						caducidad + 1;		
+	
+	
 	tecla <= key(8 downto 1);
-	onota <= silencio	when estadoa = arriba else
+	
+	onota <= silencio	when estadoa = callado else
 			  do			when tecla = x"1C" or tecla = x"1D" else
 			  re			when tecla = x"1B" or tecla = x"24" else
 			  mi			when tecla = x"23" else

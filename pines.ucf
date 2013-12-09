@@ -25,7 +25,7 @@ NET reset LOC=J4;
 #NET octave<1> LOC=K16;
 #NET octave<2> LOC=F15;
 
-NET onda LOC=P11;
+NET onda LOC=L15;
 
 #
 	#push buttons placa superior
@@ -102,9 +102,9 @@ NET r<6> loc=G1;
 
 # códec de audio (placa extendida)
 	# entradas
-#NET au_mclk LOC=P11;	# Master Clock
-#NET au_lrck LOC=R12;  # Input/Output Channel Clock Pin (selector de canal)
-#NET au_sclk LOC=T12;	# Audio Serial Data Clock Pin
-#NET au_sdti LOC=M10;	# Entrada conversor digital-analógico
+NET au_mclk LOC=P11;	# Master Clock
+NET au_lrck LOC=R12;  # Input/Output Channel Clock Pin (selector de canal)
+NET au_bclk LOC=T12;	# Audio Serial Data Clock Pin
+NET au_sdti LOC=M10;	# Entrada conversor digital-analógico
 	# salida
 #NET au_sdto LOC=K5;		# Salida conversor analógico-digital
