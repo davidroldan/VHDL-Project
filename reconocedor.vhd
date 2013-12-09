@@ -62,25 +62,43 @@ architecture Behavioral of reconocedor is
 	
 	-- Contador del tiempe desde la última nota leída
 	signal caducidad : std_logic_vector(23 downto 0);
+
+	-- Señal estable del reloj del teclado
+	signal PS2CLK_E : std_logic;
+
+	-- Retraso de la señal de teclado
+	constant ps2Retraso : Positive := 16;
 	
+	-- Biestable que recuerda el último valor conocido del reloj del teclado
 	signal ps2clk_ant : std_logic;
 
 begin
+	
+	-- Estabiliza la señal del reloj del teclado
+	stb_clk : entity work.estabilizador generic map (
+		DELAY => ps2Retraso
+	) port map (
+		reloj		=> reloj,
+		reset		=> reset,
+		input		=> PS2CLK,
+		output	=> PS2CLK_E
+	);
+
 	process (reloj, reset, estadoa, caducidad, PS2CLK, PS2DATA, bitsleidos, key)
 	begin
 	
 		if reset = '1' then
 			estadoa <= callado;
 			caducidad <= (others => '0');
+			ps2clk_ant <= '0';
 			
 		elsif reloj'event and reloj = '1' then
-			ps2clk_ant <= PS2CLK;
+			ps2clk_ant <= PS2CLK_E;
 		
 			if estadoa = sonando and caducidad = -1 then
 					estadoa <= callado;
-			end if;
 			
-			if PS2CLK /= ps2clk_ant and PS2CLK = '1' then
+			elsif PS2CLK_E /= ps2clk_ant and PS2CLK_E = '1' then
 				key <= PS2DATA & key(10 downto 1);
 			
 				-- Bits leídos en cada secuencia
