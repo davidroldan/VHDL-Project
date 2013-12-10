@@ -24,7 +24,7 @@ use ieee.std_logic_unsigned.all;
 
 entity estabilizador is
 	generic (
-		DELAY		: Positive;
+		DELAY		: Positive
 	);
 	port(
 		-- Reloj
@@ -48,7 +48,7 @@ architecture stab of estabilizador is
 	-- 'output' también actúa como un biestable
 begin
 
-	filtro : process ()
+	filtro : process (reset, reloj, input, delay_cnt, interno)
 	begin
 
 		if reset = '1' then
@@ -59,10 +59,10 @@ begin
 		elsif reloj'event and reloj = '1' then
 			if input /= interno then
 				interno		<= input;
-				delay_cnt	<= '0';
+				delay_cnt	<= 0;
 
 			elsif delay_cnt = DELAY then
-				output <= internal;
+				output <= interno;
 
 			else
 				delay_cnt <= delay_cnt + 1;

@@ -60,7 +60,7 @@ begin
 	end process cnt_proc;
 
 	-- Relojes del códec (ver manual)
-	au_mclk <= cnt(0);
+	au_mclk <= cnt(1);
 	au_bclk <= cnt(3);
 	au_lrck <= cnt(9);
 

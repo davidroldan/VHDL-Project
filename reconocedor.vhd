@@ -94,12 +94,20 @@ begin
 			
 		elsif reloj'event and reloj = '1' then
 			ps2clk_ant <= PS2CLK_E;
+			
+			if estadoa = callado then
+				caducidad <= (others => '0');
+			else
+				caducidad <= caducidad + 1;
+			end if;
 		
-			if estadoa = sonando and caducidad = -1 then
+			if estadoa = sonando and caducidad + 1 = 0 then
 					estadoa <= callado;
 			
 			elsif PS2CLK_E /= ps2clk_ant and PS2CLK_E = '1' then
 				key <= PS2DATA & key(10 downto 1);
+				
+				caducidad <= (others => '0');
 			
 				-- Bits leídos en cada secuencia
 				if bitsleidos = 0 then
@@ -115,10 +123,6 @@ begin
 			end if;
 		end if;
 	end process;
-	
-	caducidad <=	(others => '0') when estadoa = callado else
-						caducidad + 1;		
-	
 	
 	tecla <= key(8 downto 1);
 	
