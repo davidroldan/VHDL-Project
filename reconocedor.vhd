@@ -52,7 +52,7 @@ architecture Behavioral of reconocedor is
 	signal estadoa : Estado;
 
 	-- Registro de desplazamiento con la última transmisión entrante en reposo
-	signal key : std_logic_vector (10 downto 0);
+	signal mensaje : std_logic_vector (10 downto 0);
 	
 	-- Número de bits leídos en una misma transmisión
 	signal bitsleidos : std_logic_vector(9 downto 0);
@@ -63,11 +63,11 @@ architecture Behavioral of reconocedor is
 	-- Contador del tiempe desde la última nota leída
 	signal caducidad : std_logic_vector(23 downto 0);
 
-	-- Señal estable del reloj del teclado
-	signal PS2CLK_E : std_logic;
-
 	-- Retraso de la señal de teclado
 	constant ps2Retraso : Positive := 16;
+
+	-- Señal estable del reloj del teclado
+	signal PS2CLK_E : std_logic;
 	
 	-- Biestable que recuerda el último valor conocido del reloj del teclado
 	signal ps2clk_ant : std_logic;
@@ -81,51 +81,62 @@ begin
 		reloj		=> reloj,
 		reset		=> reset,
 		input		=> PS2CLK,
-		output	=> PS2CLK_E
+		output		=> PS2CLK_E
 	);
 
-	process (reloj, reset, estadoa, caducidad, PS2CLK, PS2DATA, bitsleidos, key)
+	process (reloj, reset, estadoa, caducidad, PS2CLK, PS2DATA, bitsleidos, mensaje)
 	begin
 	
 		if reset = '1' then
 			estadoa <= callado;
 			caducidad <= (others => '0');
-			ps2clk_ant <= '0';
+			ps2clk_ant <= '1';
 			
 		elsif reloj'event and reloj = '1' then
+			-- Almacena el valor del reloj del teclado
+			-- (visible en el ciclo siguiente)
 			ps2clk_ant <= PS2CLK_E;
 			
+			-- Independiente del teclado
 			if estadoa = callado then
 				caducidad <= (others => '0');
+
+			elsif caducidad + 1 = 0 then
+				estadoa <= callado;
+
 			else
 				caducidad <= caducidad + 1;
 			end if;
-		
-			if estadoa = sonando and caducidad + 1 = 0 then
-					estadoa <= callado;
-			
-			elsif PS2CLK_E /= ps2clk_ant and PS2CLK_E = '1' then
-				key <= PS2DATA & key(10 downto 1);
+	
+			-- Atendiendo al teclado
+			if PS2CLK_E /= ps2clk_ant and PS2CLK_E = '0' then
+
+				-- Introduce en serie el mensaje en el registro
+				mensaje <= PS2DATA & mensaje(10 downto 1);
 				
+				-- Se ha pulsado una tecla: la caducidad se renueva
 				caducidad <= (others => '0');
+
+				-- Lectura del mensaje completa
+				if bitsleidos = 0 then
+					if mensaje(8 downto 1) /= x"F0" then
+						estadoa <= sonando;
+						tecla <= mensaje(8 downto 1);
+
+					end if;
+				end if;
 			
-				-- Bits leídos en cada secuencia
+				-- Contador: bits leídos en cada secuencia
 				if bitsleidos = 0 then
 					bitsleidos <= "0000000001";
 				else
 					bitsleidos <= bitsleidos(8 downto 0) & '0';
 				end if;
-				
-				-- Conteo de pulsaciones y almacenamiento de la tecla leída
-				if bitsleidos = 0 then
-							estadoa <= sonando;
-				end if;
 			end if;
 		end if;
 	end process;
 	
-	tecla <= key(8 downto 1);
-	
+	-- Nota pulsada
 	onota <= silencio	when estadoa = callado else
 			  do			when tecla = x"1C" or tecla = x"1D" else
 			  re			when tecla = x"1B" or tecla = x"24" else
@@ -136,14 +147,16 @@ begin
 			  si			when tecla = x"3B" else
 			  do			when tecla = x"42" or tecla = x"44" else
 			  silencio;
-			  
+	
+	-- Sostenido  
 	sharp <= '1' when tecla = x"1D" or tecla = x"24" or tecla = x"2C" or
 							tecla = x"35" or tecla = x"3C" or tecla = x"44" else
 				 '0';
-				 
+	
+	-- Octava	 
 	octava <= "010" when tecla = x"42" or tecla = x"44" else
 				 "001";
 
-	u : segments port map (key(4 downto 1), r);
-	v : segments port map (key(8 downto 5), t);
+	u : segments port map (tecla(7 downto 4), r);
+	v : segments port map (tecla(3 downto 0), t);
 end Behavioral;
