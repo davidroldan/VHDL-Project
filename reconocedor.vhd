@@ -46,7 +46,7 @@ architecture Behavioral of reconocedor is
 	end component segments;
 
 	-- Estado para diferenciar pulsación de suelta (acción y efecto de soltar)
-	type Estado is (callado, sonando);
+	type Estado is (callado, inicio, sonando);
 	
 	-- Estado
 	signal estadoa : Estado;
@@ -61,7 +61,7 @@ architecture Behavioral of reconocedor is
 	signal tecla : std_logic_vector(7 downto 0);
 	
 	-- Contador del tiempe desde la última nota leída
-	signal caducidad : std_logic_vector(23 downto 0);
+	signal caducidad : std_logic_vector(21 downto 0);
 
 	-- Retraso de la señal de teclado
 	constant ps2Retraso : Positive := 16;
@@ -90,6 +90,7 @@ begin
 		if reset = '1' then
 			estadoa <= callado;
 			caducidad <= (others => '0');
+			tecla <= (others => '0');
 			ps2clk_ant <= '1';
 			
 		elsif reloj'event and reloj = '1' then
@@ -98,11 +99,10 @@ begin
 			ps2clk_ant <= PS2CLK_E;
 			
 			-- Independiente del teclado
-			if estadoa = callado then
-				caducidad <= (others => '0');
-
-			elsif caducidad + 1 = 0 then
+			if caducidad + 1 = 0 and estadoa = sonando then
 				estadoa <= callado;
+				caducidad <= (others => '0');
+				tecla <= (others => '0');
 
 			else
 				caducidad <= caducidad + 1;
@@ -119,10 +119,18 @@ begin
 
 				-- Lectura del mensaje completa
 				if bitsleidos = 0 then
-					if mensaje(8 downto 1) /= x"F0" then
+					if mensaje(9 downto 2) /= x"F0" then
+						if estadoa = callado then
+							estadoa <= inicio;
+						else
+							estadoa <= sonando;
+						end if;
+						
+						tecla <= mensaje(9 downto 2);
+					else
+						caducidad <= (others => '0');
 						estadoa <= sonando;
-						tecla <= mensaje(8 downto 1);
-
+						
 					end if;
 				end if;
 			
@@ -157,6 +165,6 @@ begin
 	octava <= "010" when tecla = x"42" or tecla = x"44" else
 				 "001";
 
-	u : segments port map (tecla(7 downto 4), r);
-	v : segments port map (tecla(3 downto 0), t);
+	u : segments port map (tecla(7 downto 4), t);
+	v : segments port map (tecla(3 downto 0), r);
 end Behavioral;
