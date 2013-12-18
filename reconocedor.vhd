@@ -46,7 +46,7 @@ architecture Behavioral of reconocedor is
 	end component segments;
 
 	-- Estado para diferenciar pulsación de suelta (acción y efecto de soltar)
-	type Estado is (callado, inicio, sonando);
+	type Estado is (manosarriba, teclapulsada, soltando);
 	
 	-- Estado
 	signal estadoa : Estado;
@@ -55,13 +55,10 @@ architecture Behavioral of reconocedor is
 	signal mensaje : std_logic_vector (10 downto 0);
 	
 	-- Número de bits leídos en una misma transmisión
-	signal bitsleidos : std_logic_vector(9 downto 0);
+	signal bitsleidos : std_logic_vector(10 downto 0);
 	
 	-- Última tecla leída
 	signal tecla : std_logic_vector(7 downto 0);
-	
-	-- Contador del tiempe desde la última nota leída
-	signal caducidad : std_logic_vector(21 downto 0);
 
 	-- Retraso de la señal de teclado
 	constant ps2Retraso : Positive := 16;
@@ -84,62 +81,72 @@ begin
 		output		=> PS2CLK_E
 	);
 
-	process (reloj, reset, estadoa, caducidad, PS2CLK, PS2DATA, bitsleidos, mensaje)
+	process (reloj, reset, estadoa, PS2CLK, PS2DATA, bitsleidos, mensaje)
 	begin
 	
 		if reset = '1' then
-			estadoa <= callado;
-			caducidad <= (others => '0');
+			estadoa <= manosarriba;
 			tecla <= (others => '0');
-			ps2clk_ant <= '1';
+			ps2clk_ant <= '0';
 			
 		elsif reloj'event and reloj = '1' then
 			-- Almacena el valor del reloj del teclado
 			-- (visible en el ciclo siguiente)
 			ps2clk_ant <= PS2CLK_E;
-			
-			-- Independiente del teclado
-			if caducidad + 1 = 0 and estadoa = sonando then
-				estadoa <= callado;
-				caducidad <= (others => '0');
-				tecla <= (others => '0');
-
-			else
-				caducidad <= caducidad + 1;
-			end if;
 	
 			-- Atendiendo al teclado
 			if PS2CLK_E /= ps2clk_ant and PS2CLK_E = '0' then
 
 				-- Introduce en serie el mensaje en el registro
 				mensaje <= PS2DATA & mensaje(10 downto 1);
-				
-				-- Se ha pulsado una tecla: la caducidad se renueva
-				caducidad <= (others => '0');
-
-				-- Lectura del mensaje completa
-				if bitsleidos = 0 then
-					if mensaje(9 downto 2) /= x"F0" then
-						if estadoa = callado then
-							estadoa <= inicio;
-						else
-							estadoa <= sonando;
-						end if;
-						
-						tecla <= mensaje(9 downto 2);
-					else
-						caducidad <= (others => '0');
-						estadoa <= sonando;
-						
-					end if;
-				end if;
 			
 				-- Contador: bits leídos en cada secuencia
 				if bitsleidos = 0 then
-					bitsleidos <= "0000000001";
+					bitsleidos <= "00000000001";
 				else
-					bitsleidos <= bitsleidos(8 downto 0) & '0';
+					bitsleidos <= bitsleidos(9 downto 0) & '0';
 				end if;
+			end if;
+
+			-- Lectura del mensaje completa
+
+			-- Obs: está fuera del reloj del teclado porque cuando se escribe
+			-- el último carácter leído, no es visible en registro hasta el ciclo
+			-- siguiente de la FPGA
+
+			if bitsleidos(bitsleidos'length-1) = '1' then
+				-- Si es un "make code"
+				if mensaje(8 downto 1) /= x"F0" then
+					case estadoa is
+						when manosarriba =>
+							estadoa <= teclapulsada;
+							tecla <= mensaje(8 downto 1);
+
+						when teclapulsada =>
+							-- Si pulsa una tecla sin soltar
+							-- la otra queda vigente la última
+							estadoa <= teclapulsada;
+							tecla <= mensaje(8 downto 1);
+
+						when others => -- subiendo
+							-- Sólo se considera sin pulsar si
+							-- se libera la tecla vigente
+							if mensaje(8 downto 1) = tecla then
+								estadoa <= manosarriba;
+								tecla <= (others => '0'); -- por afabilidad
+							else
+								estadoa <= teclapulsada;
+							end if;
+					end case;		
+
+				-- Si es un "break code"
+				else
+					estadoa <= soltando;
+				
+				end if;
+
+				-- Ya la anterior lectura es historia
+				bitsleidos <= (others => '0');
 			end if;
 		end if;
 	end process;

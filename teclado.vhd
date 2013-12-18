@@ -19,6 +19,8 @@
 ----------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
 
 use work.tipos.all;
 
@@ -33,64 +35,36 @@ entity teclado is
 end teclado;
 
 architecture Behavioral of teclado is
-	component reconocedor is
-		port(
-			PS2DATA, PS2CLK : in std_logic;
-			reset, reloj : std_logic;
-			octava : out std_logic_vector(2 downto 0);
-			sharp : out std_logic;
-			onota : out Nota;
-			r, t: out std_logic_vector (6 downto 0)
-			
-		);
-	end component reconocedor;
-	
-	component gensonido is
-		port (
-			-- Nota de acuerdo a la codificación escrita
-			nota	: in Nota;
-			
-			-- Aplicación o no del sostenido
-			sharp	: in std_logic;
-			
-			-- Número de octava
-			octave	: in std_logic_vector(2 downto 0);
-			
-			-- Señal de reloj
-			reloj		: in std_logic;
-
-			-- Señal de reinicio
-			reset		: in std_logic;
-			
-			-- Señal de salida
-			onda	: out std_logic
-		);
-	end component gensonido;
-	component XX is
-		port (
-			-- Reloj del teclado
-			PS2CLK	: inout std_logic;
-			-- Puerto de datos del teclado (aquí sólo out)
-			PS2DATA	: inout std_logic;
-			-- Reloj de la FPGA
-			reloj	: in std_logic;
-			-- Reset 
-			reset : in std_logic
-		);
-	end component XX;
-	
-	
+	-- Cable para eschufar entradas y salidas unos módulos a otros
 	signal cableNota : Nota;
-	
 	signal cableSharp : std_logic;
-	
 	signal cableOctava : std_logic_vector(2 downto 0);
-	
-	signal cableOnda	: std_logic;
+	signal cableOnda : std_logic;
 
+	-- Contador del divisor de la señal del reloj
+	signal contdivisor : std_logic_vector(5 downto 0); -- Tamaño al azar
+
+	-- Reloj dividido
+	signal relojdiv	: std_logic;
 begin
 
-	recon : reconocedor port map (
+	-- Divisor de la señal de reloj para grabación y reprodución
+	divisor_clk : process (reset, reloj)
+	begin
+		if reset = '1' then
+			contdivisor <= (others => '0');
+
+		elsif reloj'event and reloj = '1' then
+			contdivisor <= contdivisor + 1;
+
+		end if;
+	end process divisor_clk;
+
+	-- Señal de reloj dividida
+	relojdiv <= contdivisor(contdivisor'length - 1);
+
+	-- Reconocedor del teclado
+	recon : entity work.reconocedor port map (
 		PS2DATA => PS2DATA,
 		PS2CLK => PS2CLK,
 		reloj => reloj,
@@ -102,6 +76,7 @@ begin
 		t => t
 	);
 	
+	-- Códec de audio
 	codec : entity work.audiocod port map (
 		onda	=> cableOnda,
 		au_sdti	=> au_sdti,
@@ -112,20 +87,14 @@ begin
 		reset		=> reset
 	);
 
-	generador : gensonido port map (
+	-- Generador de sonidos (ondas cuadradas)
+	generador : entity work.gensonido port map (
 		nota => cableNota,
 		sharp => cableSharp,
 		octave => cableOctava,
 		reloj => reloj,
 		reset => reset,
 		onda => cableOnda
-	);
-	
-	uut : XX port map (
-		PS2DATA => PS2DATA,
-		PS2CLK => PS2CLK,
-		reloj => reloj,
-		reset => reset
 	);
 	
 	onda <= cableOnda;
