@@ -105,7 +105,10 @@ begin
 		clock => reloj,
       hsyncb => hsyncb,
       vsyncb => vsyncb,
-      rgb => rgb
+      rgb => rgb,
+      nota => cableNota,
+		sharp => cableSharp,
+		octave => cableOctava
 	);
    
 	onda <= cableOnda;

@@ -3,6 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 
+use work.tipos.all;
 
 entity vgacore is
 	port
@@ -11,7 +12,14 @@ entity vgacore is
 		clock: in std_logic;
 		hsyncb: inout std_logic;	-- horizontal (line) sync
 		vsyncb: out std_logic;	-- vertical (frame) sync
-		rgb: out std_logic_vector(8 downto 0) -- red,green,blue colors
+		rgb: out std_logic_vector(8 downto 0); -- red,green,blue colors
+      nota	: in Nota;
+		
+		-- Aplicación o no del sostenido
+		sharp	: in std_logic;
+		
+		-- Número de octava
+		octave	: in std_logic_vector(2 downto 0)
 	);
 end vgacore;
 
