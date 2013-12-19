@@ -14,12 +14,8 @@ entity vgacore is
 		vsyncb: out std_logic;	-- vertical (frame) sync
 		rgb: out std_logic_vector(8 downto 0); -- red,green,blue colors
       nota	: in Nota;
-		
-		-- Aplicación o no del sostenido
 		sharp	: in std_logic;
-		
-		-- Número de octava
-		octave	: in std_logic_vector(2 downto 0)
+		octave : in std_logic_vector(2 downto 0)
 	);
 end vgacore;
 
@@ -30,8 +26,9 @@ signal vcnt: std_logic_vector(9 downto 0);	-- vertical line counter
 signal pintar: std_logic;					-- video blanking signal
 signal clk : std_logic; 
 signal contador : std_logic_vector(2 downto 0);
+signal teclaB_P : integer;
 
-type object is (teclaN,teclaB,borde);
+type object is (teclaN,teclaB,teclaPulsada,borde);
 signal currentobject : object;
 
 begin
@@ -145,55 +142,107 @@ begin
          --C#
          if hcnt > 13 and hcnt < 13 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "000" and nota = do then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
          --D#
 			elsif hcnt > 28 and hcnt < 28 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "000" and nota = re then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
 			--F#
 			elsif hcnt > 52 and hcnt < 52 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "000" and nota = fa then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
 			--G#
 			elsif hcnt > 66 and hcnt < 66 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "000" and nota = sol then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
 			--A#
 			elsif hcnt > 80 and hcnt < 80 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "000" and nota = la then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
 			--C#
 			elsif hcnt > 104 and hcnt < 104 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "001" and nota = do then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
 			--D#
 			elsif hcnt > 119 and hcnt < 119 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "001" and nota = re then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
          --F#
 			elsif hcnt > 143 and hcnt < 143 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "001" and nota = fa then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
 			--G#
 			elsif hcnt > 157 and hcnt < 157 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "001" and nota = sol then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
 			--A#
 			elsif hcnt > 171 and hcnt < 171 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "001" and nota = la then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
          --C#
          elsif hcnt > 195 and hcnt < 195 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "010" and nota = do then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
          --D#
 			elsif hcnt > 210 and hcnt < 210 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "010" and nota = re then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
          --F#
 			elsif hcnt > 234 and hcnt < 234 + 8 and vcnt < 415 then
 				pintar <= '1';
-            currentobject <= teclaN;
+            if sharp = '1' and octave = "010" and nota = fa then
+               currentobject <= teclaPulsada;
+            else
+               currentobject <= teclaN;
+            end if;
          elsif hcnt = 5 or hcnt = 18 or hcnt = 31 or hcnt = 44 or hcnt = 57
 					or hcnt = 70 or hcnt = 83 or hcnt = 96 or hcnt = 109
 					or hcnt = 122 or hcnt = 135 or hcnt = 148 or hcnt = 161
@@ -201,13 +250,38 @@ begin
                or hcnt = 226 or hcnt = 239 or hcnt = 251 then
 				pintar <= '1';
             currentobject <= borde;
-			else
+			elsif hcnt > teclaB_P and hcnt < teclaB_P + 13 then
+            pintar <= '1';
+				currentobject <= teclaPulsada;
+         else
             pintar <= '1';
 				currentobject <= teclaB;
          end if;
 		end if;
-	end if;
+   end if;
 end process que_pintar;
+
+teclaB_P <= 300 when sharp = '1' else 
+            5 when nota = do and octave = "000" else
+            18 when nota = re and octave = "000" else
+            31 when nota = mi and octave = "000" else
+            44 when nota = fa and octave = "000" else
+            57 when nota = sol and octave = "000" else
+            70 when nota = la and octave = "000" else
+            83 when nota = si and octave = "000" else
+            96 when nota = do and octave = "001" else
+            109 when nota = re and octave = "001" else
+            122 when nota = mi and octave = "001" else
+            135 when nota = fa and octave = "001" else
+            148 when nota = sol and octave = "001" else
+            161 when nota = la and octave = "001" else
+            174 when nota = si and octave = "001" else
+            187 when nota = do and octave = "010" else
+            200 when nota = re and octave = "010" else
+            213 when nota = mi and octave = "010" else
+            226 when nota = fa and octave = "010" else
+            239 when nota = sol and octave = "010" else
+            300;
 
 colorear: process(pintar, hcnt, vcnt, currentobject)
 begin
@@ -215,6 +289,7 @@ begin
       case currentobject is
 			when teclaN => rgb <= "000000000";
 			when teclaB => rgb <= "111111111";
+         when teclaPulsada => rgb <= "111000000";
 			when borde => rgb <= "000000000";
 			when others => rgb <= "000000000";
 		end case;
