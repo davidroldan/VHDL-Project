@@ -106,7 +106,6 @@ begin
 				else
 					bitsleidos <= bitsleidos(9 downto 0) & '0';
 				end if;
-			--end if;
 
 			-- Lectura del mensaje completa
 
@@ -151,7 +150,7 @@ begin
 		end if;
 	end process;
 	
-   -- Nota pulsada
+	-- Nota pulsada
 	onota <=  silencio		when tecla = x"00" else
 			  do			when tecla = x"1A" or tecla = x"1B" else
 			  re			when tecla = x"22" or tecla = x"23" else
@@ -165,13 +164,13 @@ begin
 			  mi			when tecla = x"4A" or tecla = x"24" else -- son la misma tecla
 			  fa			when tecla = x"2D" or tecla = x"2E" else
 			  sol			when tecla = x"2C" or tecla = x"36" else
-           la        when tecla = x"35" or tecla = x"3D" else
-           si        when tecla = x"3C" else
-           do        when tecla = x"43" or tecla = x"46" else
-           re        when tecla = x"44" or tecla = x"45" else
-           mi        when tecla = x"4D" else
-           fa        when tecla = x"54" or tecla = x"55" else
-           sol       when tecla = x"5B" else
+			  la			when tecla = x"35" or tecla = x"3D" else
+			  si			when tecla = x"3C" else
+			  do			when tecla = x"43" or tecla = x"46" else
+			  re			when tecla = x"44" or tecla = x"45" else
+			  mi			when tecla = x"4D" else
+			  fa			when tecla = x"54" or tecla = x"55" else
+			  sol			when tecla = x"5B" else
 			  silencio;
 	
 	-- Sostenido  

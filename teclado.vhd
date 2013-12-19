@@ -22,6 +22,9 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
+library unisim;
+use unisim.vcomponents.RAMB18;
+
 use work.tipos.all;
 
 entity teclado is
@@ -50,7 +53,6 @@ architecture Behavioral of teclado is
 	-- Reloj dividido
 	signal relojdiv	: std_logic;
 begin
-
 	-- Divisor de la señal de reloj para grabación y reprodución
 	divisor_clk : process (reset, reloj)
 	begin
@@ -62,6 +64,12 @@ begin
 
 		end if;
 	end process divisor_clk;
+	
+	-- Memoria RAM de doble puerto (palabra 16 bits)
+	mem_ram : RAMB18 port map (
+		ssra => '0',
+		ssrb => '0'
+	);
 
 	-- Señal de reloj dividida
 	relojdiv <= contdivisor(contdivisor'length - 1);
