@@ -151,26 +151,48 @@ begin
 		end if;
 	end process;
 	
-	-- Nota pulsada
-	onota <= silencio	when estadoa = manosarriba else
-			  do			when tecla = x"1C" or tecla = x"1D" else
-			  re			when tecla = x"1B" or tecla = x"24" else
-			  mi			when tecla = x"23" else
-			  fa			when tecla = x"2B" or tecla = x"2C" else
-			  sol			when tecla = x"34" or tecla = x"35" else
-			  la			when tecla = x"33" or tecla = x"3C" else
-			  si			when tecla = x"3B" else
-			  do			when tecla = x"42" or tecla = x"44" else
+   -- Nota pulsada
+	onota <=  silencio		when tecla = x"00" else
+			  do			when tecla = x"1A" or tecla = x"1B" else
+			  re			when tecla = x"22" or tecla = x"23" else
+			  mi			when tecla = x"21" else
+			  fa			when tecla = x"2A" or tecla = x"34" else
+			  sol			when tecla = x"32" or tecla = x"33" else
+			  la			when tecla = x"31" or tecla = x"3B" else
+			  si			when tecla = x"3A" else
+			  do			when tecla = x"41" or tecla = x"4B" or tecla = x"15" or tecla = x"1E" else
+			  re			when tecla = x"49" or tecla = x"4C" or tecla = x"1D" or tecla = x"26" else
+			  mi			when tecla = x"4A" or tecla = x"24" else -- son la misma tecla
+			  fa			when tecla = x"2D" or tecla = x"2E" else
+			  sol			when tecla = x"2C" or tecla = x"36" else
+           la        when tecla = x"35" or tecla = x"3D" else
+           si        when tecla = x"3C" else
+           do        when tecla = x"43" or tecla = x"46" else
+           re        when tecla = x"44" or tecla = x"45" else
+           mi        when tecla = x"4D" else
+           fa        when tecla = x"54" or tecla = x"55" else
+           sol       when tecla = x"5B" else
 			  silencio;
 	
 	-- Sostenido  
-	sharp <= '1' when tecla = x"1D" or tecla = x"24" or tecla = x"2C" or
-							tecla = x"35" or tecla = x"3C" or tecla = x"44" else
-				 '0';
+	sharp <= 	'1' when tecla = x"1B" or tecla = x"23" or tecla = x"34" or
+							tecla = x"33" or tecla = x"3B" or tecla = x"4B" or
+							tecla = x"1E" or tecla = x"4C" or tecla = x"26" or
+							tecla = x"2E" or tecla = x"36" or tecla = x"3D" or
+                     tecla = x"46" or tecla = x"45" or tecla = x"55"
+                     else
+				'0';
 	
 	-- Octava	 
-	octava <= "010" when tecla = x"42" or tecla = x"44" else
-				 "001";
+	octava <= 	"001" when tecla = x"41" or tecla = x"4B" or tecla = x"15" or tecla = x"1E" or
+						 tecla = x"49" or tecla = x"4C" or tecla = x"1D" or tecla = x"26" or
+						 tecla = x"4A" or tecla = x"24" or tecla = x"2D" or tecla = x"2E" or
+						 tecla = x"2C" or tecla = x"36" or tecla = x"35" or tecla = x"3D" or
+                   tecla = x"3C" else
+               "010" when tecla = x"43" or tecla = x"46" or
+                  tecla = x"44" or tecla = x"45" or tecla = x"4D" or
+                  tecla = x"54" or tecla = x"55" or tecla = x"5B" else
+				"000";
 
 	u : segments port map (tecla(7 downto 4), t);
 	v : segments port map (tecla(3 downto 0), r);
