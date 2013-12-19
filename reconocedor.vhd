@@ -106,7 +106,7 @@ begin
 				else
 					bitsleidos <= bitsleidos(9 downto 0) & '0';
 				end if;
-			end if;
+			--end if;
 
 			-- Lectura del mensaje completa
 
@@ -114,7 +114,7 @@ begin
 			-- el último carácter leído, no es visible en registro hasta el ciclo
 			-- siguiente de la FPGA
 
-			if bitsleidos(bitsleidos'length-1) = '1' then
+			elsif bitsleidos(bitsleidos'length-1) = '1' then
 				-- Si es un "make code"
 				if mensaje(8 downto 1) /= x"F0" then
 					case estadoa is
@@ -152,7 +152,7 @@ begin
 	end process;
 	
 	-- Nota pulsada
-	onota <= silencio	when estadoa = callado else
+	onota <= silencio	when estadoa = manosarriba else
 			  do			when tecla = x"1C" or tecla = x"1D" else
 			  re			when tecla = x"1B" or tecla = x"24" else
 			  mi			when tecla = x"23" else
