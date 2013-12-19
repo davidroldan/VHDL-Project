@@ -30,7 +30,10 @@ entity teclado is
 		reloj, reset : in std_logic;
 		onda	: out std_logic;
 		au_sdti, au_mclk, au_bclk, au_lrck : out std_logic;
-		r, t: out std_logic_vector (6 downto 0)
+		r, t: out std_logic_vector (6 downto 0);
+      hsyncb: inout std_logic;	-- horizontal (line) sync
+		vsyncb: out std_logic;	-- vertical (frame) sync
+		rgb: out std_logic_vector(8 downto 0) -- red,green,blue colors
 	);
 end teclado;
 
@@ -97,6 +100,14 @@ begin
 		onda => cableOnda
 	);
 	
+   pantalla: entity work.vgacore port map (
+		reset => reset,	
+		clock => reloj,
+      hsyncb => hsyncb,
+      vsyncb => vsyncb,
+      rgb => rgb
+	);
+   
 	onda <= cableOnda;
 
 end Behavioral;
