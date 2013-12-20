@@ -17,7 +17,7 @@ architecture circuito  of ram_vga is
     signal RAM : ram_type := ((others => (others => '0')));
 begin
 
-    escritura : process (clk)
+    escritura : process (clk, RAM)
     begin
 		-- escritura sincrona
       if rising_edge(clk) then

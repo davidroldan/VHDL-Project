@@ -9,7 +9,8 @@ entity vgacore is
 	port
 	(
 		reset: in std_logic;	-- reset
-		clock: in std_logic;
+		clk: in std_logic;
+		clkdiv: in std_logic;
 		hsyncb: inout std_logic;	-- horizontal (line) sync
 		vsyncb: out std_logic;	-- vertical (frame) sync
 		rgb: out std_logic_vector(8 downto 0); -- red,green,blue colors
@@ -24,8 +25,6 @@ architecture vgacore_arch of vgacore is
 signal hcnt: std_logic_vector(8 downto 0);	-- horizontal pixel counter
 signal vcnt: std_logic_vector(9 downto 0);	-- vertical line counter
 signal pintar: std_logic;					-- video blanking signal
-signal clk, clkdiv : std_logic; 
-signal contador : std_logic_vector(19 downto 0);
 signal teclaB_Pulsada, teclaB_pos : std_logic_vector(8 downto 0);
 signal entradaRAM : std_logic_vector(31 downto 0);
 signal entradaRAM_aux : std_logic_vector(11 downto 0);
@@ -38,20 +37,6 @@ type object is (teclaN, teclaB, teclaB_gris, teclaPulsada, borde, bordeNotaMov, 
 signal currentobject : object;
 
 begin
-
-divisor: process(clock, contador, reset)
-
-begin
-if reset = '1' then
-contador <= (others => '0');
-elsif clock'event and clock = '1' then
-	contador <= contador + 1;
-end if;
-
-clk <= contador(2);
-clkdiv <= contador(19);
-
-end process;
 
 A: process(clk,reset)
 begin
@@ -159,8 +144,8 @@ begin
 				pintar <= '1';
             if sharp = '1' and octave = "000" and nota = do then
                currentobject <= teclaPulsada;
-            else
-               currentobject <= teclaN;
+				else
+					currentobject <= teclaN;
             end if;
          --D#
 			elsif hcnt > 28 and hcnt < 28 + 8 and vcnt < 415 then

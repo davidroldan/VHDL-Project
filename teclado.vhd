@@ -48,12 +48,16 @@ architecture Behavioral of teclado is
 	signal cableOnda : std_logic;
 
 	-- Contador del divisor de la señal del reloj
-	signal contdivisor : std_logic_vector(5 downto 0); -- Tamaño al azar
+	signal contdivisor : std_logic_vector(19 downto 0); -- Tamaño al azar
 
 	-- Reloj dividido
 	signal relojdiv	: std_logic;
+	
+	-- Relojes para VGA
+	signal vga_clk		: std_logic;
+	signal vga_clkdiv	: std_logic;
 begin
-	-- Divisor de la señal de reloj para grabación y reprodución
+	-- Divisor de la señal de reloj
 	divisor_clk : process (reset, reloj)
 	begin
 		if reset = '1' then
@@ -66,13 +70,17 @@ begin
 	end process divisor_clk;
 	
 	-- Memoria RAM de doble puerto (palabra 16 bits)
-	mem_ram : RAMB18 port map (
-		ssra => '0',
-		ssrb => '0'
-	);
+--	mem_ram : RAMB18 port map (
+--		ssra => '0',
+--		ssrb => '0'
+--	);
 
 	-- Señal de reloj dividida
-	relojdiv <= contdivisor(contdivisor'length - 1);
+	relojdiv <= contdivisor(5);
+	
+	-- Señales divididas para pantalla
+	vga_clk <= contdivisor(2);
+	vga_clkdiv <= contdivisor(19);
 
 	-- Reconocedor del teclado
 	recon : entity work.reconocedor port map (
@@ -110,7 +118,8 @@ begin
 	
    pantalla: entity work.vgacore port map (
 		reset => reset,	
-		clock => reloj,
+		clk => vga_clk,
+		clkdiv => vga_clkdiv,
       hsyncb => hsyncb,
       vsyncb => vsyncb,
       rgb => rgb,
