@@ -24,11 +24,16 @@ architecture vgacore_arch of vgacore is
 signal hcnt: std_logic_vector(8 downto 0);	-- horizontal pixel counter
 signal vcnt: std_logic_vector(9 downto 0);	-- vertical line counter
 signal pintar: std_logic;					-- video blanking signal
-signal clk : std_logic; 
-signal contador : std_logic_vector(2 downto 0);
-signal teclaB_P : integer;
+signal clk, clkdiv : std_logic; 
+signal contador : std_logic_vector(20 downto 0);
+signal teclaB_Pulsada : integer;
+signal teclaB_pos : integer;
+signal entradaRAM_aux, entradaRAM : std_logic_vector(4 downto 0);
+signal tocando : std_logic;
+signal d_out : std_logic_vector(4 downto 0);
+signal addr2 : std_logic_vector(4 downto 0);
 
-type object is (teclaN,teclaB,teclaPulsada,borde);
+type object is (teclaN,teclaB,teclaB_gris,teclaPulsada,borde);
 signal currentobject : object;
 
 begin
@@ -43,6 +48,7 @@ elsif clock'event and clock = '1' then
 end if;
 
 clk <= contador(2);
+clkdiv <= contador(20);
 
 end process;
 
@@ -127,7 +133,7 @@ end process;
 ----------------------------------------------------------------------------
 --
 -- Ejemplo
-que_pintar: process(hcnt, vcnt)
+que_pintar: process(hcnt, vcnt, sharp, nota, octave, teclaB_pulsada)
 begin
 	pintar<='0';
    currentobject <= borde;
@@ -195,7 +201,7 @@ begin
             else
                currentobject <= teclaN;
             end if;
-         --F#
+			--F#
 			elsif hcnt > 143 and hcnt < 143 + 8 and vcnt < 415 then
 				pintar <= '1';
             if sharp = '1' and octave = "001" and nota = fa then
@@ -219,15 +225,15 @@ begin
             else
                currentobject <= teclaN;
             end if;
-         --C#
-         elsif hcnt > 195 and hcnt < 195 + 8 and vcnt < 415 then
+			 --C#
+			 elsif hcnt > 195 and hcnt < 195 + 8 and vcnt < 415 then
 				pintar <= '1';
             if sharp = '1' and octave = "010" and nota = do then
                currentobject <= teclaPulsada;
             else
                currentobject <= teclaN;
             end if;
-         --D#
+			--D#
 			elsif hcnt > 210 and hcnt < 210 + 8 and vcnt < 415 then
 				pintar <= '1';
             if sharp = '1' and octave = "010" and nota = re then
@@ -235,7 +241,7 @@ begin
             else
                currentobject <= teclaN;
             end if;
-         --F#
+			--F#
 			elsif hcnt > 234 and hcnt < 234 + 8 and vcnt < 415 then
 				pintar <= '1';
             if sharp = '1' and octave = "010" and nota = fa then
@@ -250,38 +256,106 @@ begin
                or hcnt = 226 or hcnt = 239 or hcnt = 251 then
 				pintar <= '1';
             currentobject <= borde;
-			elsif hcnt > teclaB_P and hcnt < teclaB_P + 13 then
+			elsif hcnt > teclaB_Pulsada and hcnt < teclaB_Pulsada + 13 then
             pintar <= '1';
 				currentobject <= teclaPulsada;
+         elsif vcnt > 443 then
+            pintar <= '1';
+				currentobject <= teclaB_gris;
          else
             pintar <= '1';
 				currentobject <= teclaB;
          end if;
-		end if;
+      elsif vcnt > 31 and vcnt < 63 then
+         if hcnt > 100 and hcnt < 120 and d_out(4) = '1' then
+               pintar <= '1';
+               currentobject <= teclaB;
+         elsif hcnt > 120 and hcnt < 140 and d_out(3) = '1' then
+               pintar <= '1';
+               currentobject <= teclaB;
+         elsif hcnt > 140 and hcnt < 160 and d_out(2) = '1' then
+               pintar <= '1';
+               currentobject <= teclaB;
+         elsif hcnt > 160 and hcnt < 180 and d_out(1) = '1' then
+               pintar <= '1';
+               currentobject <= teclaB;
+         elsif hcnt > 180 and hcnt < 200 and d_out(0) = '1' then
+               pintar <= '1';
+               currentobject <= teclaB;
+         end if;
+      end if;
    end if;
 end process que_pintar;
 
-teclaB_P <= 300 when sharp = '1' else 
-            5 when nota = do and octave = "000" else
-            18 when nota = re and octave = "000" else
-            31 when nota = mi and octave = "000" else
-            44 when nota = fa and octave = "000" else
-            57 when nota = sol and octave = "000" else
-            70 when nota = la and octave = "000" else
-            83 when nota = si and octave = "000" else
-            96 when nota = do and octave = "001" else
-            109 when nota = re and octave = "001" else
-            122 when nota = mi and octave = "001" else
-            135 when nota = fa and octave = "001" else
-            148 when nota = sol and octave = "001" else
-            161 when nota = la and octave = "001" else
-            174 when nota = si and octave = "001" else
-            187 when nota = do and octave = "010" else
-            200 when nota = re and octave = "010" else
-            213 when nota = mi and octave = "010" else
-            226 when nota = fa and octave = "010" else
-            239 when nota = sol and octave = "010" else
-            300;
+-- Determino en que posicion esta la nota que quiero pulsar (Solo notas blancas).
+teclaB_pos <= 5 when nota = do else
+            18 when nota = re else
+            31 when nota = mi else
+            44 when nota = fa else
+            57 when nota = sol else
+            70 when nota = la else
+            83 when nota = si else
+            0;		
+teclaB_Pulsada <= 300 when sharp = '1' or nota = silencio else --fuera del piano, no pinta nada
+						teclaB_pos when octave = "000" else
+						teclaB_pos + 91 when octave = "001" else
+						teclaB_pos + 182 when octave = "010" else
+						300;
+						
+entradaRAM_aux <= "00000" when nota = do and sharp = '0' else
+				  "00001" when nota = do and sharp = '1' else
+				  "00010" when nota = re and sharp = '0' else
+				  "00011" when nota = re and sharp = '1' else
+				  "00100" when nota = mi and sharp = '0' else
+				  "00101" when nota = fa and sharp = '0' else
+				  "00110" when nota = fa and sharp = '1' else
+				  "00111" when nota = sol and sharp = '0' else
+				  "01000" when nota = sol and sharp = '1' else
+				  "01001" when nota = la and sharp = '0' else
+				  "01010" when nota = la and sharp = '1' else
+				  "01011" when nota = si and sharp = '0' else
+				  "00000";
+              
+entrada_ram : process(entradaRAM_aux)
+begin
+   if octave = "001" then
+      entradaRAM <= 	entradaRAM_aux;
+   elsif octave = "010" then
+      entradaRAM <= 	entradaRAM_aux + "01100";
+   else
+      entradaRAM <= entradaRAM_aux + "11000";
+   end if;
+end process;
+				
+tocando <= '0' when nota = silencio else '1';
+addr2 <= vcnt(4 downto 0);
+
+--RAM (parte de la pantalla de arriba)
+vgaRam : entity work.ram_vga port map (
+		clk		=> clkdiv,
+		addr1		=> entradaRAM,
+      addr2    => addr2,
+		we		=> tocando,
+      do    => d_out
+	);
+						
+-- Idea, poner sombra gris abajo.
+						
+--5 C
+--13 C#
+--20 D
+--28 D#
+--35 E
+--44 F
+--52 F#
+--59 G
+--66 G#
+--73 A
+--80 A#
+--87 B
+
+--96 C
+----91 + 
 
 colorear: process(pintar, hcnt, vcnt, currentobject)
 begin
@@ -289,6 +363,7 @@ begin
       case currentobject is
 			when teclaN => rgb <= "000000000";
 			when teclaB => rgb <= "111111111";
+         when teclaB_gris => rgb <= "110110110";
          when teclaPulsada => rgb <= "111000000";
 			when borde => rgb <= "000000000";
 			when others => rgb <= "000000000";
