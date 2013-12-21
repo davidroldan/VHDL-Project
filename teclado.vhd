@@ -22,9 +22,6 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
-library unisim;
-use unisim.vcomponents.RAMB18;
-
 use work.tipos.all;
 
 entity teclado is
@@ -68,12 +65,6 @@ begin
 
 		end if;
 	end process divisor_clk;
-	
-	-- Memoria RAM de doble puerto (palabra 16 bits)
---	mem_ram : RAMB18 port map (
---		ssra => '0',
---		ssrb => '0'
---	);
 
 	-- Señal de reloj dividida
 	relojdiv <= contdivisor(5);
@@ -127,6 +118,17 @@ begin
 		sharp => cableSharp,
 		octave => cableOctava
 	);
+	
+	-- Archivero (reproductor y grabador)
+	archivero: entity work.archivero port map (
+		reloj	=> reloj,
+		rjdiv	=> relojdiv,
+		reset	=> reset,
+		nota	=> cableNota,
+		octava=> cableOctava,
+		sos	=> cableSharp
+	);
+	-- Se han omitido algunas salidas
    
 	onda <= cableOnda;
 

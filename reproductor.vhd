@@ -35,9 +35,9 @@ entity reproductor is
 			clkdiv : in std_logic;
 			rst : in std_logic;
 			play : in std_logic;
-			addr : in std_logic_vector( 7 downto 0);
-			memdir : out std_logic_vector ( 7 downto 0);
-			memdata : in std_logic_vector ( 7 downto 0);
+			addr : in std_logic_vector(9 downto 0);
+			memdir : out std_logic_vector (9 downto 0);
+			memdata : in std_logic_vector (15 downto 0);
 			fin : out std_logic;
 			onota	: out Nota
 			);
@@ -69,9 +69,9 @@ begin
 					
 			end case;
 		end if;
-	end process secuencial;
+	end process sincrono;
 
-	combinacional : process (esdadoa)
+	combinacional : process (estadoa)
 	
 	begin
 		if play = '1' then
