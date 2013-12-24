@@ -131,6 +131,6 @@ begin
 	estado_sig <=	activo	 	when estadoa = parado and grabar = '1' else
 			cierre		when estadoa = activo and grabar = '0' else
 			parado		when estadoa = cierre else
-			parado;
+			estado;
 			
 end architecture grab_arq;
