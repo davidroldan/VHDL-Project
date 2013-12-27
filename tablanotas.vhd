@@ -13,7 +13,7 @@ use work.tipos.all;
 
 entity tablanotas is 
 	port (
-		nota		: in Nota;
+		nota		: in TNota;
 		semiper	: out std_logic_vector(11 downto 0)
 	);
 end entity tablanotas;

@@ -16,7 +16,7 @@ entity grabador is
 		reset	: in std_logic;
 
 		-- Fuente de datos
-		nota	: in Nota;
+		nota	: in TNota;
 		octava 	: in std_logic_vector(2 downto 0);
 		sos	: in std_logic;
 
@@ -42,8 +42,7 @@ architecture grab_arq of grabador is
 	signal estadoa, estado_sig : Estado;
 
 	-- Datos registrados
---	signal r_nota	: Nota; -- No funciona
-	signal r_nota : std_logic_vector(2 downto 0);
+	signal r_nota	: TNota;
 	signal r_octava	: std_logic_vector(2 downto 0);
 	signal r_sos	: std_logic;
 

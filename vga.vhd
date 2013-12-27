@@ -14,7 +14,7 @@ entity vgacore is
 		hsyncb: inout std_logic;	-- horizontal (line) sync
 		vsyncb: out std_logic;	-- vertical (frame) sync
 		rgb: out std_logic_vector(8 downto 0); -- red,green,blue colors
-      nota	: in Nota;
+      nota	: in TNota;
 		sharp	: in std_logic;
 		octave : in std_logic_vector(2 downto 0)
 	);
@@ -317,7 +317,7 @@ entradaRAM_aux <= "100000000000" when nota = do and sharp = '0' else
 						"000000000010" when nota = la and sharp = '1' else
 						"000000000001" when nota = si and sharp = '0' else
 						"000000000000";
-              
+
 entrada_ram : process(entradaRAM_aux)
 begin
    if octave = "000" then

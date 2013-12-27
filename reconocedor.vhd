@@ -30,7 +30,7 @@ entity reconocedor is
 		reset, reloj	: in std_logic;
 		octava : out std_logic_vector(2 downto 0);
 		sharp : out std_logic;
-		onota : out Nota;
+		onota : out TNota;
 
 		r, t: out std_logic_vector (6 downto 0)
 	);

@@ -12,7 +12,7 @@ use work.tipos.all;
 entity gensonido is
 	port (
 		-- Nota de acuerdo a la codificación escrita
-		nota	: in Nota;
+		nota	: in TNota;
 		
 		-- Aplicación o no del sostenido
 		sharp	: in std_logic;

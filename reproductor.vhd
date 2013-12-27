@@ -39,7 +39,7 @@ entity reproductor is
 			memdir : out std_logic_vector (9 downto 0);
 			memdata : in std_logic_vector (15 downto 0);
 			fin : out std_logic;
-			onota	: out Nota
+			onota	: out TNota
 			);
 			
 end reproductor;

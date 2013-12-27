@@ -39,7 +39,7 @@ end teclado;
 
 architecture Behavioral of teclado is
 	-- Cable para eschufar entradas y salidas unos módulos a otros
-	signal cableNota : Nota;
+	signal cableNota : TNota;
 	signal cableSharp : std_logic;
 	signal cableOctava : std_logic_vector(2 downto 0);
 	signal cableOnda : std_logic;

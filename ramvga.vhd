@@ -34,5 +34,3 @@ begin
 		do <= RAM(conv_integer(addr2))(31 downto 0);
     end process lectura;
 end circuito;
-
-
