@@ -65,7 +65,7 @@ bool convSostenido(int nota) {
 	}
 }
 
-LyLector::LyLector(istream &in) : _fuente(in), _linea(1), _col(0), _ccar(' '), _eof(false), _tempo(60), _octava(3) { }
+LyLector::LyLector(istream &in) : _fuente(in), _linea(1), _col(0), _ccar(' '), _eof(false), _tempo(60), _octava(2) { }
 
 
 void LyLector::iniciar() throw (ErrorFormato) {
@@ -132,7 +132,7 @@ void LyLector::leerNota() throw (ErrorFormato) {
 		case 'b' : _nota = 11;	break;
 		case 'c' : _nota = 0;	break;
 		case 'd' : _nota = 2;	break;
-		case 'm' : _nota = 4;	break;
+		case 'e' : _nota = 4;	break;
 		case 'f' : _nota = 5;	break;
 		case 'g' : _nota = 7;	break;
 
@@ -166,9 +166,9 @@ void LyLector::leerNota() throw (ErrorFormato) {
 		// Despreocupación: las alteraciones no cambian la octava si# será el do de abajo
 
 		if (snota[0] == 'e')
-			_nota = (_nota + 1) % 12;
-		else
 			_nota = (_nota - 1) % 12;
+		else
+			_nota = (_nota + 1) % 12;
 
 		snota = snota.substr(2, string::npos);
 
@@ -226,7 +226,7 @@ void LyLector::leerNotaInicial() throw (ErrorFormato) {
 		case 'b' : _nota = 11;	break;
 		case 'c' : _nota = 0;	break;
 		case 'd' : _nota = 2;	break;
-		case 'm' : _nota = 4;	break;
+		case 'e' : _nota = 4;	break;
 		case 'f' : _nota = 5;	break;
 		case 'g' : _nota = 7;	break;
 

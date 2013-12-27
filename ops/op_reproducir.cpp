@@ -3,12 +3,13 @@
  *
  * @brief Operación de reproducción.
  *
- * @todo No se hace la multiplicación para las escalas.
  */
 
 #include <cstring>
+#include <string>
 #include <fstream>
 #include <cerrno>
+#include <cmath>
 
 #include "op_reproducir.h"
 
@@ -19,17 +20,25 @@
 using namespace std;
 using namespace ops;
 
-unsigned int frecuenciaNota(NotaMus nota){
+unsigned int frecuenciaNota(NotaMus nota, int octava, bool sos){
+	int notast;
+
+	// Convierte la nota
 	switch (nota) {
-		case DO : return 26163;
-		case RE : return 29366;
-		case MI : return 32963;
-		case FA : return 34923;
-		case SOL : return 39200;
-		case LA : return 44000;
-		case SI : return 49388;
-		default	: return 0;
+		case DO : notast = 1; break;
+		case RE : notast = 3; break;
+		case MI : notast = 5; break;
+		case FA : notast = 6; break;
+		case SOL : notast = 8; break;
+		case LA : notast = 10; break;
+		case SI : notast = 12; break;
+		default : notast = 0;
 	}
+	
+	// Añade un semitono con el sostenido
+	if (sos) notast++;
+	
+	return 440 * pow(1.059463094359295, ((octava+1)-4) * 12 + (notast - 10)) * 100;
 }
 
 void Reproducir::iniciar(const std::vector<std::string> &params, const std::map<std::string, std::string> &mods) throw (ErrorParametros) {
@@ -82,7 +91,7 @@ void Reproducir::ejecutar() throw (ErrorEjecucion) {
 
 		// Distingue silencio de nota audible 
 		if (nota.nota() != SILENCIO) {
-			onda = OndaSeno(frecuenciaNota(nota.nota()) * 1 << (nota.octava() - 3));
+			onda = OndaSeno(frecuenciaNota(nota.nota(), nota.octava(), nota.sostenido()));
 
 			onda.open(Pa_GetDefaultOutputDevice());
 

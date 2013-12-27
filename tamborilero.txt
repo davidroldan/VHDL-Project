@@ -1,16 +1,17 @@
 %
 % El tamborilero - The Little Drummer Boy
-% Katherine Kennicott Davis (1941)
+% Katherine Kennicott Daves (1941)
 %
 % Basada en una canción tradicional bohemia (Chequia).
 %
 
-\tempo 60
+\tempo 80
+	
+\relative c'
 
-\relative c
-
-c4. d8 m4 m8 m8 f16 m16 f8 m2 r8
-c8 c8 d8 m8 m8 m8 m8 f16 m16 f8 m2 r8
-d8 m8 f8 g8 g8 g8 a8 g16 f16 m8 d2 r8
-d8 m8 f8 g8 g8 g8 a8 bis16 a16 g8 f4
-a16 g16 f8 m4 g16 f16 m8 d4 d4
+f2. g4		| a2 a4 a4	| bes8 a8 bes4 a2	| a1		|
+r4 f4 f4 g4	| a4 a4 a4 a4	| bes8 a8 bes4 a2	| a1		|
+r4 g4 a4 bes4	| c4 c4 c4 d4	| c8 bes8 a4 g2		| g1		|
+r4 g4 a4 bes4	| c4 c4 c4 d4	| ees8 d8 c4 bes2	| d8 c8 bes4 a2	|
+c8 bes8 a4 g2	| g1		| f2. g4		| a4 a4 a4 a4	|
+bes8 a8 bes4 a2	| a1		| g8 f8 g4 f2		| f1		|
