@@ -119,7 +119,7 @@ end process;
 ----------------------------------------------------------------------------
 --
 -- Ejemplo
-que_pintar: process(hcnt, vcnt, sharp, nota, octave, teclaB_pulsada)
+que_pintar: process(hcnt, vcnt, sharp, nota, octave, teclaB_pulsada, d_out)
 begin
 	pintar<='0';
    currentobject <= borde;
@@ -318,7 +318,7 @@ entradaRAM_aux <= "100000000000" when nota = do and sharp = '0' else
 						"000000000001" when nota = si and sharp = '0' else
 						"000000000000";
 
-entrada_ram : process(entradaRAM_aux)
+entrada_ram : process(entradaRAM_aux, octave)
 begin
    if octave = "000" then
       entradaRAM <= 	entradaRAM_aux & conv_std_logic_vector(0,20);

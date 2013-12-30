@@ -26,6 +26,7 @@ entity grabador is
 		-- Salidas para la memoria
 		mem_dir	: out std_logic_vector(9 downto 0);
 		mem_dat	: out std_logic_vector(15 downto 0);
+		mem_we	: out std_logic;
 
 		-- Entrada de capacitación
 		-- Cuando se desactiva la grabación tarda un ciclo
@@ -54,9 +55,6 @@ architecture grab_arq of grabador is
 
 	-- Dirección de escritura
 	signal dir	: std_logic_vector(9 downto 0);
-
-	-- Capacitación de escritura de la memoria
-	signal we	: std_logic;
 
 	-- Señal de reloj dividido anterior
 	signal rjdiv_ant : std_logic;
@@ -115,9 +113,9 @@ begin
 				(others => '0')					when others;
 
 	-- Escritura en la memoria
-	we <=	'1' when estadoa = cierre else
-		'1' when estadoa = activo and cambio = '1' else
-		'0';
+	mem_we <=	'1' when estadoa = cierre else
+		 	'1' when estadoa = activo and cambio = '1' else
+		 	'0';
 
 	-- Señal de cambio (por legibilidad)
 	cambio <=	'1' when r_nota /= nota else

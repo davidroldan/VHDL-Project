@@ -28,7 +28,7 @@ begin
 		end if;
     end process escritura;
 
-    lectura : process (clk)
+    lectura : process (clk, RAM)
     begin
 		--lectura asíncrona
 		do <= RAM(conv_integer(addr2))(31 downto 0);

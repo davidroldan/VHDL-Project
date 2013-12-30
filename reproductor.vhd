@@ -52,7 +52,7 @@ architecture Behavioral of reproductor is
 
 
 begin
-	sincrono : process (clk, clkdiv)
+	sincrono : process (clk, clkdiv, rst)
 	begin
 		if rst = '1' then
 			estadoa <= esperando;
@@ -71,7 +71,7 @@ begin
 		end if;
 	end process sincrono;
 
-	combinacional : process (estadoa)
+	combinacional : process (estadoa, play)
 	
 	begin
 		if play = '1' then
