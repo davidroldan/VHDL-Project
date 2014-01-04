@@ -60,7 +60,7 @@ architecture grab_arq of grabador is
 	signal rjdiv_ant : std_logic;
 begin
 	-- Reloj principal
-	process (reset, reloj)
+	process (reset, reloj, estado_sig, rjdiv, dir_ini, contador, dir)
 	begin
 		if reset = '1' then
 			estadoa <= parado;
@@ -97,7 +97,7 @@ begin
 			end case;
 
 			-- Actualiza los datos registrados
-			r_nota		<= nota;
+			r_nota	<= nota;
 			r_octava	<= octava;
 			r_sos		<= sos;
 
@@ -128,6 +128,6 @@ begin
 	estado_sig <=	activo	 	when estadoa = parado and grabar = '1' else
 			cierre		when estadoa = activo and grabar = '0' else
 			parado		when estadoa = cierre else
-			estado;
+			estadoa;
 			
 end architecture grab_arq;

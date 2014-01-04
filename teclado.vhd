@@ -126,9 +126,11 @@ begin
 		reset	=> reset,
 		nota	=> cableNota,
 		octava=> cableOctava,
-		sos	=> cableSharp
+		sos	=> cableSharp,
+		onota => open,
+		ooctava => open,
+		osos		=> open
 	);
-	-- Se han omitido algunas salidas
    
 	onda <= cableOnda;
 

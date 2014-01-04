@@ -20,7 +20,7 @@ end entity tablanotassos;
 
 architecture rom_tablanotassos of tablanotassos is
 	-- Señal de tipo entero para escribir menos
-	signal tmp : Integer;
+	signal tmp : Integer range 0 to 2819;
 begin
 
 	-- Asigna el semiperiodo en función de la nota

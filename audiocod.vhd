@@ -48,6 +48,9 @@ architecture audioAK4565 of audiocod is
 
 	-- Amplitud de la onda
 	constant ampl : std_logic_vector(19 downto 0) := ('0', '1', others => '0');
+	
+	-- Valor de la onda en el momento actual
+	signal vonda : std_logic_vector(19 downto 0);
 
 	-- Registro de desplazamiento de 20 bits
 	signal regds : std_logic_vector(19 downto 0);
@@ -76,22 +79,28 @@ begin
 	-- Indicadores de ciclo
 	ciclo <= cnt(6 downto 2);
 	subCiclo <= cnt(1 downto 0);
+	
+	-- Valor de la onda (en 20 bits) dependiendo de onda (1 bit)
+	with onda select
+		vonda <=	ampl													when '1',
+					(not ampl) + conv_std_logic_vector(1, 20)	when others;
+					
 
 	-- Registro de desplazamiento
-	des_proc : process (reloj, reset, cnt)
+	des_proc : process (reloj, reset, cnt, vonda)
 	begin
-		if reloj'event and reloj = '1' then
+		if reset = '1' then
+			regds <= vonda;
+		
+		elsif reloj'event and reloj = '1' then
 			-- Desplaza para el envío en serie
 			if ciclo < 20 and subCiclo = 2 then
 				regds <= regds(18 downto 0) & '0';
 			
 			-- Carga en paralelo la muestra
 			elsif ciclo = 31 and subCiclo = 3 then
-				if onda = '1' then
-					regds <= ampl;
-				else
-					regds <= (not ampl) + 1; -- Complemento a 2
-				end if;	
+				regds <= vonda;
+				
 			end if;
 		end if;
 	end process des_proc;

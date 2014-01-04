@@ -20,7 +20,7 @@ end entity tablanotas;
 
 architecture rom_tablanotas of tablanotas is
 	-- Señal de tipo entero escribir menos
-	signal tmp : Integer;
+	signal tmp : Integer range 0 to 2986;
 begin
 
 	-- Asigna el semiperiodo en función de la nota

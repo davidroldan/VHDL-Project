@@ -52,6 +52,7 @@ architecture Behavioral of reconocedor is
 	signal estadoa : Estado;
 
 	-- Registro de desplazamiento con la última transmisión entrante en reposo
+	-- TODO: cambiar a 10 downto 1 pues el primer bit nunca se lee
 	signal mensaje : std_logic_vector (10 downto 0);
 	
 	-- Número de bits leídos en una misma transmisión
