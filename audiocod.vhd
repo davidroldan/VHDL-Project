@@ -46,8 +46,8 @@ architecture audioAK4565 of audiocod is
 	-- Contador para los relojes del códec
 	signal cnt: std_logic_vector(7 downto 0);
 
-	-- Amplitud de la onda
-	constant ampl : std_logic_vector(19 downto 0) := ('0', '1', others => '0');
+	-- Amplitud de la onda (entre 0 y 524287)
+	constant ampl : std_logic_vector(19 downto 0) := conv_std_logic_vector(520003, 20);
 	
 	-- Valor de la onda en el momento actual
 	signal vonda : std_logic_vector(19 downto 0);
@@ -93,6 +93,7 @@ begin
 			regds <= vonda;
 		
 		elsif reloj'event and reloj = '1' then
+
 			-- Desplaza para el envío en serie
 			if ciclo < 20 and subCiclo = 2 then
 				regds <= regds(18 downto 0) & '0';
