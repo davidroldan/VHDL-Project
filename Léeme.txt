@@ -1,0 +1,14 @@
+** Manipulador de archivos FLAN **
+
+	Se incluye un Makefile: cuenta con dos reglas principales 'make'
+y 'make-pa', que  generan el  proyecto, en el último caso  sin la opción
+de reproducción y por tanto sin necesidad de la biblioteca PortAudio.
+
+	La biblioteca PortAudio se puede descargar de www.portaudio.com.
+El paquete correspondiente en Debian se denomina 'portaudio19-dev'.
+
+	En Windows, el Makefile de NMake no soporta la opción 'make' 
+completa (con PortAudio) pero sí la opción 'make-pa'. Para compilar
+desde la consola de comandos de Visual Studio basta ejecutar
+	"nmake -f Makefile.mak make-pa".
+También se puede abrir con el EID de Visual Studio.
