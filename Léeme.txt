@@ -1,0 +1,13 @@
+** Comunicador con la FPGA **
+
+	Necesita la  biblioteca de  Java RxTx disponible  en 'rxtx.qbang.org'.
+
+	En Debian se corresponde con el paquete 'librxtx-java'.
+
+	Para ejecutar  el programa basta incluir el archivo  'RXTXcomm.jar' en
+el 'classpath' y el archivo binario en cualquiera de las ubicaciones referidas
+en la propiedad  'java.library.path'.  En Windows  se considera por defecto la
+carpeta desde la que se ejecuta.
+
+	Eurotas es el nombre del río que pasaba por la antigua Esparta. La FPGA
+se llama Spartan.
