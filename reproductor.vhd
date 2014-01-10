@@ -1,6 +1,8 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use ieee.std_logic_arith.all;
+use ieee.std_logic_unsigned.all;
 
 use work.tipos.all;
 
@@ -26,10 +28,10 @@ entity reproductor is
 		-- Datos de salida
 		onota	: out TNota;
 		ooctava : out std_logic_vector(2 downto 0);
-		osos : out std_logic
+		osos : out std_logic;
 		
 		-- Señal de fin de reproducción
-		fin : out std_logic;
+		fin : out std_logic
 	);
 			
 end reproductor;
@@ -79,11 +81,11 @@ begin
 				else reproduciendo;
 	
 	with estadoa select
-		fin <= '1' when esperando
+		fin <= '1' when esperando,
 				'0' when others;
 				
 				
-	onota <= memdata(14 downto 12)
+	onota <= memdata(14 downto 12);
 	ooctava <= memdata (11 downto 9);
 	osos <= memdata(8);
 	

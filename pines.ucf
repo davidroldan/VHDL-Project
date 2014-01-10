@@ -38,7 +38,7 @@ NET reset LOC=J4;
 #NET octave<1> LOC=K16;
 #NET octave<2> LOC=F15;
 
-NET onda LOC=D15;
+#NET onda LOC=D15;
 
 #
 	#push buttons placa superior

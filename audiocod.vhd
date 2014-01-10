@@ -47,7 +47,7 @@ architecture audioAK4565 of audiocod is
 	signal cnt: std_logic_vector(7 downto 0);
 
 	-- Amplitud de la onda (entre 0 y 524287)
-	constant ampl : std_logic_vector(19 downto 0) := conv_std_logic_vector(520003, 20);
+	constant ampl : std_logic_vector(19 downto 0) := conv_std_logic_vector(100, 20);
 	
 	-- Valor de la onda en el momento actual
 	signal vonda : std_logic_vector(19 downto 0);
