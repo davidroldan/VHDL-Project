@@ -9,7 +9,7 @@ OBJDIR = obj
 PAFLAGS = `pkg-config portaudiocpp --libs`
 
 # Modificadores del compilador de C++
-CXXFLAGS = -Wall -Wextra -pedantic -Wfatal-errors
+CXXFLAGS = -Wall -Wextra -pedantic -Wfatal-errors -O3
 
 # En la regla "sin PortAudio" define el macro SIN_PORTAUDIO
 make-pa : CXXFLAGS := $(CXXFLAGS) -DSIN_PORTAUDIO

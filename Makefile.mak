@@ -21,10 +21,10 @@ MOD_PA	= obj/op_reproducir.obj obj/ondaseno.obj
 ## Reglas ##
 
 # Construye el proyecto completo
-make: general ops portaudio
+make: $(OBJDIR) general ops portaudio
 	$(CXX) $(CXXFLAGS) main.cpp $(MODULOS) $(MOD_OPS) $(MOD_PA) $(PAFLAGS)
 
-make-pa: general ops
+make-pa: $(OBJDIR) general ops
 	$(CXX) $(CXXFLAGS) main.cpp $(MODULOS) $(MOD_OPS)
 
 # Reglas para compilar objetos de operación
@@ -60,4 +60,5 @@ $(OBJDIR) :
 
 # Limpia lo generado
 clean:
-	del -r obj
+	del /f obj
+	rmdir obj

@@ -55,7 +55,7 @@ void Reproducir::iniciar(const std::vector<std::string> &params, const std::map<
 
 	// El comando no acepta modificadores
 	if (!mods.empty()) {
-		throw ErrorParametros("la operación \'escalar\' no admite modificadores.");
+		throw ErrorParametros("la operación \'reproducir\' no admite modificadores.");
 	}
 }
 
