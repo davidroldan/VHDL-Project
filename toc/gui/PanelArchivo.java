@@ -33,10 +33,10 @@ public class PanelArchivo extends JPanel {
 	 */
 	public PanelArchivo(String titulo, boolean abrir){
 		setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-		
+
 		// Coloca un borde con título
 		setBorder(BorderFactory.createTitledBorder(titulo));
-		
+
 		/*
 		 * El panel se compone del selector de bloque,
 		 * la ruta del archivo a cargar, el botón de
@@ -47,12 +47,12 @@ public class PanelArchivo extends JPanel {
 
 		JButton explorar = new JButton("...");
 		_btnActuar = new JButton(titulo);
-		
+
 		_btnActuar.setEnabled(false);
-		
+
 		// Carga el contenido del selector de bloque
 		cargarBloques();
-		
+
 		_ruta.getDocument().addDocumentListener(new DocumentListener() {
 			
 			@Override
@@ -69,13 +69,13 @@ public class PanelArchivo extends JPanel {
 			@Override
 			public void changedUpdate(DocumentEvent de) { }
 		});
-		
+
 		// Crea el selector de archivos
 		_fcho = crearFileChooser();
-		
+
 		// Guarda la opción abrir para usarla en la clase anómima
 		_abrir = abrir;
-		
+
 		// Acción de explorar
 		explorar.addActionListener(new ActionListener() {
 			@Override
@@ -90,9 +90,9 @@ public class PanelArchivo extends JPanel {
 				if (respuesta == JFileChooser.APPROVE_OPTION)
 					_ruta.setText(_fcho.getSelectedFile().getPath());
 			}
-		});	
-		
-		
+		});
+
+
 		// Acción principal del panel
 		_btnActuar.addActionListener(new ActionListener() {
 			@Override
@@ -102,7 +102,7 @@ public class PanelArchivo extends JPanel {
 							(Integer) _bloque.getSelectedItem());
 			}
 		});
-		
+
 		// Inserta los componentes en el panel
 		add(_bloque);
 		add(Box.createHorizontalStrut(4));
@@ -110,13 +110,13 @@ public class PanelArchivo extends JPanel {
 		add(explorar);
 		add(Box.createHorizontalStrut(5));
 		add(_btnActuar);
-		
+
 		// Fija una dimensión máxima para que no salga desproporcionado
 		Dimension dim = _btnActuar.getPreferredSize();
 		dim.setSize(Integer.MAX_VALUE, dim.getHeight());
 		setMaximumSize(dim);
 	}
-	
+
 	/**
 	 * Fija el oyente de eventos del panel.
 	 * 
@@ -125,7 +125,7 @@ public class PanelArchivo extends JPanel {
 	public void setListener(PanelArchivoListener pal){
 		_oyente = pal;
 	}
-	
+
 	/**
 	 * Carga los bloques de BRAM en el selector.
 	 */
@@ -133,7 +133,7 @@ public class PanelArchivo extends JPanel {
 		for (int i = 1; i <= 20; i++)
 			_bloque.addItem(i);
 	}
-	
+
 	/**
 	 * Crea un selector de archivos.
 	 * 
@@ -141,49 +141,50 @@ public class PanelArchivo extends JPanel {
 	 */
 	private JFileChooser crearFileChooser(){
 		JFileChooser ret = new JFileChooser();
-		
-		FileNameExtensionFilter filtro = 
-				new FileNameExtensionFilter("Archivo de reproducción/grabación", "dat");
-		
+
+		FileNameExtensionFilter filtro =
+				new FileNameExtensionFilter("Archivo de reproducción/grabación (*.dat)", "dat");
+
 		ret.setFileFilter(filtro);
-		
+
 		ret.setCurrentDirectory(new File("."));
 		ret.setMultiSelectionEnabled(false);
-		
+
 		return ret;
 	}
-	
-	
-	
+
 	/**
 	 * Selector de bloque
 	 */
 	private JComboBox<Integer> _bloque;
-	
+
 	/**
 	 * Ruta de acceso al archivo
 	 */
 	private JTextField _ruta;
-	
+
 	/**
 	 * Selector de archivos
 	 */
 	private JFileChooser _fcho;
-	
+
 	/**
 	 * Opción abrir
 	 */
 	private boolean _abrir;
-	
+
 	/**
 	 * Oyente de eventos del panel
 	 */
 	private PanelArchivoListener _oyente = null;
-	
+
 	/**
 	 * Identificador para la serialización (da igual)
 	 */
 	private static final long serialVersionUID = 8916031774715989058L;
 
+	/**
+	 * Botón que activa la operación e informa a los oyentes
+	 */
 	private JButton _btnActuar;
 }
