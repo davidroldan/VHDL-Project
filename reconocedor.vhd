@@ -31,6 +31,14 @@ entity reconocedor is
 		octava : out std_logic_vector(2 downto 0);
 		sharp : out std_logic;
 		onota : out TNota;
+		
+		-- Señales de reproducción y grabación (permanecen
+		-- activas durante al menos un ciclo)
+		btn_play	: out std_logic;
+		btn_rec	: out std_logic;
+		btn_stop	: out std_logic;
+		btn_bsig : out std_logic;
+		btn_bant	: out std_logic;
 
 		r, t: out std_logic_vector (6 downto 0)
 	);
@@ -193,7 +201,29 @@ begin
                   tecla = x"44" or tecla = x"45" or tecla = x"4D" or
                   tecla = x"54" or tecla = x"55" or tecla = x"5B" else
 				"000";
+				
+	-- Botones de reproducción, grabación y detención
+	with tecla select
+		btn_play <= '1'	when x"6B",
+						'0'	when others;
+						
+	with tecla select
+		btn_rec <=	'1'	when x"73",
+						'0'	when others;
+	
+	with tecla select
+		btn_stop <=	'1'	when x"74",
+						'0'	when others;
+						
+	with tecla select
+		btn_bsig	<=	'1'	when x"7A",
+						'0'	when others;
+	
+	with tecla select
+		btn_bant <=	'1'	when x"7D",
+						'0'	when others;
 
+	-- Displays de 7 segmentos que muestran la tecla pulsada
 	u : segments port map (tecla(7 downto 4), t);
 	v : segments port map (tecla(3 downto 0), r);
 end Behavioral;

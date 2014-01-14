@@ -14,6 +14,11 @@ entity archivero is
 		reloj	: in std_logic;
 		-- Reloj
 		rjdiv	: in std_logic;
+		
+		-- Activadores de reproducción y grabación
+		play	: std_logic;
+		rec	: std_logic;
+		stop	: std_logic;
 
 		-- Reset
 		reset	: in std_logic;

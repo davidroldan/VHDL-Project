@@ -53,6 +53,9 @@ architecture Behavioral of teclado is
 	-- Relojes para VGA
 	signal vga_clk		: std_logic;
 	signal vga_clkdiv	: std_logic;
+	
+	-- Activadores de reproducción etc.
+	signal btn_play, btn_rec, btn_stop : std_logic;
 begin
 	-- Divisor de la señal de reloj
 	divisor_clk : process (reset, reloj)
@@ -82,6 +85,9 @@ begin
 		octava => cableOctava,
 		sharp => cableSharp,
 		onota => cableNota,
+		btn_play	=> btn_play,
+		btn_rec	=> btn_rec,
+		btn_stop	=> btn_stop,
 		r => r,
 		t => t
 	);
@@ -129,7 +135,10 @@ begin
 		sos	=> cableSharp,
 		onota => open,
 		ooctava => open,
-		osos		=> open
+		osos		=> open,
+		play => btn_play,
+		stop	=> btn_stop,
+		rec	=> btn_rec
 	);
    
 	onda <= cableOnda;
