@@ -121,3 +121,12 @@ NET au_bclk LOC=T12;	# Audio Serial Data Clock Pin
 NET au_sdti LOC=M10;	# Entrada conversor digital-analógico
 	# salida
 #NET au_sdto LOC=K5;		# Salida conversor analógico-digital
+
+# puerto RS232 (placa extendida)
+	# entradas
+#NET rs232_cts	LOC=D1;	# Control de flujo
+#NET rs232_rd	LOC=G5;	# Recepción de datos
+	# salidas
+#NET rs232_rts	LOC=F4;	# Control de flujo
+#NET rs232_td	LOC=J2;	# Transmisión de datos
+ 

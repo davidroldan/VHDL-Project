@@ -7,6 +7,7 @@ use work.tipos.all;
 
 library unisim;
 use unisim.vcomponents.RAMB16_S18_S18;
+use unisim.vcomponents.RAMB16_S4;
 
 entity archivero is
 	port (
@@ -15,10 +16,23 @@ entity archivero is
 		-- Reloj
 		rjdiv	: in std_logic;
 		
-		-- Activadores de reproducción y grabación
+		-- Activadores (se supone que su activación dura al menos un ciclo)
+		-- Inicia la reproducción
 		play	: std_logic;
+		-- Inicia la grabación
 		rec	: std_logic;
+		-- Detiene la reproducción o la grabación
 		stop	: std_logic;
+		-- Selecciona el siguiente bloque de r/g
+		bsig	: std_logic;
+		-- Selecciona el bloque anterior de r/g
+		bant	: std_logic;
+		
+		-- Información sobre el estado de r/g
+		en_reproducion	: out std_logic;
+		en_grabacion	: out std_logic;
+		
+		-- TODO: queda pendiente una señal indicando la memoria activa
 
 		-- Reset
 		reset	: in std_logic;
@@ -39,9 +53,9 @@ architecture archivero_arq of archivero is
 	-- Número de bloques de RAM
 	constant NRam	: Positive	:= 20;
 
-	-- Tipos array de vectores
+	-- Tipos array de datos (del tamaño de datos de la memoria)
 	type ArrayDatos is array (0 to NRam-1) of std_logic_vector(15 downto 0);
-
+	
 	-- Salida y entrada de datos de la memoria
 	signal doa, dib: std_logic_vector(15 downto 0);
 	
@@ -55,29 +69,103 @@ architecture archivero_arq of archivero is
 	-- Array de salidas de la memoria
 	signal adoa : ArrayDatos;
 
+	-- Señales booleanas grabando y reproducción
+	signal grabando, grabando_sig : std_logic;
+	signal reproduciendo, reproduciendo_sig : std_logic;
+	
+	-- Salida indicadora del fin de la reproducción por el
+	-- reproductor
+	signal fin_repr : std_logic;
+
 	-- Memoria activa
 	-- Obs: comprobado que se sintetiza como un
 	-- std_logic_vector de tamaño mínimo
-	signal mem_grab : Integer range 0 to NRam-1;
-	signal mem_repr : Integer range 0 to NRam-1;
+	signal mem_grab, mem_grab_sig : Integer range 0 to NRam-1;
+	signal mem_repr, mem_repr_sig : Integer range 0 to NRam-1;
 begin
-	-- Temporalmente
-	mem_grab	<= 1;
-	mem_repr	<= 2;
+
+	-- Parte síncrona (registros y demás)
+	sinc : process (reloj, reset, mem_grab_sig, mem_repr_sig, reproduciendo_sig, grabando_sig)
+	begin
+		if reset = '1' then
+			mem_grab <= 0;
+			mem_repr <= 0;
+		
+		elsif reloj'event and reloj = '1' then
+			
+			mem_grab <= mem_grab_sig;
+			mem_repr <= mem_repr_sig;
+
+			reproduciendo	<= reproduciendo_sig;
+			grabando			<= grabando_sig;
+			
+		end if;
+	end process sinc;
+	
+
+	-- Memoria seleccionada para la grabación
+	-- (a priori la memoria para grabación y reprodución
+	-- es la misma)
+	mem_grab_sig <=	mem_grab + 1	when bsig = '1' else
+							mem_grab	- 1	when bant = '1' else
+							mem_grab;
+								
+	mem_repr_sig <= mem_grab_sig;
+
+	
+	-- Control del estado de grabación y reproducción
+	grabando_sig	<= '1'		when rec = '1' and reproduciendo = '0' else
+							'0'		when stop = '1' else
+							
+							-- Desactiva la grabación automáticamente cuando
+							-- observa que se va a pasar
+							'0'		when grabando = '1' and addrb = -2 else
+							grabando;
+							
+	reproduciendo_sig <=	'1'	when play = '1' and grabando = '0' else
+								'0'	when stop = '1' else
+								
+								-- Se desactiva automáticamente cuando el reproductor
+								-- informa de que se ha alcanzado el final del medio
+								'0'	when grabando = '1' and fin_repr = '1' else
+								
+								reproduciendo;
+								
+	-- Salidas informativas de este estado
+	en_reproducion	<= reproduciendo;
+	en_grabacion	<= grabando;
+	
+	-- Memoria RAM para metadatos (de momento simple puerto)
+--	mtd_mem : RAMB16_S4 port map (
+--		do	=> metadatos,
+--		addr	=> mtd_addr,
+--		clk	=> reloj,
+--		di	=> metadatos_w,
+--		we	=> we_mtd,
+--		en	=> '1',
+--		ssr	=> '0'		
+--	);
+
 
 	-- Memorias RAM de doble puerto (para grabación y reproducción)
+	
+	-- El reproductor usará el puerto A para lectura y el
+	-- grabador el puerto B para escritura
 	mem_gen : for i in 0 to NRam-1 generate
 		mem : RAMB16_S18_S18 port map (
 			doa 	=> adoa(i),
 			addra => addra,
 			addrb => addrb,
 			dib 	=> dib,
+			dipb	=> (others => '0'),
 			ena 	=> '1',
 			enb 	=> '1',
 			ssra 	=> '0',
 			ssrb	=> '0',
 			wea 	=> '0',
-			web 	=> aweb(i)
+			web 	=> aweb(i),
+			clka	=> reloj,
+			clkb	=> reloj
 		);
 	end generate mem_gen;
 	
@@ -86,11 +174,12 @@ begin
 		clk		=> reloj,
 		clkdiv	=> rjdiv,
 		rst		=> reset,
-		play		=> '0',
+		play		=> reproduciendo,
+		-- Dirección inicial a 0
 		addr		=> (others => '0'),
 		memdir	=> addra,
 		memdata	=> doa,
-		fin		=> open,
+		fin		=> fin_repr,
 		onota		=> onota,
 		ooctava	=> ooctava,
 		osos		=> osos
@@ -106,11 +195,12 @@ begin
 		nota		=> nota,
 		octava	=> octava,
 		sos		=> sos,
+		-- Dirección inicial a 0
 		dir_ini	=> (others => '0'),
 		mem_dir	=> addrb,
 		mem_dat	=> dib,
 		mem_we 	=> web,
-		grabar	=> '0'
+		grabar	=> grabando
 	);
 	
 	-- Activa la escritura sólo en la memoria ocupada
@@ -119,5 +209,8 @@ begin
 			aweb(i) <= 	web	when i = mem_grab else
 							'0';
 	end generate we_gen;
-
+	
+	-- TODO: activar la lectura también condicionalmente
+	-- si es conveniente
+	
 end architecture archivero_arq;

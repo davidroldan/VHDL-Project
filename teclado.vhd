@@ -39,24 +39,28 @@ end teclado;
 
 architecture Behavioral of teclado is
 	-- Cable para eschufar entradas y salidas unos módulos a otros
-	signal cableNota : TNota;
-	signal cableSharp : std_logic;
-	signal cableOctava : std_logic_vector(2 downto 0);
+	signal cableNota, notaTeclado, notaRepr : TNota;
+	signal cableSharp, sharpTeclado, sharpRepr : std_logic;
+	signal cableOctava, octavaTeclado, octavaRepr : std_logic_vector(2 downto 0);
 	signal cableOnda : std_logic;
 
 	-- Contador del divisor de la señal del reloj
 	signal contdivisor : std_logic_vector(19 downto 0); -- Tamaño al azar
 
-	-- Reloj dividido
+	-- Reloj dividido (para el archivero)
 	signal relojdiv	: std_logic;
 	
 	-- Relojes para VGA
 	signal vga_clk		: std_logic;
 	signal vga_clkdiv	: std_logic;
 	
-	-- Activadores de reproducción etc.
-	signal btn_play, btn_rec, btn_stop : std_logic;
+	-- Activadores de reproducción, grabación, etc.
+	signal btn_play, btn_rec, btn_stop, btn_bsig, btn_bant : std_logic;
+	
+	-- Indicadores de estado del archivero
+	signal en_reproducion : std_logic;
 begin
+
 	-- Divisor de la señal de reloj
 	divisor_clk : process (reset, reloj)
 	begin
@@ -76,18 +80,22 @@ begin
 	vga_clk <= contdivisor(2);
 	vga_clkdiv <= contdivisor(19);
 
+
+
 	-- Reconocedor del teclado
 	recon : entity work.reconocedor port map (
 		PS2DATA => PS2DATA,
 		PS2CLK => PS2CLK,
 		reloj => reloj,
 		reset => reset,
-		octava => cableOctava,
-		sharp => cableSharp,
-		onota => cableNota,
+		octava => octavaTeclado,
+		sharp => sharpTeclado,
+		onota => notaTeclado,
 		btn_play	=> btn_play,
 		btn_rec	=> btn_rec,
 		btn_stop	=> btn_stop,
+		btn_bsig	=> btn_bsig,
+		btn_bant	=> btn_bant,
 		r => r,
 		t => t
 	);
@@ -113,6 +121,7 @@ begin
 		onda => cableOnda
 	);
 	
+	-- Pantalla
    pantalla: entity work.vgacore port map (
 		reset => reset,	
 		clk => vga_clk,
@@ -130,17 +139,38 @@ begin
 		reloj	=> reloj,
 		rjdiv	=> relojdiv,
 		reset	=> reset,
-		nota	=> cableNota,
-		octava=> cableOctava,
-		sos	=> cableSharp,
-		onota => open,
-		ooctava => open,
-		osos		=> open,
+		nota	=> notaTeclado,
+		octava=> octavaTeclado,
+		sos	=> sharpTeclado,
+		onota => notaRepr,
+		ooctava => octavaRepr,
+		osos		=> sharpRepr,
 		play => btn_play,
 		stop	=> btn_stop,
-		rec	=> btn_rec
+		rec	=> btn_rec,
+		bsig	=> btn_bsig,
+		bant	=> btn_bant,
+		en_reproducion => en_reproducion,
+		en_grabacion => open
 	);
-   
-	onda <= cableOnda;
+	
+	
+	-- Conecta adecuadamente los datos a reproducir dependiendo
+	-- de si se está grabando o no
+	with en_reproducion select
+		cableNota	<= notaRepr		when '1',
+							notaTeclado	when others;
+	
+	with en_reproducion select
+		cableOctava <= octavaRepr		when '1',
+							octavaTeclado	when others;
+							
+	with en_reproducion select
+		cableSharp	<= sharpRepr		when '1',
+							sharpTeclado	when others;
 
+
+	-- Conecta a la salida onda la onda generada
+	onda <= cableOnda;
+	
 end Behavioral;
