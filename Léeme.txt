@@ -7,8 +7,15 @@ de reproducción y por tanto sin necesidad de la biblioteca PortAudio.
 	La biblioteca PortAudio se puede descargar de www.portaudio.com.
 El paquete correspondiente en Debian se denomina 'portaudio19-dev'.
 
-	En Windows, el Makefile de NMake no soporta la opción 'make' 
-completa (con PortAudio) pero sí la opción 'make-pa'. Para compilar
-desde la consola de comandos de Visual Studio basta ejecutar
-	"nmake -f Makefile.mak make-pa".
-También se puede abrir con el EID de Visual Studio.
+	En Windows, con el Makefile de NMake, la compilación sin
+reproducción se puede realizar desde la consola de comandos de Visual
+Studio ejecutando
+	"nmake -f Makefile.mak make-pa"
+Para compilar la versión completa se deben incluir los archivos de
+encabezado y los archivos .lib y .dll de PortAudio en el directorio
+raíz. Además es necesario alterar en el Makefile la variable CXXFLAGS
+eliminando la definición "/DSIN_PORTAUDIO". Si se quiere compilar para
+32 bits también habrá que cambiar en PAFLAGS "portaudio_x64.lib" por
+"portaudio_x86.lib".
+	
+	El Makefile se puede importar al EID de Visual Studio.

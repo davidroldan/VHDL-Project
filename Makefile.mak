@@ -6,6 +6,7 @@
 OBJDIR = obj
 
 # Modificadores del compilador de C++
+# Eliminar /DSIN_PORTAUDIO para la compilación general
 CXXFLAGS = /DSIN_PORTAUDIO /D_CRT_SECURE_NO_WARNINGS
 
 # Módulos generales
@@ -16,6 +17,9 @@ MOD_OPS = obj/op_leer.obj obj/op_escalar.obj obj/op_convertir.obj
 
 # Modulos para reproducción
 MOD_PA	= obj/op_reproducir.obj obj/ondaseno.obj
+
+# Modificadores de enlace para PA
+PAFLAGS	= portaudio_x64.lib
 
 
 ## Reglas ##
@@ -45,6 +49,13 @@ obj/mflan.obj: mflan.cpp mflan.h
 obj/lylector.obj: lylector.cpp lylector.h
 	$(CXX) $(CXXFLAGS) /c /I. /Fo$@ lylector.cpp
 
+# Reglas para compilar los módulos de reproducción
+obj/ondaseno.obj: ondaseno.cpp ondaseno.h
+	$(CXX) $(CXXFLAGS) /c /Fo$@ /I. /Iinclude ondaseno.cpp
+
+obj/op_reproducir.obj: ops/op_reproducir.cpp ops/op_reproducir.h
+	$(CXX) $(CXXFLAGS) /c /Fo$@ /I. /Iinclude ops/op_reproducir.cpp
+
 # Módulos generales
 general: $(MODULOS)
 
@@ -56,9 +67,9 @@ ops : $(MOD_OPS)
 
 # Creación de la carpeta para meter los códigos objeto
 $(OBJDIR) : 
-	mkdir -p $(OBJDIR)
+	mkdir $(OBJDIR)
 
 # Limpia lo generado
 clean:
-	del /f obj
+	del obj
 	rmdir obj
