@@ -106,8 +106,10 @@ begin
 	-- Memoria seleccionada para la grabación
 	-- (a priori la memoria para grabación y reprodución
 	-- es la misma)
-	mem_grab_sig <=	mem_grab + 1	when bsig = '1' else
-							mem_grab	- 1	when bant = '1' else
+	mem_grab_sig <=	0	when bsig = '1' and mem_grab = NRam-1 else
+							mem_grab + 1		when bsig = '1' else
+							NRam-1			when bant = '1' and mem_grab = 0 else
+							mem_grab - 1		when bant = '1' else
 							mem_grab;
 								
 	mem_repr_sig <= mem_grab_sig;
