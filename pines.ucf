@@ -54,8 +54,8 @@ NET reset LOC=J4;
 
 #barra de leds placa extendida
 
-#NET leds<1> LOC=L5;
-#NET leds<2> LOC=N2;
+NET led_repr LOC=L5;
+NET led_grab LOC=N2;
 #NET leds<3> LOC=M3;
 #NET leds<4> LOC=N1;
 #NET leds<5> LOC=T13;

@@ -33,7 +33,8 @@ entity teclado is
 		r, t: out std_logic_vector (6 downto 0);
       hsyncb: inout std_logic;	-- horizontal (line) sync
 		vsyncb: out std_logic;	-- vertical (frame) sync
-		rgb: out std_logic_vector(8 downto 0) -- red,green,blue colors
+		rgb: out std_logic_vector(8 downto 0); -- red,green,blue colors
+		led_repr, led_grab : out std_logic
 	);
 end teclado;
 
@@ -58,7 +59,7 @@ architecture Behavioral of teclado is
 	signal btn_play, btn_rec, btn_stop, btn_bsig, btn_bant : std_logic;
 	
 	-- Indicadores de estado del archivero
-	signal en_reproducion : std_logic;
+	signal en_reproduccion, en_grabacion : std_logic;
 begin
 
 	-- Divisor de la señal de reloj
@@ -150,24 +151,28 @@ begin
 		rec	=> btn_rec,
 		bsig	=> btn_bsig,
 		bant	=> btn_bant,
-		en_reproducion => en_reproducion,
-		en_grabacion => open
+		en_reproducion => en_reproduccion,
+		en_grabacion => en_grabacion
 	);
 	
 	
 	-- Conecta adecuadamente los datos a reproducir dependiendo
 	-- de si se está grabando o no
-	with en_reproducion select
+	with en_reproduccion select
 		cableNota	<= notaRepr		when '1',
 							notaTeclado	when others;
 	
-	with en_reproducion select
+	with en_reproduccion select
 		cableOctava <= octavaRepr		when '1',
 							octavaTeclado	when others;
 							
-	with en_reproducion select
+	with en_reproduccion select
 		cableSharp	<= sharpRepr		when '1',
 							sharpTeclado	when others;
+							
+	--
+	led_repr <= en_reproduccion;
+	led_grab <= en_grabacion;
 
 
 	-- Conecta a la salida onda la onda generada

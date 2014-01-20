@@ -127,7 +127,7 @@ begin
 								
 								-- Se desactiva automáticamente cuando el reproductor
 								-- informa de que se ha alcanzado el final del medio
-								'0'	when grabando = '1' and fin_repr = '1' else
+								'0'	when reproduciendo = '1' and fin_repr = '1' else
 								
 								reproduciendo;
 								
