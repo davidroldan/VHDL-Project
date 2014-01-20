@@ -18,5 +18,8 @@ package tipos is
 	constant sol		: TNota	:= "101";
 	constant la		: TNota	:= "110";
 	constant si		: TNota	:= "111";
+   
+   -- Enumerado para saber que se está pintando en la pantalla
+   type vga_object is (teclaN, teclaB, teclaB_gris, teclaPulsada, borde, bordeNotaMov, notaMov);
 
 end package tipos;
