@@ -24,8 +24,8 @@ architecture vgacore_arch of vgacore is
 
 signal hcnt: std_logic_vector(8 downto 0);	-- horizontal pixel counter
 signal vcnt: std_logic_vector(9 downto 0);	-- vertical line counter
-signal pintar, p_teclado, p_barras: std_logic;					-- video blanking signal
-signal currentobject, c_o_teclado, c_o_barras : vga_object; -- el tipo vga_obejct esta definido en tipos.vhd
+signal pintar, p_teclado, p_barras, p_rec: std_logic;					-- video blanking signal
+signal currentobject, c_o_teclado, c_o_barras, c_o_rec : vga_object; -- el tipo vga_obejct esta definido en tipos.vhd
 
 begin
 
@@ -127,6 +127,9 @@ begin
 		elsif vcnt = 450 then
 			pintar <= '1';
          currentobject <= borde;
+		elsif hcnt > 220 and vcnt < 70 and vcnt > 43 then
+			pintar <= p_rec;
+			currentobject <= c_o_rec;
 		--TECLADO
 		elsif vcnt > 375 and vcnt < 450 then
 			currentobject <= c_o_teclado;
@@ -160,6 +163,16 @@ vga_brr : entity work.vga_barras port map(
 		octave => octave,
 		pintar => p_barras,
       currentobject => c_o_barras
+	);
+	
+--REC
+vgarc: entity vga_recButton	port map(
+		hcnt  => hcnt,
+		vcnt  => vcnt,
+		hcnt_aux => conv_std_logic_vector(220,9),
+		vcnt_aux => conv_std_logic_vector(43,10),
+		pintar => p_rec,
+      currentobject => c_o_rec
 	);
 						
 
