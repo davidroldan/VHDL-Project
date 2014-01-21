@@ -9,7 +9,6 @@
 
 #include "portaudio.h"
 
-const unsigned int SAMPLE_RATE = 44100;
 const unsigned int TABLE_SIZE = 200;
 
 /**
@@ -19,53 +18,43 @@ class OndaSeno {
 public:
 	/**
 	 * @brief Crea un objeto onda-seno.
-	 */
-	OndaSeno(unsigned int sampleRate = SAMPLE_RATE);
-
-	/**
-	 * @brief Abre un flujo de PortAudio para la reproducción.
 	 *
-	 * @param index Índice del dispositivo de reproducción.
+	 * @param tamTabla Tamaño de la tabla de onda.
 	 */
-	bool open(PaDeviceIndex index);
+	OndaSeno(unsigned int tamTabla = TABLE_SIZE);
 
 	/**
-	 * @brief Cierra el flujo de PortAudio asociado.
+	 * @brief Libera los recursos capturados.
 	 */
-	bool close();
+	~OndaSeno();
 
 	/**
-	 * @brief Comienza la reproducción de la onda.
+	 * @brief Fija la frecuencia de la onda.
+	 *
+	 * @param f Frecuencia de onda.
 	 */
-	bool start();
+	void fijarFrecuencia(float f);
 
-	/**
-	 * @brief Detiene la reproducción de la onda.
-	 */
-	bool stop();
+	// Método llamado por el sistema de PortAudio
+	int generate(const void *, void *, unsigned long,
+		const PaStreamCallbackTimeInfo*, PaStreamCallbackFlags);
 
 private:
-	// :: Métodos privados :: Alcantarillas de la clase
-	int paCallbackMethod(const void *, void *, unsigned long,
-		const PaStreamCallbackTimeInfo*, PaStreamCallbackFlags);
-	static int paCallback(const void *, void *, unsigned long, const PaStreamCallbackTimeInfo*,
-		PaStreamCallbackFlags, void *);
-	void paStreamFinishedMethod();
-	static void paStreamFinished(void*);
+	// Genera la tabla de onda
+	float valorOnda(unsigned int n);
 
 	// :: Atributos ::
 
-	// Flujo de PortAudio
-	PaStream *_stream;
-	// Tabla de seno
-	float _sine[TABLE_SIZE];
-	// Fase del canal izquierdo
-	unsigned int _left_phase;
-	// Fase del canal derecho
-	unsigned int _right_phase;
+	// Tamaño de la tabla (ficticia)
+	unsigned int _tamTabla;
 
-	// Tasa de muestra
-	unsigned int _sampleRate;
+	// Frecuencia
+	double _frecuencia;
+
+	// Fase del canal izquierdo
+	unsigned int _leftPhase;
+	// Fase del canal derecho
+	unsigned int _rightPhase;
 };
 
 #endif // ONDASENO_H

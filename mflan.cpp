@@ -38,7 +38,7 @@ MFlan::~MFlan() {
 }
 
 int MFlan::ejecutar(){
-	cout << "Manipulador de archivos FLAN 1.0" << endl;
+	cout << "Manipulador de archivos FLAN 1.1" << endl;
 	cout << "Equipo1 (" << __DATE__ << ")" << endl << endl;
 
 	setlocale(LC_ALL, "");

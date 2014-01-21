@@ -208,7 +208,7 @@ void LyLector::leerNota() throw (ErrorFormato) {
 	if (_duracion != 1 && _duracion != 2 && _duracion != 4 && _duracion != 8 && _duracion != 16 && _duracion != 32)
 		throw ErrorFormato(_elinea, _ecol, "indicador de duración no soportado");
 
-	_duracion = (960 / _tempo * 4) / _duracion;
+	_duracion = (((5.9605 * 60) / _tempo) * 4) / _duracion;
 
 	// Aplica el puntillo
 	if (snota[snota.length()-1] == '.')

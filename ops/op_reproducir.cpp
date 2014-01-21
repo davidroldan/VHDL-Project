@@ -7,11 +7,14 @@
 
 #include <cstring>
 #include <string>
+#include <limits>
 #include <fstream>
 #include <cerrno>
 #include <cmath>
 
 #include "op_reproducir.h"
+
+#include <portaudiocpp/PortAudioCpp.hxx>
 
 #include "ondaseno.h"
 
@@ -71,53 +74,81 @@ void Reproducir::ejecutar() throw (ErrorEjecucion) {
 
 
 	// (*) Inicia PortAudio
-	PaError err;
+	try {
+		// Crea el sistema
+		portaudio::AutoSystem autoSis;
+		portaudio::System &sis = portaudio::System::instance();
 
-	err = Pa_Initialize();
+		// Parámetros de salida
+		portaudio::DirectionSpecificStreamParameters outParams (
+			sis.defaultOutputDevice(),
+			2,				// salida estéreo
+			portaudio::FLOAT32,
+			false,
+			sis.defaultOutputDevice().defaultLowOutputLatency(),
+			NULL
+		);
 
-	if (err != paNoError) {
-		Pa_Terminate();
+		// Constantes de la configuración
+		const unsigned int FRAMES_PER_BUFFER = 64;
+		const double SAMPLE_RATE = 44100.0;
 
-		throw ErrorEjecucion("error de sonido: " + string(Pa_GetErrorText(err)));
-	}
+		// Parámetros generales (sólo salida)
+		portaudio::StreamParameters params (
+			portaudio::DirectionSpecificStreamParameters::null(),
+			outParams,
+			SAMPLE_RATE,
+			FRAMES_PER_BUFFER,
+			paClipOff
+		);
 
-	// Variable necesarias durante el proceso
-	NotaFPGA nota;
-	OndaSeno onda;
+		// Crea el objeto de onda seno
+		OndaSeno onda;
 
-	arch >> nota;
+		// Crea la el flujo
+		portaudio::MemFunCallbackStream<OndaSeno> stream(params, onda, &OndaSeno::generate);
 
-	while (!arch.eof() && !nota.fin()) {
-
-		// Distingue silencio de nota audible 
-		if (nota.nota() != SILENCIO) {
-			onda = OndaSeno(frecuenciaNota(nota.nota(), nota.octava(), nota.sostenido()));
-
-			onda.open(Pa_GetDefaultOutputDevice());
-
-			if (onda.start()) {
-				Pa_Sleep(nota.duracion() * 40);
-				onda.stop();
-			}
-
-			onda.close();
-		}
-		else
-			Pa_Sleep(nota.duracion() * 40);
+		// Variable necesarias durante el proceso
+		NotaFPGA nota;
 
 		arch >> nota;
+
+		stream.start();
+
+		while (!arch.eof() && !nota.fin()) {
+
+			// Distingue silencio de nota audible 
+			if (nota.nota() != SILENCIO)
+				onda.fijarFrecuencia(numeric_limits<float>::infinity());
+			else
+				onda.fijarFrecuencia(frecuenciaNota(nota.nota(), nota.octava(), nota.sostenido()));
+
+				sis.sleep(nota.duracion() * 167.7722);
+				sis.sleep(nota.duracion() * 167.7722);
+
+			arch >> nota;
+		}
+
+		// Cierra PortAudio
+		stream.stop();
+		stream.close();
+		sis.terminate();
+
+		// Comprueba si ha acabado el archivo o si ha habido señal de fin
+		arch >> nota;
+
+		if (!arch.eof())
+			cerr << "Aviso: el archivo continúa tras el fin de los datos." << endl;
+		else if (!nota.fin())
+			cerr << "Error: el archivo acaba sin presentar señal de terminación." << endl;
+
+		// Cierra archivos y demás
+		arch.close();
 	}
-
-	// Comprueba si ha acabado el archivo o si ha habido señal de fin
-	arch >> nota;
-
-	if (!arch.eof())
-		cerr << "Aviso: el archivo continúa tras el fin de los datos." << endl;
-	else if (!nota.fin())
-		cerr << "Error: el archivo acaba sin presentar señal de terminación." << endl;
-
-	// Cierra archivos y demás
-	arch.close();
-
-	Pa_Terminate();
+	catch (const portaudio::PaException &e) {
+		throw ErrorEjecucion("error de sonido: " + string(e.paErrorText()));
+	}
+	catch (const portaudio::PaCppException &e) {
+		throw ErrorEjecucion("error de sonido: " + string(e.what()));
+	}
 }
