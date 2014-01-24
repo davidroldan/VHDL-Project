@@ -7,21 +7,21 @@
 
 #include <cstring>
 #include <string>
-#include <limits>
 #include <fstream>
 #include <cerrno>
 #include <cmath>
 
+#include "portaudiocpp/PortAudioCpp.hxx"
+
 #include "op_reproducir.h"
-
-#include <portaudiocpp/PortAudioCpp.hxx>
-
 #include "ondaseno.h"
-
 #include "notaFPGA.h"
 
 using namespace std;
 using namespace ops;
+
+// Factor de duración de las unidades de tiempo del formato
+const double FACTOR_DURACION = 167.7722; // segundos
 
 unsigned int frecuenciaNota(NotaMus nota, int octava, bool sos){
 	int notast;
@@ -91,7 +91,7 @@ void Reproducir::ejecutar() throw (ErrorEjecucion) {
 
 		// Constantes de la configuración
 		const unsigned int FRAMES_PER_BUFFER = 64;
-		const double SAMPLE_RATE = 44100.0;
+		const double SAMPLE_RATE = 44100 * 2;
 
 		// Parámetros generales (sólo salida)
 		portaudio::StreamParameters params (
@@ -118,13 +118,12 @@ void Reproducir::ejecutar() throw (ErrorEjecucion) {
 		while (!arch.eof() && !nota.fin()) {
 
 			// Distingue silencio de nota audible 
-			if (nota.nota() != SILENCIO)
-				onda.fijarFrecuencia(numeric_limits<float>::infinity());
+			if (nota.nota() == SILENCIO)
+				onda.fijarFrecuencia(0);
 			else
 				onda.fijarFrecuencia(frecuenciaNota(nota.nota(), nota.octava(), nota.sostenido()));
 
-				sis.sleep(nota.duracion() * 167.7722);
-				sis.sleep(nota.duracion() * 167.7722);
+			sis.sleep(nota.duracion() * FACTOR_DURACION);
 
 			arch >> nota;
 		}

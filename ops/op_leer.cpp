@@ -16,6 +16,9 @@
 using namespace std;
 using namespace ops;
 
+// Factor de duración de las unidades de tiempo del formato
+const double FACTOR_DURACION = 167.7722; // segundos
+
 Leer::Leer() : _detallado(false) {
 	_nombreNota[DO] = "do";
 	_nombreNota[RE] = "re";
@@ -90,7 +93,7 @@ void Leer::ejecutar() throw (ErrorEjecucion) {
 
 	cout << "Número de bloques:\t" << numbloques << endl;
 	cout << "Duración (ut):\t\t" << duracion << endl;
-	cout << "Duración (s):\t\t" << duracion * 0.01 << endl;
+	cout << "Duración (s):\t\t" << duracion * FACTOR_DURACION / 1000 << endl;
 
 	arch.close();
 }

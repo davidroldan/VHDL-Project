@@ -50,6 +50,13 @@ public:
 	NotaFPGA getNota() throw (ErrorFormato);
 
 	/**
+	 * @brief Informa sobre si la última nota leída está ligada
+	 * con la anterior.
+	 *
+	 */
+	bool estaLigada() const;
+
+	/**
 	 * @brief Comprueba si se ha llegado al fin del archivo.
 	 */
 	bool fin() const;
@@ -104,6 +111,9 @@ private:
 
 	/// Silencio?
 	bool _silencio;
+
+	/// Nota ligada
+	bool _ligada;
 };
 
 #endif // LYLECTOR_H

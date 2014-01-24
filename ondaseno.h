@@ -9,8 +9,6 @@
 
 #include "portaudio.h"
 
-const unsigned int TABLE_SIZE = 200;
-
 /**
  * @brief Reproduce una onda sinusoidal de una frecuencia determinada.
  */
@@ -19,9 +17,8 @@ public:
 	/**
 	 * @brief Crea un objeto onda-seno.
 	 *
-	 * @param tamTabla Tamaño de la tabla de onda.
 	 */
-	OndaSeno(unsigned int tamTabla = TABLE_SIZE);
+	OndaSeno();
 
 	/**
 	 * @brief Libera los recursos capturados.

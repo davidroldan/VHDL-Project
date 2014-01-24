@@ -65,7 +65,7 @@ bool convSostenido(int nota) {
 	}
 }
 
-LyLector::LyLector(istream &in) : _fuente(in), _linea(1), _col(0), _ccar(' '), _eof(false), _tempo(60), _octava(2) { }
+LyLector::LyLector(istream &in) : _fuente(in), _linea(1), _col(0), _ccar(' '), _eof(false), _tempo(60), _octava(2), _ligada(false) { }
 
 
 void LyLector::iniciar() throw (ErrorFormato) {
@@ -110,6 +110,20 @@ NotaFPGA LyLector::getNota() throw (ErrorFormato) {
 
 void LyLector::leerNota() throw (ErrorFormato) {
 	string snota = leerPalabra();
+
+	// Abre un bloque de notas ligadas
+	if (snota == "(") {
+		_ligada = true;
+		
+		snota = leerPalabra();
+	}
+
+	// Cierra un bloque de notas ligadas
+	if (snota == ")") {
+		_ligada = false;
+
+		snota = leerPalabra();
+	}
 
 	// Si es una barra de compás la omite
 	if (snota == "|")
@@ -324,6 +338,10 @@ void LyLector::sigCaracter() {
 	}
 	else
 		_col++;
+}
+
+bool LyLector::estaLigada() const {
+	return _ligada;
 }
 
 void LyLector::marcarPosicion(){

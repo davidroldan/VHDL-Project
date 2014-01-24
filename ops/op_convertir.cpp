@@ -79,17 +79,24 @@ void Convertir::ejecutar() throw (ErrorEjecucion) {
 		throw ErrorEjecucion("no se pudo abrir el archivo destino: " + string(strerror(errno)));
 
 	// Variables necesarias durante el proceso
-	NotaFPGA nota;
+	NotaFPGA nota, notant;
 	unsigned int nbloques = 0;
 
 	try {
-		nota = lector.getNota();
+		nota = lector.getNota();	
 
 		while (!lector.fin()) {
 			destino << nota;
-			nbloques++;
+			nbloques++;		
 
+			notant = nota;
 			nota = lector.getNota();
+
+			// Añade un espacio entre notas iguales no ligadas
+			if (!lector.fin() && nota.nota() == notant.nota() && nota.octava() == notant.octava()
+				&& nota.sostenido() == notant.sostenido() && !lector.estaLigada())
+
+				destino << NotaFPGA(SILENCIO, 1, false, nota.octava());
 		}
 	}
 	catch (LyLector::ErrorFormato &ef) {

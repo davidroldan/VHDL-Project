@@ -2,13 +2,12 @@
  * @file ondaseno.cpp
  * @brief Reproductor de sonido.
  *
- * @note Basado en paex_sine_c++.cpp por Ross Bencina y Phil Burk.
  */
 
 #include <iostream>
-#include <limits>
 #include <cmath>
 #include "ondaseno.h"
+
 
 using namespace std;
 
@@ -16,9 +15,11 @@ using namespace std;
 	const double M_PI = 3.14159265;
 #endif
 
-const double SAMPLE_RATE = 44100 * 4;
+const double SAMPLE_RATE = 44100;
 
-OndaSeno::OndaSeno(unsigned int tamTabla) : _tamTabla(tamTabla), _frecuencia(numeric_limits<double>::infinity()),
+const unsigned int TABLE_SIZE = 200;
+
+OndaSeno::OndaSeno() : _tamTabla(20), _frecuencia(0),
 	_leftPhase(0), _rightPhase(0) {
 	
 	// Nada que hacer
@@ -36,7 +37,7 @@ void OndaSeno::fijarFrecuencia(float f){
 // :: Funciones privadas ::
 
 float OndaSeno::valorOnda(unsigned int n) {
-	if (_frecuencia == numeric_limits<double>::infinity())
+	if (_frecuencia == 0)
 		return 0;
 	else {
 		return sin(( (double) n / (double) _tamTabla) * M_PI * 2.0);
