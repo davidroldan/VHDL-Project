@@ -38,21 +38,11 @@ entity reconocedor is
 		btn_rec	: out std_logic;
 		btn_stop	: out std_logic;
 		btn_bsig : out std_logic;
-		btn_bant	: out std_logic;
-
-		r, t: out std_logic_vector (6 downto 0)
+		btn_bant	: out std_logic
 	);
 end reconocedor;
 
 architecture Behavioral of reconocedor is
-	-- Conversor a 7 segmentos
-	component segments is
-		port (
-			entrada	: in std_logic_vector(3 downto 0);
-			salida	: out std_logic_vector(6 downto 0)
-		);
-	end component segments;
-
 	-- Estado para diferenciar pulsación de suelta (acción y efecto de soltar)
 	type Estado is (manosarriba, teclapulsada, soltando);
 	
@@ -68,6 +58,9 @@ architecture Behavioral of reconocedor is
 	
 	-- Última tecla leída
 	signal tecla : std_logic_vector(7 downto 0);
+	
+	-- Octava actual
+	signal octava_act, octava_sig	: std_logic_vector(2 downto 0);
 
 	-- Retraso de la señal de teclado
 	constant ps2Retraso : Positive := 16;
@@ -96,6 +89,7 @@ begin
 		if reset = '1' then
 			estadoa <= manosarriba;
 			tecla <= (others => '0');
+			octava_act	<= "001";
 			ps2clk_ant <= '0';
 			
 		elsif reloj'event and reloj = '1' then
@@ -152,6 +146,9 @@ begin
 					estadoa <= soltando;
 				
 				end if;
+				
+				-- Modifica el valor de la octava actual
+				octava_act	<= octava_sig;
 
 				-- Ya la anterior lectura es historia
 				bitsleidos <= (others => '0');
@@ -192,15 +189,16 @@ begin
 				'0';
 	
 	-- Octava	 
-	octava <= 	"001" when tecla = x"41" or tecla = x"4B" or tecla = x"15" or tecla = x"1E" or
-						 tecla = x"49" or tecla = x"4C" or tecla = x"1D" or tecla = x"26" or
-						 tecla = x"4A" or tecla = x"24" or tecla = x"2D" or tecla = x"2E" or
-						 tecla = x"2C" or tecla = x"36" or tecla = x"35" or tecla = x"3D" or
-                   tecla = x"3C" else
-               "010" when tecla = x"43" or tecla = x"46" or
-                  tecla = x"44" or tecla = x"45" or tecla = x"4D" or
-                  tecla = x"54" or tecla = x"55" or tecla = x"5B" else
-				"000";
+	octava <= octava_act			when tecla = x"41" or tecla = x"4B" or tecla = x"15" or tecla = x"1E" or
+											tecla = x"49" or tecla = x"4C" or tecla = x"1D" or tecla = x"26" or
+											tecla = x"4A" or tecla = x"24" or tecla = x"2D" or tecla = x"2E" or
+											tecla = x"2C" or tecla = x"36" or tecla = x"35" or tecla = x"3D" or
+											tecla = x"3C" else
+									
+             octava_act + 1	when tecla = x"43" or tecla = x"46" or
+											tecla = x"44" or tecla = x"45" or tecla = x"4D" or
+											tecla = x"54" or tecla = x"55" or tecla = x"5B" else
+				 "000";
 				
 	-- Botones de reproducción, grabación y detención
 	with tecla select
@@ -223,7 +221,10 @@ begin
 		btn_bant <=	'1'	when x"7D",
 						'0'	when others;
 
-	-- Displays de 7 segmentos que muestran la tecla pulsada
-	u : segments port map (tecla(7 downto 4), t);
-	v : segments port map (tecla(3 downto 0), r);
+
+	-- Botones de cambio de octava
+	octava_sig <=	octava_act + 1 when tecla = x"75" and octava_act /= "110" else
+						octava_act - 1 when tecla = x"72" and octava_act /= "000" else
+						octava_act;
+						
 end Behavioral;

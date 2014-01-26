@@ -37,10 +37,10 @@ entity reproductor is
 end reproductor;
 
 architecture Behavioral of reproductor is
-	type estado is (esperando, reproduciendo);
+	type estado is (esperando, leyendo, reproduciendo);
 	
 	signal estadoa, estadosig : estado;
-	signal tiempo : std_logic_vector( 7 downto 0);
+	signal tiempo : std_logic_vector(7 downto 0);
 	signal dirsig : std_logic_vector(9 downto 0);
 	signal clkdiv_ant : std_logic;
 	
@@ -61,12 +61,14 @@ begin
 			case estadoa is
 				when esperando =>
 					dirsig <= addr;
-					tiempo <= (others => '0');			
+					tiempo <= memdata(7 downto 0);
+
+				when leyendo =>
+					tiempo <= memdata(7 downto 0);
 					
 				when reproduciendo =>
 					if tiempo = 0 then
 						dirsig <= dirsig + 1;
-						tiempo <= memdata(7 downto 0);
 						
 					elsif clkdiv_ant /= clkdiv and clkdiv = '1' then
 						tiempo <= tiempo - 1;
@@ -77,12 +79,15 @@ begin
 	end process sincrono;
 
 
-	estadosig <= esperando when play = '0' OR memdata = 0
-				else reproduciendo;
+	estadosig <=	reproduciendo	when estadoa = esperando and play = '1' else
+						esperando		when play = '0' or memdata = 0 else
+						reproduciendo	when estadoa = leyendo else
+						leyendo			when tiempo = 0 else
+						estadoa;
 	
 	with estadoa select
-		fin <= '1' when esperando,
-				'0' when others;
+		fin <=	'1' when esperando,
+					'0' when others;
 				
 				
 	onota <= memdata(14 downto 12);
@@ -90,4 +95,3 @@ begin
 	osos <= memdata(8);
 	
 end Behavioral;
-

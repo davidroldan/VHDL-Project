@@ -32,7 +32,7 @@ entity archivero is
 		en_reproducion	: out std_logic;
 		en_grabacion	: out std_logic;
 		
-		-- TODO: queda pendiente una señal indicando la memoria activa
+		bloqueact	: out std_logic_vector(7 downto 0);
 
 		-- Reset
 		reset	: in std_logic;
@@ -136,6 +136,8 @@ begin
 	-- Salidas informativas de este estado
 	en_reproducion	<= reproduciendo;
 	en_grabacion	<= grabando;
+
+	bloqueact	<= conv_std_logic_vector(mem_repr, bloqueact'Length);
 	
 	-- Memoria RAM para metadatos (de momento simple puerto)
 --	mtd_mem : RAMB16_S4 port map (
@@ -154,7 +156,17 @@ begin
 	-- El reproductor usará el puerto A para lectura y el
 	-- grabador el puerto B para escritura
 	mem_gen : for i in 0 to NRam-1 generate
-		mem : RAMB16_S18_S18 port map (
+		mem : RAMB16_S18_S18 generic map (
+			INIT_01 => x"E60380019601B601E601F6038001B601D701F60198038001B601B801A901B801",
+			INIT_02 => x"A901B801F601A8019801E60380019601B601E601F6038001B6019801F601E607",
+			INIT_03 => x"B801A901B801A901B801F601A8019801E60380019601B601E601F6038001B601",
+			INIT_04 => x"D701F60198038001B601B801A901B801A901B801F601A8019801E60380019601",
+			INIT_05 => x"B601E601F6038001B6019801F601E6038001F6019801A801B804D601C801B801",
+			INIT_06 => x"A804C601B801A8019804B601A8019801F6038001B601B8018003B801BA018003",
+			INIT_07 => x"A901B8018003A901B801A901B801A901B801F601A8019801E60380019601B601",
+			INIT_08 => x"E601F6038001B601D701F60198038001B601B801A901B801A901B801F601A801",
+			INIT_09 => x"9801E60380019601B601E601F6038001B6019801F601E60A0000000000000000"
+		) port map (
 			doa 	=> adoa(i),
 			addra => addra,
 			addrb => addrb,

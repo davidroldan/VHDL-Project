@@ -60,10 +60,13 @@ architecture grab_arq of grabador is
 	signal rjdiv_ant : std_logic;
 begin
 	-- Reloj principal
-	process (reset, reloj, estado_sig, rjdiv, dir_ini, contador, dir)
+	process (reset, reloj, estado_sig, rjdiv, dir_ini, contador, dir, nota, octava, sos)
 	begin
 		if reset = '1' then
-			estadoa <= parado;
+			estadoa	<= parado;
+			r_nota	<= nota;
+			r_octava	<= octava;
+			r_sos		<= sos;
 
 		elsif reloj'event and reloj = '1' then
 			-- Cambia de estado
@@ -110,24 +113,24 @@ begin
 	-- Dato de entrada para la memoria
 	with estadoa select
 		mem_dat <=	'1' & r_nota & r_octava & r_sos & contador	when activo,
-				(others => '0')					when others;
+						(others => '0')					when others;
 
 	-- Escritura en la memoria
-	mem_we <=	'1' when estadoa = cierre else
-		 	'1' when estadoa = activo and cambio = '1' else
-		 	'0';
+	mem_we <=	'1'	when estadoa = cierre else
+					'1'	when estadoa = activo and cambio = '1' else
+					'0';
 
 	-- Señal de cambio (por legibilidad)
-	cambio <=	'1' when r_nota /= nota else
-		  	'1' when r_octava /= octava else
-			'1' when r_sos /= sos	else
-			'1' when contador = -1 else
-			'0';
+	cambio <=	'1'	when r_nota /= nota else
+					'1'	when r_octava /= octava else
+					'1'	when r_sos /= sos	else
+					'1'	when contador = -1 else
+					'0';
 
 	-- Cambio de estado
 	estado_sig <=	activo	 	when estadoa = parado and grabar = '1' else
-			cierre		when estadoa = activo and grabar = '0' else
-			parado		when estadoa = cierre else
-			estadoa;
+						cierre		when estadoa = activo and grabar = '0' else
+						parado		when estadoa = cierre else
+						estadoa;
 			
 end architecture grab_arq;

@@ -92,26 +92,26 @@ NET led_grab LOC=N2;
 
 #Display 7-segmentos de la parte izquierda de la placa extendida:
 
-NET t<0> LOC=H14;
-NET t<1> LOC=M4;
-NET t<2> LOC=P1;
-NET t<3> LOC=N3;
-NET t<4> LOC=M15;
-NET t<5> LOC=H13;
-NET t<6> LOC=G16;
+NET dspiz<0> LOC=H14;
+NET dspiz<1> LOC=M4;
+NET dspiz<2> LOC=P1;
+NET dspiz<3> LOC=N3;
+NET dspiz<4> LOC=M15;
+NET dspiz<5> LOC=H13;
+NET dspiz<6> LOC=G16;
 
 
 
 
 #Display 7-segmentos de la parte derecha de la placa extendida
 
-NET r<0> loc=E2;
-NET r<1> loc=E1;
-NET r<2> loc=F3;
-NET r<3> loc=F2;
-NET r<4> loc=G4;
-NET r<5> loc=G3;
-NET r<6> loc=G1;
+NET dspdr<0> loc=E2;
+NET dspdr<1> loc=E1;
+NET dspdr<2> loc=F3;
+NET dspdr<3> loc=F2;
+NET dspdr<4> loc=G4;
+NET dspdr<5> loc=G3;
+NET dspdr<6> loc=G1;
 
 # códec de audio (placa extendida)
 	# entradas
