@@ -33,7 +33,7 @@ entity reconocedor is
 		onota : out TNota;
 		
 		-- Señales de reproducción y grabación (permanecen
-		-- activas durante al menos un ciclo)
+		-- activas durante exactamente un ciclo)
 		btn_play	: out std_logic;
 		btn_rec	: out std_logic;
 		btn_stop	: out std_logic;
@@ -71,6 +71,8 @@ architecture Behavioral of reconocedor is
 	-- Biestable que recuerda el último valor conocido del reloj del teclado
 	signal ps2clk_ant : std_logic;
 
+	-- Biestable para desactivar las señales binarias pasado un ciclo
+	signal senbin, senbin_sig : std_logic;
 begin
 	
 	-- Estabiliza la señal del reloj del teclado
@@ -96,6 +98,10 @@ begin
 			-- Almacena el valor del reloj del teclado
 			-- (visible en el ciclo siguiente)
 			ps2clk_ant <= PS2CLK_E;
+			
+			if bitsleidos = 0 then
+				senbin <= '0';
+			end if;
 	
 			-- Atendiendo al teclado
 			if PS2CLK_E /= ps2clk_ant and PS2CLK_E = '0' then
@@ -144,6 +150,7 @@ begin
 				-- Si es un "break code"
 				else
 					estadoa <= soltando;
+					senbin <= '1';
 				
 				end if;
 				
@@ -189,41 +196,40 @@ begin
 				'0';
 	
 	-- Octava	 
-	octava <= octava_act			when tecla = x"41" or tecla = x"4B" or tecla = x"15" or tecla = x"1E" or
+	octava <= octava_act + 1			when tecla = x"41" or tecla = x"4B" or tecla = x"15" or tecla = x"1E" or
 											tecla = x"49" or tecla = x"4C" or tecla = x"1D" or tecla = x"26" or
 											tecla = x"4A" or tecla = x"24" or tecla = x"2D" or tecla = x"2E" or
 											tecla = x"2C" or tecla = x"36" or tecla = x"35" or tecla = x"3D" or
 											tecla = x"3C" else
 									
-             octava_act + 1	when tecla = x"43" or tecla = x"46" or
+             octava_act + 2	when tecla = x"43" or tecla = x"46" or
 											tecla = x"44" or tecla = x"45" or tecla = x"4D" or
 											tecla = x"54" or tecla = x"55" or tecla = x"5B" else
-				 "000";
+				 octava_act;
 				
 	-- Botones de reproducción, grabación y detención
 	with tecla select
-		btn_play <= '1'	when x"6B",
-						'0'	when others;
+		btn_play <= '1' and senbin	when x"6B",
+						'0'				when others;
 						
 	with tecla select
-		btn_rec <=	'1'	when x"73",
-						'0'	when others;
+		btn_rec <=	'1' and senbin	when x"73",
+						'0'				when others;
 	
 	with tecla select
-		btn_stop <=	'1'	when x"74",
-						'0'	when others;
+		btn_stop <=	'1' and senbin	when x"74",
+						'0'				when others;
 						
 	with tecla select
-		btn_bsig	<=	'1'	when x"7A",
-						'0'	when others;
+		btn_bsig	<=	'1' and senbin	when x"7A",
+						'0'				when others;
 	
 	with tecla select
-		btn_bant <=	'1'	when x"7D",
-						'0'	when others;
+		btn_bant <=	'1' and senbin	when x"7D",
+						'0'				when others;
 
-
-	-- Botones de cambio de octava
-	octava_sig <=	octava_act + 1 when tecla = x"75" and octava_act /= "110" else
+	-- Botones de cambio de octava (falta senbin)
+	octava_sig <=	octava_act + 1 when tecla = x"75" and octava_act /= "101" else
 						octava_act - 1 when tecla = x"72" and octava_act /= "000" else
 						octava_act;
 						

@@ -192,7 +192,8 @@ begin
 		-- Dirección inicial a 0
 		addr		=> (others => '0'),
 		memdir	=> addra,
-		memdata	=> doa,
+		--memdata	=> doa,
+		memdata	=> (x"8000"),
 		fin		=> fin_repr,
 		onota		=> onota,
 		ooctava	=> ooctava,

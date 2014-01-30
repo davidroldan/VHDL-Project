@@ -39,12 +39,12 @@ begin
 
 	-- Conversores a display de 7 segmentos para el número de bloque
 	bloque_ms_ds7 : entity work.segments port map (
-		entrada => bloqueact(3 downto 0),
+		entrada => bloqueact(7 downto 4),
 		salida	=> bloque_ms
 	);
 
 	bloque_ls_ds7 : entity work.segments port map (
-		entrada => bloqueact(7 downto 4),
+		entrada => bloqueact(3 downto 0),
 		salida	=> bloque_ls
 	);
 
@@ -67,9 +67,9 @@ begin
 	-- hay sostenido. En silencio muestra el dígito
 	-- menos significativo del bloque de memoria en uso.
 
-	dspdr <=	"0110110"		when sos = '1' else	-- Una especie de H
+	dspdr <=	"1110110"		when sos = '1' else	-- Una especie de H
 				octava_ds		when nota /= SILENCIO else
-		 		bloque_ls;		
+		 		bloque_ls;
 					
 
 end architecture display_arq;
