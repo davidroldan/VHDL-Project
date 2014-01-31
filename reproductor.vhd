@@ -80,14 +80,14 @@ begin
 
 
 	estadosig <=	reproduciendo	when estadoa = esperando and play = '1' else
-						esperando		when play = '0' or memdata = 0 else
+						esperando	when play = '0' or memdata = 0 else
 						reproduciendo	when estadoa = leyendo else
-						leyendo			when tiempo = 0 else
+						leyendo		when tiempo = 0 else
 						estadoa;
 	
-	with estadoa select
-		fin <=	'1' when esperando,
-					'0' when others;
+	-- Señal de fin que dura un 
+	fin <=	'1' when memdata = 0 else
+				'0';
 				
 				
 	onota <= memdata(14 downto 12);

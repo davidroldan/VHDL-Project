@@ -90,6 +90,8 @@ begin
 		if reset = '1' then
 			mem_grab <= 0;
 			mem_repr <= 0;
+			reproduciendo <= '0';
+			grabando <= '0';
 		
 		elsif reloj'event and reloj = '1' then
 			
@@ -170,6 +172,8 @@ begin
 			doa 	=> adoa(i),
 			addra => addra,
 			addrb => addrb,
+			dia	=> (others => '0'),
+			dipa	=> (others => '0'),
 			dib 	=> dib,
 			dipb	=> (others => '0'),
 			ena 	=> '1',
@@ -192,8 +196,7 @@ begin
 		-- Dirección inicial a 0
 		addr		=> (others => '0'),
 		memdir	=> addra,
-		--memdata	=> doa,
-		memdata	=> (x"8000"),
+		memdata	=> doa,
 		fin		=> fin_repr,
 		onota		=> onota,
 		ooctava	=> ooctava,
