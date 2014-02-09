@@ -51,22 +51,24 @@ architecture grab_arq of grabador is
 	signal cambio	: std_logic;
 
 	-- Contador de tiempo
-	signal contador	: std_logic_vector(7 downto 0);
+	signal contador, contador_sig	: std_logic_vector(7 downto 0);
 
 	-- Dirección de escritura
-	signal dir	: std_logic_vector(9 downto 0);
+	signal dir, dir_sig	: std_logic_vector(9 downto 0);
 
 	-- Señal de reloj dividido anterior
 	signal rjdiv_ant : std_logic;
 begin
 	-- Reloj principal
-	process (reset, reloj, estado_sig, rjdiv, dir_ini, contador, dir, nota, octava, sos)
+	process (reset, reloj, estado_sig, rjdiv, dir_ini, contador, dir, nota, octava, sos, contador_sig, dir_sig)
 	begin
 		if reset = '1' then
 			estadoa	<= parado;
 			r_nota	<= nota;
 			r_octava	<= octava;
 			r_sos		<= sos;
+			contador <= conv_std_logic_vector(1, 8);
+			dir		<= dir_ini;
 
 		elsif reloj'event and reloj = '1' then
 			-- Cambia de estado
@@ -76,43 +78,35 @@ begin
 			-- (visible en el ciclo siguiente)
 			rjdiv_ant <= rjdiv;
 
-			-- Cambios en contador y dirección	
-			case estadoa is
-				when parado =>
-					contador <= (others => '0');
-					dir <= dir_ini;
-
-				when activo =>
-					-- Cambio del reloj divido
-					if rjdiv_ant /= rjdiv and rjdiv = '1' then
-						contador <= contador + 1;
-
-					-- Cuando ha surgido la necesidad de escribir la
-					-- palabra en curso
-					elsif cambio = '1' then
-						contador <= (others => '0');
-						dir <= dir + 1;
-
-					end if;
-
-				when others => -- cierre
-				
-			end case;
+			-- Actualiza los contadores
+			contador	<= contador_sig;
+			dir		<= dir_sig;
 
 			-- Actualiza los datos registrados
 			r_nota	<= nota;
 			r_octava	<= octava;
 			r_sos		<= sos;
-
 		end if;
 	end process;
 
 	-- Dirección de escritura en la memoria
 	mem_dir <= dir;
+	
+	-- Contador de duración del cuadro
+	contador_sig <=	contador + 1						when estadoa = activo and rjdiv_ant /= rjdiv else
+							conv_std_logic_vector(1, 8)	when estadoa = activo and cambio = '1' else
+							conv_std_logic_vector(1, 8)	when estadoa = parado else
+							contador;
+
+	-- Dirección de la memoria
+	dir_sig <=	dir + 1			when estadoa = activo and cambio = '1' else
+					dir_ini			when estadoa = parado else		
+					dir;
 
 	-- Dato de entrada para la memoria
 	with estadoa select
 		mem_dat <=	'1' & r_nota & r_octava & r_sos & contador	when activo,
+						'1' & r_nota & r_octava & r_sos & contador	when cierre,
 						(others => '0')					when others;
 
 	-- Escritura en la memoria
@@ -132,5 +126,5 @@ begin
 						cierre		when estadoa = activo and grabar = '0' else
 						parado		when estadoa = cierre else
 						estadoa;
-			
+
 end architecture grab_arq;

@@ -72,7 +72,12 @@ architecture behavior of sim_repr is
    -- Clock period definitions
    constant clk_period : time := 10 ns;
    constant clkdiv_period : time := 100 ns;
- 
+	
+	-- Memoria para la lectura
+	type TMem is array (0 to 10) of std_logic_vector(15 downto 0);
+	
+	signal mem : TMem := ("1000000000000010", "1000001000000100",
+			"1000001100000001", "1111111000101111", others => x"0000");
 begin
  
 	-- Instantiate the Unit Under Test (UUT)
@@ -106,7 +111,9 @@ begin
 		clkdiv <= '1';
 		wait for clkdiv_period/2;
    end process;
- 
+
+	-- Datos de memoria
+	memdata <= mem(conv_integer(memdir));
 
    -- Stimulus process
    stim_proc: process
@@ -117,17 +124,12 @@ begin
 
 		-- Fija un valor no final para la lectura del reproductor
 		rst <= '0';
-		memdata <= x"8004";
       wait for clk_period * 2;
-		
-		-- Comienza la reproducción hasta la palabra 4
+
+		-- Comienza la reproducción hasta el fin
 		play <= '1';
-		wait until memdir = 4;
-		
-		-- Envía el valor de finalización
-		memdata <= x"0000";
 		wait until fin = '1';
-		
+
 		-- Fin de la simulación
 		play <= '0';
       wait;
