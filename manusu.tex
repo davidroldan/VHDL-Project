@@ -1,0 +1,193 @@
+\documentclass{article}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage[spanish]{babel}
+\usepackage{anysize}
+\usepackage{tabu}
+\usepackage{graphicx}
+
+\usepackage{tikz}
+\usetikzlibrary{trees} 
+
+\title{Teclado: manual de uso}
+\author{Juan Andrés Claramunt Pérez, David Roldán Santos y Rubén Rafael Rubio Cuéllar}
+
+\begin{document}
+
+\maketitle
+
+\section{Ficheros y dependencias}
+
+% Separación de las filas de la tabla
+\let\sep\hline
+
+% TODO: faltan archivos ¿sobran?
+
+\begin{tabu}{| >{\itshape}X[2, l] | X[7, l] |}
+	\multicolumn{2}{c}{\bfseries Archivos principales} \\ \sep
+	archivero.vhd & Archivero (reproductor, grabador, memoria y comunicación serie) \\ \sep
+	audiocod.vhd & Controlador del códec de audio \\ \sep
+	display.vhd & Controlador del display de 7 segmentos \\ \sep
+	estabilizador.vhd & Estabilizador de señal de 1 bit \\ \sep
+	gensonido.vhd & Generador de ondas sonoras binarias \\ \sep
+	grabador.vhd & Grabador \\ \sep
+	pines.ucf & Pines \\ \sep
+	reconocedor.vhd & Reconocedor de teclado \\ \sep
+	reproductor.vhd & Reproductor \\ \sep
+	segments.vhd & Conversor de binario a display de 7 segmentos \\ \sep
+	tablanotas.vhd & Tabla de semiperiodos de nota \\ \sep
+	tablanotassos.vhd & Tabla de semiperiodos de nota (con sostenido) \\ \sep
+	teclado.vhd & Entidad principal \\ \sep
+	tipos.vhd & Paquete de tipos y definiciones comunes \\ \sep
+	uart\_rx.vhd & Transistor de la UART (comunicación serie) \\ \sep
+	uart\_tx.vhd & Receptor de la UART (comunicación serie) \\ \sep
+	vga.vhd & Controlador de pantalla \\ \sep
+	vga\_barras.vhd & Componente de barras (pantalla) \\ \sep
+	vga\_recButton.vhd & Señal de grabación (pantalla) \\ \sep
+	vga\_teclado.vhd & Componente teclado (pantalla) \\ \sep
+
+	% ¿Incluimos estos archivos?
+	\multicolumn{2}{c}{} \\
+	\multicolumn{2}{c}{{\bfseries Simulaciones} en {\itshape pruebas}} \\ \sep
+	sim\_archivero.vhd & Simulación del archivero \\ \sep
+	sim\_codec.vhd & Simulación del códec \\ \sep
+	sim\_grab.vhd & Simulación del grabador \\ \sep
+	sim\_repr.vhd & Simulación del reproductor \\ \sep
+
+	\multicolumn{2}{c}{} \\
+	\multicolumn{2}{c}{{\bfseries Conversor BMP a VHD} en {\itshape conversorBMPtoVHD}} \\ \sep
+	converter.cpp & Archivo principal \\ \sep
+\end{tabu}
+
+\vspace*{1cm}
+
+\begin{figure}[ht] \centering
+\begin{tikzpicture}[level 1/.style={sibling distance=20mm}]
+
+	\node {archivero} [style=edge from parent fork down]
+		child { node {reproductor} }
+		child { node {grabador} }
+		child { node {uart\_rx} }
+		child { node {uart\_tx} }
+	;
+\end{tikzpicture}
+\caption{Árbol de dependencias de los archivos de la descripción {\itshape hardware} (archivero)}
+\end{figure}
+
+\begin{figure}[ht] \centering
+\begin{tikzpicture}[level 1/.style={sibling distance=20mm}]
+
+	\node {teclado} [style=edge from parent fork down]
+		child {
+			node {gensonido}
+			child { node {tablanotas} }
+			child { node {tablanotassos} }
+		}
+		child { node {reconocedor} }
+		child {
+			node {archivero*}
+		}
+		child {
+			node {vga}
+			child { node {vga\_barras} }
+			child { node {vga\_\ldots} }
+			child { node {vga\_teclado} }
+		}
+		child { node {audiocod} }
+		child {
+			node {display}
+			child { node {segments} }
+		}
+		child { node {pines.ucf} }
+	;
+\end{tikzpicture}
+\caption{Árbol de dependencias de los archivos de la descripción {\itshape hardware}}
+\end{figure}
+
+\begin{tabu}{| >{\itshape}X[3, l] | X[5, l] |}
+	\multicolumn{2}{c}{{\bfseries Manipulador de archivos FLAN} en {\itshape mflan}} \\ \sep
+	Léeme.txt & Instrucciones de compilación \\ \sep
+	Makefile & Archivo de construcción (GNU Makefile) \\ \sep
+	Makefile.mak & Archivo de construcción (Microsoft NMake) \\ \sep
+	lylector.cpp & Lector de archivos de partitura \\ \sep
+	lylector.h & \\ \sep
+	main.cpp & Archivo principal \\ \sep
+	mflan.cpp & Clase principal \\ \sep
+	mflan.h & \\ \sep
+	nota.h & Clase abstracta Nota. \\ \sep
+	notaFPGA.cpp & Nota del formato FLAN \\ \sep
+	notaFPGA.h & \\ \sep
+	ondaseno.cpp & Onda senoidal (con PortAudio) \\ \sep
+	ondaseno.h & \\ \sep
+	operacion.h & Clase abstracta Operación \\ \sep
+	ops/op\_convertir.cpp & Operación de conversión \\ \sep
+	ops/op\_convertir.h & \\ \sep
+	ops/op\_escalar.cpp & Operación de cambio de escala \\ \sep
+	ops/op\_escalar.h & \\ \sep
+	ops/op\_leer.cpp & Operación de lectura y comprobación \\ \sep
+	ops/op\_leer.h & \\ \sep
+	ops/op\_reproducir.cpp & Operación de reproducción \\ \sep
+	ops/op\_reproducir.h & \\ \sep
+	tamborilero.txt & Archivo de partitura de ejemplo \\ \sep
+
+	\multicolumn{2}{c}{} \\
+	\multicolumn{2}{c}{{\bfseries Cargador/descargador de archivos} en {\itshape eurotas}} \\ \sep
+	Léeme.txt & Intrucciones de compilación y uso \\ \sep
+	toc/Main.java & Clase principal \\ \sep
+	toc/OyenteTarea.java & Interfaz de oyente de tarea \\ \sep
+	toc/comm/Cargador.java & Cargador de archivos en la FPGA \\ \sep
+	toc/comm/Comunicador.java & Clase abstracta: comunicador con la FPGA \\ \sep
+	toc/comm/Descargador.java & Descargador de archivos desde la FPGA \\ \sep
+	toc/comm/ErrorComunicacion.java & Excepción de error en la comunicación \\ \sep
+	toc/comm/OyenteSerieDebug.java & Oyente de eventos de la comunicación \\ \sep
+	toc/comm/Saludador.java & Saludador de la FPGA \\ \sep
+	toc/comm/package-info.java & Información del paquete {\itshape toc.comm} \\ \sep
+	toc/gui/MonitorProgreso.java & Diálogo monitor del progreso \\ \sep
+	toc/gui/PanelArchivo.java & Panel de selección de archivos \\ \sep
+	toc/gui/PanelArchivoListener.java & Oyente del selector de archivos s\\ \sep
+	toc/gui/VentanaPpal.java & Ventana principal \\ \sep
+	toc/gui/package-info.java & Información del paquete {\itshape toc.gui} \\ \sep
+	toc/package-info.java & Información del paquete {\itshape toc} \\ \sep
+\end{tabu}
+
+\section{Pines}
+
+\begin{tabu}{|>{\bfseries}X[1, l] | >{\tt}X[2, l] | >{\itshape}X[1, l] |X[10, l] |}
+	\sep T9 & reloj & in & Señal de reloj de la FPGA \\ \sep
+	J4 & reset & in & Interruptor de reinicio \\ \sep
+	D15 & onda & out & Señal de onda \\ \sep
+
+	\multicolumn{4}{c}{\bfseries Teclado PS/2} \\ \sep	
+	B16 & PS2CLK & in & Reloj del teclado PS/2 \\ \sep
+	E13 & PS2DATA & in & Bit de datos del teclado PS/2 \\ \sep
+	
+	\multicolumn{4}{c}{\bfseries Códec de audio} \\ \sep
+	P11 & au\_mclk & out & Reloj principal \\ \sep
+	R12 & au\_lrck & out & Selector de canal \\ \sep
+	T12 & au\_bclk & out & Reloj de la entrada en serie del códec \\ \sep
+	M10 & au\_sdti & out & Entrada de datos \\ \sep
+
+	\multicolumn{4}{c}{\bfseries Pantalla} \\ \sep
+	B7 & hsyncb & in & Bit de sincronía horizontal \\ \sep
+	D8 & vsyncb & inout? & Bit se sincronía vertical \\ \sep
+
+	\multicolumn{4}{c}{\bfseries  Puerto serie} \\ \sep
+	G5 & rs232\_rd & in & Entrada de datos \\ \sep
+	J2 & rs232\_td & out & Salida de datos \\ \sep
+\end{tabu}
+
+% TODO: faltan pines
+
+\section{Inicialización}
+
+\section{Funcionamiento}
+
+\begin{figure}[ht] \centering
+	\includegraphics[scale=1.8]{keyboard.pdf}
+
+	\caption{Disposición del teclado}
+\end{figure}
+\section{¿Qué espero ver?}
+\end{document}
