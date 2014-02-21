@@ -31,6 +31,7 @@ entity archivero is
 		-- Información sobre el estado de r/g
 		en_reproducion	: out std_logic;
 		en_grabacion	: out std_logic;
+		en_transferencia: out std_logic;
 		
 		bloqueact	: out std_logic_vector(7 downto 0);
 
@@ -55,24 +56,30 @@ architecture archivero_arq of archivero is
 
 	-- Tipos array de datos (del tamaño de datos de la memoria)
 	type ArrayDatos is array (0 to NRam-1) of std_logic_vector(15 downto 0);
-	
+	type ArrayDirs is array (0 to NRam-1) of std_logic_vector(9 downto 0);
+
 	-- Salida y entrada de datos de la memoria
-	signal doa, dib: std_logic_vector(15 downto 0);
+	signal do_repr, di_grab	: std_logic_vector(15 downto 0);
+	signal do_trans, di_trans : std_logic_vector(15 downto 0);
+
+	-- Señales de dirección de los componentes
+	signal addr_repr, addr_grab, addr_trans : std_logic_vector(9 downto 0);
+
+	-- Array de direcciones para los puertos A y B de las memorias
+	signal addra, addrb	: ArrayDirs;
 	
-	-- Buses de direcciones
-	signal addra, addrb	: std_logic_vector(9 downto 0);
+	-- Array de salidas de datos para los puertos A y B de las memorias
+	signal adoa, adob : ArrayDatos;
 
 	-- Capacitación de escritura (B)
 	signal aweb : std_logic_vector(0 to NRam-1);
-	signal web : std_logic;
+	signal we_grab, we_trans : std_logic;
 
-	-- Array de salidas de la memoria
-	signal adoa : ArrayDatos;
-
-	-- Señales booleanas grabando y reproducción
+	-- Señales booleanas grabando y reproduciendo
 	signal grabando, grabando_sig : std_logic;
 	signal reproduciendo, reproduciendo_sig : std_logic;
-	
+	signal transfiriendo : std_logic;
+
 	-- Salida indicadora del fin de la reproducción por el
 	-- reproductor
 	signal fin_repr : std_logic;
@@ -82,6 +89,7 @@ architecture archivero_arq of archivero is
 	-- std_logic_vector de tamaño mínimo
 	signal mem_grab, mem_grab_sig : Integer range 0 to NRam-1;
 	signal mem_repr, mem_repr_sig : Integer range 0 to NRam-1;
+	signal mem_trans : Integer range 0 to NRam-1;
 begin
 
 	-- Parte síncrona (registros y demás)
@@ -108,25 +116,25 @@ begin
 	-- Memoria seleccionada para la grabación
 	-- (a priori la memoria para grabación y reprodución
 	-- es la misma)
-	mem_grab_sig <=	0	when bsig = '1' and mem_grab = NRam-1 else
-							mem_grab + 1		when bsig = '1' else
+	mem_grab_sig <=	0					when bsig = '1' and mem_grab = NRam-1 else
+							mem_grab + 1	when bsig = '1' else
 							NRam-1			when bant = '1' and mem_grab = 0 else
-							mem_grab - 1		when bant = '1' else
+							mem_grab - 1	when bant = '1' else
 							mem_grab;
 								
 	mem_repr_sig <= mem_grab_sig;
 
 	
 	-- Control del estado de grabación y reproducción
-	grabando_sig	<= '1'		when rec = '1' and reproduciendo = '0' else
+	grabando_sig	<= '1'		when rec = '1' and reproduciendo = '0' and transfiriendo = '0' else
 							'0'		when stop = '1' else
 							
 							-- Desactiva la grabación automáticamente cuando
 							-- observa que se va a pasar
-							'0'		when grabando = '1' and addrb = -2 else
+							'0'		when grabando = '1' and addr_grab = -2 else
 							grabando;
 							
-	reproduciendo_sig <=	'1'	when play = '1' and grabando = '0' else
+	reproduciendo_sig <=	'1'	when play = '1' and grabando = '0' and transfiriendo = '0' else
 								'0'	when stop = '1' else
 								
 								-- Se desactiva automáticamente cuando el reproductor
@@ -134,29 +142,28 @@ begin
 								'0'	when reproduciendo = '1' and fin_repr = '1' else
 								
 								reproduciendo;
+	
+	-- TODO: Conexiones tempoles del comunicador por el puerto serie
+	transfiriendo <= '0';
+	we_trans <= '0';
+	mem_trans <= 3;
+	di_trans <= (others => '0');
+	addr_trans <= (others => '0');
 								
 	-- Salidas informativas de este estado
-	en_reproducion	<= reproduciendo;
-	en_grabacion	<= grabando;
+	en_reproducion	 <= reproduciendo;
+	en_grabacion	 <= grabando;
+	en_transferencia <= transfiriendo;
 
 	bloqueact	<= conv_std_logic_vector(mem_repr, bloqueact'Length);
 	
-	-- Memoria RAM para metadatos (de momento simple puerto)
---	mtd_mem : RAMB16_S4 port map (
---		do	=> metadatos,
---		addr	=> mtd_addr,
---		clk	=> reloj,
---		di	=> metadatos_w,
---		we	=> we_mtd,
---		en	=> '1',
---		ssr	=> '0'		
---	);
-
 
 	-- Memorias RAM de doble puerto (para grabación y reproducción)
 	
 	-- El reproductor usará el puerto A para lectura y el
 	-- grabador el puerto B para escritura
+	-- El trasmisor usará el puerto B para lectura y el
+	-- A para escritura
 	mem_gen : for i in 0 to NRam-1 generate
 		mem : RAMB16_S18_S18 generic map (
 			INIT_01 => x"E60380019601B601E601F6038001B601D701F60198038001B601B801A901B801",
@@ -170,11 +177,12 @@ begin
 			INIT_09 => x"9801E60380019601B601E601F6038001B6019801F601E60A0000000000000000"
 		) port map (
 			doa 	=> adoa(i),
-			addra => addra,
-			addrb => addrb,
-			dia	=> (others => '0'),
+			dob	=> adob(i),
+			addra => addra(i),
+			addrb => addrb(i),
+			dia	=> di_trans,
 			dipa	=> (others => '0'),
-			dib 	=> dib,
+			dib 	=> di_grab,
 			dipb	=> (others => '0'),
 			ena 	=> '1',
 			enb 	=> '1',
@@ -195,15 +203,13 @@ begin
 		play		=> reproduciendo,
 		-- Dirección inicial a 0
 		addr		=> (others => '0'),
-		memdir	=> addra,
-		memdata	=> doa,
+		memdir	=> addr_repr,
+		memdata	=> do_repr,
 		fin		=> fin_repr,
 		onota		=> onota,
 		ooctava	=> ooctava,
 		osos		=> osos
 	);
-	
-	doa <= adoa(mem_repr);
 	
 	-- Grabador
 	grab : entity work.grabador port map (
@@ -215,20 +221,38 @@ begin
 		sos		=> sos,
 		-- Dirección inicial a 0
 		dir_ini	=> (others => '0'),
-		mem_dir	=> addrb,
-		mem_dat	=> dib,
-		mem_we 	=> web,
+		mem_dir	=> addr_grab,
+		mem_dat	=> di_grab,
+		mem_we 	=> we_grab,
 		grabar	=> grabando
 	);
 	
+	-- Distribución de la señal de salida de datos en A y B
+	do_repr <= adoa(mem_repr);
+	do_trans <= adob(mem_trans);
+	
+
+	-- Distribución de la señal de dirección de los puerto A y B
+
+	-- Obs: por defecto las entradas de direcciones de todas las memorias
+	-- en los puertos A y B son la salidas correspondientes del reproductor
+	-- y del grabador respectivamente. Cuando está activa la transferencia
+	-- se coloca su dirección en su bloque de memoria.
+	addr_gen : for i in addra'Range generate
+		addra(i)	<=	addr_trans	when i = mem_trans and transfiriendo = '1' else
+						addr_repr;
+
+		addrb(i) <=	addr_trans	when i = mem_trans and transfiriendo = '1' else
+						addr_grab;
+	end generate addr_gen;
+	
+	
 	-- Activa la escritura sólo en la memoria ocupada
-	-- por el grabador
+	-- por el grabador o por el transmisor
 	we_gen : for i in aweb'Range generate
-			aweb(i) <= 	web	when i = mem_grab else
+			aweb(i) <= 	we_grab		when i = mem_grab and grabando = '1' else
+							we_trans		when i = mem_trans and transfiriendo = '1' else
 							'0';
 	end generate we_gen;
-	
-	-- TODO: activar la lectura también condicionalmente
-	-- si es conveniente
-	
+
 end architecture archivero_arq;

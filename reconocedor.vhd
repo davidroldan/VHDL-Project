@@ -82,7 +82,7 @@ begin
 		reloj		=> reloj,
 		reset		=> reset,
 		input		=> PS2CLK,
-		output		=> PS2CLK_E
+		output	=> PS2CLK_E
 	);
 
 	process (reloj, reset, estadoa, PS2CLK, PS2DATA, bitsleidos, mensaje)

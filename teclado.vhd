@@ -39,8 +39,9 @@ entity teclado is
 		-- Displays de 7 segmentos informativos
 		dspiz, dspdr : out std_logic_vector (6 downto 0);
 		
-		-- LEDs informativos de activación de la grabación y la reproducción
-		led_repr, led_grab : out std_logic;
+		-- LEDs informativos de activación de la grabación, la reproducción
+		-- y la transferencia
+		led_repr, led_grab, led_trans : out std_logic;
 		
 		-- Señales de comunicación VGA
       hsyncb: inout std_logic;	-- horizontal (line) sync
@@ -71,7 +72,7 @@ architecture Behavioral of teclado is
 	signal btn_play, btn_rec, btn_stop, btn_bsig, btn_bant : std_logic;
 	
 	-- Indicadores de estado del archivero
-	signal en_reproduccion, en_grabacion : std_logic;
+	signal en_reproduccion, en_grabacion, en_transferencia : std_logic;
 begin
 
 	-- Divisor de la señal de reloj
@@ -173,6 +174,7 @@ begin
 		bant		=> btn_bant,
 		en_reproducion	=> en_reproduccion,
 		en_grabacion 	=> en_grabacion,
+		en_transferencia => en_transferencia,
 		bloqueact		=> cableBloqueAct
 	);
 	
@@ -191,10 +193,11 @@ begin
 		cableSharp	<= sharpRepr		when '1',
 							sharpTeclado	when others;
 							
-	--
+	-- LEDs indicativos del estado del archivero
 	led_repr <= en_reproduccion;
 	led_grab <= en_grabacion;
-
+	led_trans <= en_transferencia;
+	
 
 	-- Conecta a la salida onda la onda generada
 	onda <= cableOnda;
