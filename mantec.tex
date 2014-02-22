@@ -1,0 +1,46 @@
+\documentclass{article}
+
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{palatino}
+\usepackage[spanish]{babel}
+\usepackage{anysize}
+\usepackage{tabu}
+\usepackage{graphicx}
+
+\PrerenderUnicode{é}
+\PrerenderUnicode{í}
+\PrerenderUnicode{ó}
+
+\pdfinfo{
+	/Title (Teclado: manual técnico)
+	/Subject (Tecnología y Organización de Computadores)
+}
+
+\title{Teclado: manual técnico}
+\author{Juan Andrés Claramunt Pérez, David Roldán Santos y Rubén Rafael Rubio Cuéllar}
+
+\begin{document}
+
+\maketitle
+
+\section{Ruta de datos}
+
+	\begin{figure}[ht]\centering
+		\includegraphics[scale=.62]{esquema.pdf}
+		\caption{Esquema de módulos e interconexión}
+		\label{fig:esquema}
+	\end{figure}
+
+	En la figura \ref{fig:esquema} las líneas gruesas verdes indican el paso de los ``parámetros musicales'': nota (3 bits), octava (3 bits) y sostenido (3 bits).
+
+\section{Controladores}
+
+\begin{enumerate}
+	\item {\itshape Controlador de teclado}: 
+	\item {\itshape Controlador de pantalla}:
+	\item {\itshape Controlador de comunicación serie}:
+	\item {\itshape Controlador del códec de audio}:
+\end{enumerate}
+
+\end{document}

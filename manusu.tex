@@ -2,14 +2,22 @@
 
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{times}
+\usepackage{palatino}
 \usepackage[spanish]{babel}
 \usepackage{anysize}
 \usepackage{tabu}
 \usepackage{graphicx}
 
 \usepackage{tikz}
-\usetikzlibrary{trees} 
+\usetikzlibrary{trees}
+
+\PrerenderUnicode{í}
+\PrerenderUnicode{ó}
+
+\pdfinfo{
+	/Title (Teclado: manual de uso)
+	/Subject (Tecnología y Organización de Computadores)
+}
 
 \title{Teclado: manual de uso}
 \author{Juan Andrés Claramunt Pérez, David Roldán Santos y Rubén Rafael Rubio Cuéllar}
@@ -173,21 +181,72 @@
 	B7 & hsyncb & in & Bit de sincronía horizontal \\ \sep
 	D8 & vsyncb & inout? & Bit se sincronía vertical \\ \sep
 
-	\multicolumn{4}{c}{\bfseries  Puerto serie} \\ \sep
+	\multicolumn{4}{c}{\bfseries LED indicadores} \\ \sep
+	L5 & led\_repr & out & LED que indica si se está reproduciendo \\ \sep
+	N2 & led\_grab & out & LED que indica si se está grabando \\ \sep
+	M3 & led\_trans & out & Indica si se están transmitiendo datos por el puerto serie \\ \sep
+
+	\multicolumn{4}{c}{\bfseries Puerto serie} \\ \sep
 	G5 & rs232\_rd & in & Entrada de datos \\ \sep
 	J2 & rs232\_td & out & Salida de datos \\ \sep
 \end{tabu}
 
-% TODO: faltan pines
+	\bigskip Otros conjuntos de pines son:
+
+\medskip \begin{tabu}{| X[5, l] | >{\tt}X[1,l] | X[1, l] | X[5, l] |}
+	\sep
+	Señal RGB para la pantalla & rgb & 0..8 & (D5, E7, C9, C3, A5, A8, B1, D6, C8) \\ \sep
+	Display de 7 segmentos izquierdo & dspiz & 0..6 & (H14, M4, P1, N3, M15, H13, G16) \\ \sep
+	Display de 7 segmentos derecho & dspdr & 0..6 & (E2, E1, F3, F2, G4, G3, G1) \\ \sep
+\end{tabu} 
 
 \section{Inicialización}
 
+	Antes de comenzar, es necesario conectar un teclado al puerto PS2 de la FPGA. Si se dispone de un zumbador o semejante (como por ejemplo el de la placa de pruebas del laboratorio) se puede utilizar como altavoz conectándolo al pin {\color{blue} D15}. Si por el contrario, se pretende escuchar utilizando auriculares u otros dispositivos que cuenten con conector compatible se podrán conectar estos al puerto a tal efecto de la FPGA, aunque su funcionamiento puede depender de la FPGA utilizada. Para ello la disposición de los {\itshape jumper} JP2-JP5 ha de ser la que indica la figura \ref{fig:jump}.
+
+\begin{figure}[ht] \centering
+	\includegraphics[scale=.3]{poscodec.png}
+
+	\caption{Posición de los {\itshape jumper} para eschuchar con auriculares}
+	\label{fig:jump}
+\end{figure}
+
+
+	\medskip Para poder contemplar los contenidos visuales será necesario conectar una pantalla a la FPGA mediante el conector VGA.
+
+	\medskip Para permitir la transferencia de archivos de audio entre el ordenador y la FPGA, se ha de conectar el cable serie al puerto RS232 de la placa. La configuración de los {\itshape jumper} del puerto serie ha de ser idéntica a la de la figura \ref{fig:rs232} (conexión null módem).
+
+% ¿La conexión es ésta?
+\begin{figure}[ht] \centering
+	\includegraphics[scale=.25]{posserie.png}
+
+	\caption{Posición de los {\itshape jumper} para la transferencia de archivos}
+	\label{fig:rs232}
+\end{figure}
+
 \section{Funcionamiento}
+
+	El teclado funciona en diferentes modos:
+
+	\begin{enumerate}
+		\item {\itshape Modo teclado}: por defecto el sistema funciona como un piano cuyo teclado es el teclado conectado a la FPGA. Las diferentes notas (dos octavas y media simultáneamente) se distribuyen de acuerdo al esquema de la figura \ref{fig:teclado}. Se puede variar la octava con las flechas verticales del teclado numérico. El número de octava se muestra en el display de 7 segmentos al pulsar un nota natural. Al pulsar las teclas se produce sonido y simultáneamente se muestran diversas animaciones en la pantalla.
 
 \begin{figure}[ht] \centering
 	\includegraphics[scale=1.8]{keyboard.pdf}
 
 	\caption{Disposición del teclado}
+	\label{fig:teclado}
 \end{figure}
+
+	\item {\itshape Modo reproducción y grabación}: la fila central del teclado numérico permite activar o desactivar la reproducción o la grabación de pistas almacenadas en los bloques de memoria de la FPGA. Se cuenta con 20 bloques activos que permiten almacenar cada uno hasta 12 horas de grabación (en silencio) con una sensibilidad de 167,77 ms. Para cambiar de bloque de memoria se dispone de las teclas {\itshape AvPág} y {\itshape RePág} del teclado numérico. El display de 7 segmentos mostrará en reposo el bloque de memoria seleccionado.
+
+		Durante la reproducción sonará el contenido del bloque de memoria seleccionado mostrándose en la pantalla como si se tocase a mano. Las pulsaciones en la parte sonora del teclado serán ignoradas.
+
+		En la grabación se registrará aquello que se esté tocando con el teclado.
+
+	\item {\itshape Modo transmisión}: en todo momento se podrán transferir archivos de audio desde y hasta los bloques de memoria de la FPGA, siempre que el bloque requerido no esté ocupado por por una grabación o reproducción. Se dispone de un programa para el ordenador que permite escoger archivos y enviarlos o generarlos a partir de los datos recibidos.
+
+	\end{enumerate}
 \section{¿Qué espero ver?}
+
 \end{document}
