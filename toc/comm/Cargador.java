@@ -36,7 +36,7 @@ public class Cargador extends Comunicador {
 	/**
 	 * Código de respuesta: petición admitida.
 	 */
-	private static final byte COD_ADMITIDA = /*(byte) 0b10001000*/ (byte) 'b';
+	private static final byte COD_ADMITIDA = (byte) 0b10001000;
 
 	/**
 	 * Código de respuesta: bloque RAM ocupado.
