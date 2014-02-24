@@ -106,7 +106,6 @@ begin
 	-- Dato de entrada para la memoria
 	with estadoa select
 		mem_dat <=	'1' & r_nota & r_octava & r_sos & contador	when activo,
-						'1' & r_nota & r_octava & r_sos & contador	when cierre,
 						(others => '0')					when others;
 
 	-- Escritura en la memoria
@@ -119,6 +118,7 @@ begin
 					'1'	when r_octava /= octava else
 					'1'	when r_sos /= sos	else
 					'1'	when contador = -1 else
+					'1'	when estadoa = activo and grabar = '0' else
 					'0';
 
 	-- Cambio de estado
