@@ -28,7 +28,7 @@ entity reconocedor is
 	port(
 		PS2DATA, PS2CLK : in std_logic;
 		reset, reloj	: in std_logic;
-		octava : out std_logic_vector(2 downto 0);
+		octava, octava_baja : out std_logic_vector(2 downto 0);
 		sharp : out std_logic;
 		onota : out TNota;
 		
@@ -60,7 +60,7 @@ architecture Behavioral of reconocedor is
 	signal tecla : std_logic_vector(7 downto 0);
 	
 	-- Octava actual
-	signal octava_act, octava_sig	: std_logic_vector(2 downto 0);
+	signal octava_act, octava_sig, octava_baja_signal	: std_logic_vector(2 downto 0);
 
 	-- Retraso de la señal de teclado
 	constant ps2Retraso : Positive := 16;
@@ -196,16 +196,19 @@ begin
 				'0';
 	
 	-- Octava	 
-	octava <= octava_act + 1			when tecla = x"41" or tecla = x"4B" or tecla = x"15" or tecla = x"1E" or
+	octava_baja_signal <= "001"			when tecla = x"41" or tecla = x"4B" or tecla = x"15" or tecla = x"1E" or
 											tecla = x"49" or tecla = x"4C" or tecla = x"1D" or tecla = x"26" or
 											tecla = x"4A" or tecla = x"24" or tecla = x"2D" or tecla = x"2E" or
 											tecla = x"2C" or tecla = x"36" or tecla = x"35" or tecla = x"3D" or
 											tecla = x"3C" else
 									
-             octava_act + 2	when tecla = x"43" or tecla = x"46" or
+								"010"			when tecla = x"43" or tecla = x"46" or
 											tecla = x"44" or tecla = x"45" or tecla = x"4D" or
 											tecla = x"54" or tecla = x"55" or tecla = x"5B" else
-				 octava_act;
+								"000";
+				 
+	octava <= octava_act + octava_baja_signal;
+	octava_baja <= octava_baja_signal;
 				
 	-- Botones de reproducción, grabación y detención
 	with tecla select

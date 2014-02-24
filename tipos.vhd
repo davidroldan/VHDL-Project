@@ -20,6 +20,6 @@ package tipos is
 	constant si		: TNota	:= "111";
    
    -- Enumerado para saber que se está pintando en la pantalla
-   type vga_object is (teclaN, teclaB, teclaB_gris, teclaPulsada, borde, bordeNotaMov, notaMov);
+   type vga_object is (teclaN, teclaB, teclaB_gris, teclaPulsada, borde, bordeNotaMov, notaMov, colorVerde, colorRojo, colorAmarillo);
 
 end package tipos;

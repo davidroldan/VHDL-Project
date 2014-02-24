@@ -16,7 +16,8 @@ entity vgacore is
 		rgb: out std_logic_vector(8 downto 0); -- red,green,blue colors
       nota	: in TNota;
 		sharp	: in std_logic;
-		octave : in std_logic_vector(2 downto 0)
+		octave : in std_logic_vector(2 downto 0);
+		en_grabacion, en_reproduccion : in std_logic
 	);
 end vgacore;
 
@@ -24,8 +25,8 @@ architecture vgacore_arch of vgacore is
 
 signal hcnt: std_logic_vector(8 downto 0);	-- horizontal pixel counter
 signal vcnt: std_logic_vector(9 downto 0);	-- vertical line counter
-signal pintar, p_teclado, p_barras, p_rec: std_logic;					-- video blanking signal
-signal currentobject, c_o_teclado, c_o_barras, c_o_rec : vga_object; -- el tipo vga_obejct esta definido en tipos.vhd
+signal pintar, p_teclado, p_barras, p_rec, p_play, p_stop: std_logic;					-- video blanking signal
+signal currentobject, c_o_teclado, c_o_barras, c_o_rec, c_o_play, c_o_stop : vga_object; -- el tipo vga_obejct esta definido en tipos.vhd
 
 begin
 
@@ -127,9 +128,18 @@ begin
 		elsif vcnt = 450 then
 			pintar <= '1';
          currentobject <= borde;
-		elsif hcnt > 220 and vcnt < 70 and vcnt > 43 then
-			pintar <= p_rec;
-			currentobject <= c_o_rec;
+		-- Boton de grabar / reproduccion y pausa
+		elsif vcnt < 70 and vcnt > 41 then
+			if en_grabacion = '1' then
+				pintar <= p_rec;
+				currentobject <= c_o_rec;
+			elsif en_reproduccion = '1' then
+				pintar <= p_play;
+				currentobject <= c_o_play;
+			else
+				pintar <= p_stop;
+				currentobject <= c_o_stop;
+			end if;
 		--TECLADO
 		elsif vcnt > 375 and vcnt < 450 then
 			currentobject <= c_o_teclado;
@@ -166,13 +176,33 @@ vga_brr : entity work.vga_barras port map(
 	);
 	
 --REC
-vgarc: entity vga_recButton	port map(
+vgarc: entity work.vga_recButton	port map(
 		hcnt  => hcnt,
 		vcnt  => vcnt,
-		hcnt_aux => conv_std_logic_vector(220,9),
-		vcnt_aux => conv_std_logic_vector(43,10),
+		hcnt_aux => conv_std_logic_vector(180,9),
+		vcnt_aux => conv_std_logic_vector(41,10),
 		pintar => p_rec,
       currentobject => c_o_rec
+	);
+	
+--PLAY
+vgapl: entity work.vga_playButton port map(
+		hcnt  => hcnt,
+		vcnt  => vcnt,
+		hcnt_aux => conv_std_logic_vector(180,9),
+		vcnt_aux => conv_std_logic_vector(41,10),
+		pintar => p_play,
+      currentobject => c_o_play
+	);
+	
+--STOP
+vgast: entity work.vga_stopButton port map(
+		hcnt  => hcnt,
+		vcnt  => vcnt,
+		hcnt_aux => conv_std_logic_vector(180,9),
+		vcnt_aux => conv_std_logic_vector(41,10),
+		pintar => p_stop,
+      currentobject => c_o_stop
 	);
 						
 
@@ -185,6 +215,9 @@ begin
          when teclaB_gris => rgb <= "110110110";
          when teclaPulsada => rgb <= "111000000";
 			when notaMov => rgb <= "000000111";
+			when colorVerde => rgb <= "000111000";
+			when colorRojo => rgb <= "111000000";
+			when colorAmarillo => rgb <= "111111000";
 			when borde => rgb <= "000000000";
 			when bordeNotaMov => rgb <= "000111000";
 			when others => rgb <= "000000000";

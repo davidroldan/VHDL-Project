@@ -57,7 +57,7 @@ architecture Behavioral of teclado is
 	-- Cable para eschufar entradas y salidas unos módulos a otros
 	signal cableNota, notaTeclado, notaRepr : TNota;
 	signal cableSharp, sharpTeclado, sharpRepr : std_logic;
-	signal cableOctava, octavaTeclado, octavaRepr : std_logic_vector(2 downto 0);
+	signal cableOctava, cableOctavaBaja, octavaTeclado, octavaRepr : std_logic_vector(2 downto 0);
 	signal cableOnda : std_logic;
 	signal cableBloqueAct : std_logic_vector(7 downto 0);
 
@@ -76,6 +76,7 @@ architecture Behavioral of teclado is
 	
 	-- Indicadores de estado del archivero
 	signal en_reproduccion, en_grabacion, en_transferencia : std_logic;
+	signal en_reproduccion_arc, en_grabacion_arc, en_transferencia_arc : std_logic;
 begin
 
 	-- Divisor de la señal de reloj
@@ -101,18 +102,19 @@ begin
 
 	-- Reconocedor del teclado
 	recon : entity work.reconocedor port map (
-		PS2DATA	=> PS2DATA,
-		PS2CLK	=> PS2CLK,
-		reloj		=> reloj,
-		reset		=> reset,
-		octava	=> octavaTeclado,
-		sharp		=> sharpTeclado,
-		onota		=> notaTeclado,
-		btn_play	=> btn_play,
-		btn_rec	=> btn_rec,
-		btn_stop	=> btn_stop,
-		btn_bsig	=> btn_bsig,
-		btn_bant	=> btn_bant
+		PS2DATA		=> PS2DATA,
+		PS2CLK		=> PS2CLK,
+		reloj			=> reloj,
+		reset			=> reset,
+		octava		=> octavaTeclado,
+		octava_baja => cableOctavaBaja,
+		sharp			=> sharpTeclado,
+		onota			=> notaTeclado,
+		btn_play		=> btn_play,
+		btn_rec		=> btn_rec,
+		btn_stop		=> btn_stop,
+		btn_bsig		=> btn_bsig,
+		btn_bant		=> btn_bant
 	);
 	
 	-- Códec de audio
@@ -146,7 +148,9 @@ begin
       rgb		=> rgb,
       nota		=> cableNota,
 		sharp		=> cableSharp,
-		octave	=> cableOctava
+		octave	=> cableOctavaBaja,
+		en_grabacion 	=> en_grabacion,
+		en_reproduccion => en_reproduccion
 	);
 	
 	-- Display de 7 segmentos
@@ -175,9 +179,9 @@ begin
 		rec		=> btn_rec,
 		bsig		=> btn_bsig,
 		bant		=> btn_bant,
-		en_reproducion	=> en_reproduccion,
-		en_grabacion 	=> en_grabacion,
-		en_transferencia => en_transferencia,
+		en_reproducion	=> en_reproduccion_arc,
+		en_grabacion 	=> en_grabacion_arc,
+		en_transferencia => en_transferencia_arc,
 		bloqueact		=> cableBloqueAct,
 		rx => rx,
 		tx => tx
