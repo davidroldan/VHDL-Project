@@ -76,7 +76,6 @@ architecture Behavioral of teclado is
 	
 	-- Indicadores de estado del archivero
 	signal en_reproduccion, en_grabacion, en_transferencia : std_logic;
-	signal en_reproduccion_arc, en_grabacion_arc, en_transferencia_arc : std_logic;
 begin
 
 	-- Divisor de la señal de reloj
@@ -179,9 +178,9 @@ begin
 		rec		=> btn_rec,
 		bsig		=> btn_bsig,
 		bant		=> btn_bant,
-		en_reproducion	=> en_reproduccion_arc,
-		en_grabacion 	=> en_grabacion_arc,
-		en_transferencia => en_transferencia_arc,
+		en_reproducion	=> en_reproduccion,
+		en_grabacion 	=> en_grabacion,
+		en_transferencia => en_transferencia,
 		bloqueact		=> cableBloqueAct,
 		rx => rx,
 		tx => tx
