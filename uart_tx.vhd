@@ -1,5 +1,5 @@
 library ieee;
-use ieee.std-logic-ll64.all;
+use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity uart_tx is
@@ -16,11 +16,11 @@ entity uart_tx is
 		-- Bit de datos
 		tx_start : in std_logic;
 	
-		s_tick: in std_logic ;
+		rbaud: in std_logic ;
 		-- Entrada de datos enviado en paralelo
 		din: in std_logic_vector ( 7 downto 0) ;
 		tx_done_tick: out std_logic;
-		tx: out std-logic) ;
+		tx: out std_logic) ;
 end uart_tx;
 
 architecture arch of uart_tx is
@@ -30,18 +30,21 @@ architecture arch of uart_tx is
 	signal n_reg , n_next : unsigned (2 downto 0) ;
 	signal b_reg , b_next : std_logic_vector (7 downto 0 ) ;
 	signal tx_reg , tx_next : std_logic ;
+	signal s_tick, rbaud_ant : std_logic;
 	
 begin
-process (clk, reset)
+process (reloj, reset)
 begin
-	if reset=’l’ then
+	if reset= '1' then
 		state_reg <= idle;
-		s_reg <= (others = > '0') ;
-		n_reg <= (others = > '0') ;
-		b_reg <= (others = > '0') ;
+		s_reg <= (others => '0') ;
+		n_reg <= (others => '0') ;
+		b_reg <= (others => '0') ;
 		tx_reg <= '1';
+		rbaud_ant <= '0';
 
-	elsif (clk'event and clk = '1') then
+	elsif (reloj'event and reloj = '1') then
+		rbaud_ant <= rbaud;
 		state_reg <= state_next;
 		s_reg <= s_next;
 		n_reg <= n_next;
@@ -49,6 +52,8 @@ begin
 		tx_reg <= tx_next;
 	end if;
 end process;
+
+
 
 process (state_reg , s_reg ,n_reg ,b_reg, s_tick, tx_reg, tx_start,din)
 begin
@@ -64,7 +69,7 @@ begin
 		tx_next <= '1';
 		if tx_start = '1' then
 			state_next <= start;
-			s_next <= ( others = > '0') ;
+			s_next <= ( others => '0') ;
 			b_next <= din ;
 		end if ;
 		
@@ -73,8 +78,8 @@ begin
 		if s_tick = '1' then
 			if s_reg = 15 then
 				state_next <= data;
-				s_next <= (others = > '0') ;
-				n_next <= (others = > '0' ) ;
+				s_next <= (others => '0') ;
+				n_next <= (others => '0' ) ;
 
 			else
 				s_next <= s_reg + 1 ;
@@ -85,7 +90,7 @@ begin
 		tx_next <= b_reg(0) ;
 		if s_ticK = '1' then
 			if s_reg = 15 then
-				s_next <= (others = > '0' ) ;
+				s_next <= (others => '0' ) ;
 				b_next <= '0' & b_reg (7 downto 1) ;
 				if n_reg = DBIT - 1 then
 					state_next <= stop;
@@ -97,9 +102,9 @@ begin
 			end if ;
 		end if ;
 	
-		when stop = >
+		when stop =>
 		tx_next <= '1' ;
-		if s_tick = '1') then
+		if s_tick = '1' then
 			if s_reg = (SB_TICK - 1) then
 				state_next <= idle;
 				tx_done_tick <= '1';
@@ -111,5 +116,8 @@ begin
 
 end case;
 end process;
-tx <= tx_ reg;
+tx <= tx_reg;
+s_tick <= 	'1' when rbaud /= rbaud_ant and rbaud = '1' else
+				'0';
+
 end arch;

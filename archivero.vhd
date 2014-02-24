@@ -42,7 +42,13 @@ entity archivero is
 		nota	: in TNota;
 		octava 	: in std_logic_vector(2 downto 0);
 		sos	: in std_logic;
-
+		
+		-- Puerto de serie (entrada)
+		rx : in std_logic;
+		
+		-- Puerto de serie (salida)
+		tx : out std_logic;
+		
 		-- Salida de datos
 		onota	: out TNota;
 		ooctava : out std_logic_vector(2 downto 0);
@@ -53,17 +59,35 @@ end entity archivero;
 architecture archivero_arq of archivero is
 	-- Número de bloques de RAM
 	constant NRam	: Positive	:= 20;
-
+	
+	constant petOrdFpga: std_logic_vector(7 downto 0) := "10000001";
+	constant petFpgaOrd: std_logic_vector(7 downto 0) := "10000010";
+	constant petSaludo : std_logic_vector(7 downto 0) := "10000011";
+	constant respAdmit : std_logic_vector(7 downto 0) := "10001000";
+	constant respOcup : std_logic_vector(7 downto 0)  := "10001001";
+	constant respSaludo: std_logic_vector(7 downto 0) := "10001011";
+	
+	
+	type EstadosTransmisor is (reposo, saludando, espbloqlec, espbloqesc, enviandoh, enviandol, enviandoult, recibiendoh, recibiendol, recibiendoult);
+	signal estransa, estranssig : EstadosTransmisor;
+	
+	signal dtx, drx : std_logic_vector(7 downto 0);
+	signal drxh :std_logic_vector(7 downto 0);
+	signal baudcnt : std_logic_vector (4 downto 0);
+	signal baudclk : std_logic;
+	
+	signal rx_done, tx_start, tx_done : std_logic;
+	
 	-- Tipos array de datos (del tamaño de datos de la memoria)
 	type ArrayDatos is array (0 to NRam-1) of std_logic_vector(15 downto 0);
 	type ArrayDirs is array (0 to NRam-1) of std_logic_vector(9 downto 0);
-
+	
 	-- Salida y entrada de datos de la memoria
 	signal do_repr, di_grab	: std_logic_vector(15 downto 0);
 	signal do_trans, di_trans : std_logic_vector(15 downto 0);
 
 	-- Señales de dirección de los componentes
-	signal addr_repr, addr_grab, addr_trans : std_logic_vector(9 downto 0);
+	signal addr_repr, addr_grab, addr_trans, addr_trans_sig : std_logic_vector(9 downto 0);
 
 	-- Array de direcciones para los puertos A y B de las memorias
 	signal addra, addrb	: ArrayDirs;
@@ -89,28 +113,54 @@ architecture archivero_arq of archivero is
 	-- std_logic_vector de tamaño mínimo
 	signal mem_grab, mem_grab_sig : Integer range 0 to NRam-1;
 	signal mem_repr, mem_repr_sig : Integer range 0 to NRam-1;
-	signal mem_trans : Integer range 0 to NRam-1;
+	signal mem_trans, mem_trans_sig: Integer range 0 to NRam-1;
 begin
 
 	-- Parte síncrona (registros y demás)
-	sinc : process (reloj, reset, mem_grab_sig, mem_repr_sig, reproduciendo_sig, grabando_sig)
+	sinc : process (reloj, reset, mem_grab_sig, mem_repr_sig, reproduciendo_sig, grabando_sig, mem_trans_sig)
 	begin
 		if reset = '1' then
 			mem_grab <= 0;
 			mem_repr <= 0;
+			mem_trans <= 0;
 			reproduciendo <= '0';
 			grabando <= '0';
-		
 		elsif reloj'event and reloj = '1' then
-			
 			mem_grab <= mem_grab_sig;
 			mem_repr <= mem_repr_sig;
-
+			mem_trans <= mem_trans_sig;
 			reproduciendo	<= reproduciendo_sig;
 			grabando			<= grabando_sig;
 			
 		end if;
 	end process sinc;
+	
+	-- Generador de baudios
+	baud_gen: process(reloj, reset)
+	begin
+		if reset = '1' then
+			baudcnt <= (others => '0');
+			baudclk <= '0';
+		elsif reloj'event and reloj = '1' then
+			if baudcnt = conv_std_logic_vector(325, 5) then
+				baudcnt <= (others => '0');
+				baudclk <= not baudclk;
+			else
+				baudcnt <= baudcnt + 1;
+			end if;
+		end if;
+	end process baud_gen;
+	
+	sinc_trans: process (reloj, reset, estranssig, addr_trans_sig)
+	begin
+		if reset = '1' then
+			estransa <= reposo;
+			addr_trans <= (others => '0');
+		elsif reloj'event and reloj = '1' then
+			estransa <= estranssig;
+			addr_trans <= addr_trans_sig;
+		end if;
+	end process sinc_trans;
 	
 
 	-- Memoria seleccionada para la grabación
@@ -144,13 +194,50 @@ begin
 								reproduciendo;
 	
 	-- TODO: Conexiones tempoles del comunicador por el puerto serie
-	transfiriendo <= '0';
-	we_trans <= '0';
-	mem_trans <= 3;
-	di_trans <= (others => '0');
-	addr_trans <= (others => '0');
-								
-	-- Salidas informativas de este estado
+	transfiriendo <= '1' when estransa /= reposo or estransa /= saludando else
+							'1' when estransa /= espbloqlec or estransa /= espbloqesc else
+							'0';
+	
+	addr_trans_sig <= addr_trans + 1 when rx_done = '1' and transfiriendo = '1' else
+							conv_std_logic_vector(0, addr_trans'length) when estransa = reposo else
+							addr_trans;
+					
+	tx_start <= '1' when estransa = reposo and dtx = petSaludo	and rx_done = '1' else
+					'1' when estransa = espbloqlec and rx_done = '1' else
+					'1' when estransa = espbloqesc and rx_done = '1' else
+					'1' when (estransa = enviandoh or estransa = enviandol) and tx_done = '1' else
+					'0';
+					
+	dtx <= respSaludo when estransa = reposo and dtx = petSaludo	and rx_done = '1' else
+					respOcup when estransa = espbloqlec and mem_repr = drx  and (reproduciendo = '1' or grabando = '1') else
+					respOcup when estransa = espbloqesc and mem_repr = drx and (reproduciendo = '1' or grabando = '1') else
+					do_trans(15 downto 8) when estransa = enviandoh else
+					do_trans(7 downto 0) when estransa = enviandol else
+					respAdmit;
+	di_trans <= drxh & drx;
+	
+	we_trans <= '1'  when estransa = recibiendol and rx_done = '1' else
+					'0';
+	mem_trans_sig <= conv_integer(drx) when estransa = espbloqlec and rx_done = '1' else
+							conv_integer(drx)	when estransa = espbloqesc and rx_done = '1' else
+							mem_trans;
+							
+	estranssig <= saludando when estransa = reposo and dtx = petSaludo and rx_done = '1' else
+					  espbloqlec when estransa = reposo and dtx = petOrdFpga and rx_done = '1' else
+					  espbloqesc when estransa = reposo and dtx = petFpgaOrd and rx_done = '1' else
+					  saludando when (estransa = espbloqlec or estransa = espbloqesc) and mem_repr = drx and (reproduciendo = '1' or grabando = '1') else
+					  enviandoh when estransa = espbloqlec and rx_done = '1' else
+					  enviandoult when estransa = enviandoh and rx_done = '1' and do_trans = 0 else
+					  enviandol when estransa = enviandoh and tx_done = '1' else
+					  enviandoh when estransa = enviandol and rx_done = '1' else
+					  recibiendoh when estransa = espbloqesc and rx_done = '1' else
+					  recibiendoult when estransa = recibiendoh and rx_done = '1' and drx = 0 else
+					  recibiendol when estransa = recibiendoh and rx_done ='1' else
+					  recibiendoh when estransa = recibiendol and rx_done ='1' else
+					  reposo when estransa = enviandoult and tx_done ='1' else
+					  reposo when estransa = saludando else
+					  estransa;
+					 	-- Salidas informativas de este estado
 	en_reproducion	 <= reproduciendo;
 	en_grabacion	 <= grabando;
 	en_transferencia <= transfiriendo;
@@ -225,6 +312,27 @@ begin
 		mem_dat	=> di_grab,
 		mem_we 	=> we_grab,
 		grabar	=> grabando
+	);
+	
+	-- Receptor 
+	u_rx : entity work.uart_rx port map (
+		reloj => reloj,
+		reset => reset,
+		rx 	=> rx,
+		rbaud => baudclk,
+		fin 	=> rx_done,
+		dout 	=> drx
+	);
+	
+	-- Transmisor
+	u_tx : entity work.uart_tx port map (
+		reloj 			=> reloj,
+		reset 			=> reset,
+		tx_start 		=> tx_start,
+		rbaud 			=> baudclk,
+		din 				=> dtx,
+		tx_done_tick 	=> tx_done,
+		tx 				=> tx
 	);
 	
 	-- Distribución de la señal de salida de datos en A y B

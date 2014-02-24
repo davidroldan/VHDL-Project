@@ -43,6 +43,9 @@ entity teclado is
 		-- y la transferencia
 		led_repr, led_grab, led_trans : out std_logic;
 		
+		rx : in std_logic;
+		tx : out std_logic;
+		
 		-- Señales de comunicación VGA
       hsyncb: inout std_logic;	-- horizontal (line) sync
 		vsyncb: out std_logic;	-- vertical (frame) sync
@@ -175,7 +178,9 @@ begin
 		en_reproducion	=> en_reproduccion,
 		en_grabacion 	=> en_grabacion,
 		en_transferencia => en_transferencia,
-		bloqueact		=> cableBloqueAct
+		bloqueact		=> cableBloqueAct,
+		rx => rx,
+		tx => tx
 	);
 	
 	

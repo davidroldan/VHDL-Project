@@ -55,6 +55,7 @@ begin
 			dato	 <= (others => '0');	-- prescindible
 			nbr	 <= 0;
 			frac 		<= 0;
+			rbaud_ant <= '0';
 
 		elsif reloj'event and reloj = '1' then
 			-- Actualiza el valor de rbaud_ant
