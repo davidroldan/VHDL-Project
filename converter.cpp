@@ -63,10 +63,10 @@ void createVHD(){
 		<< "\t\t" << "vcnt_aux: in std_logic_vector(9 downto 0);" << endl
 		<< "\t\t" << "pintar: out std_logic;" << endl
 		<< "\t\t" << "currentobject: out vga_object --el tipo vga_object esta definido en tipos.vhd" << endl
-		<< "\t);\n" << "end vga_recButton;" << endl
+		<< "\t);\n" << "end " <<  entityName << ";" << endl
 		<< endl
 		<< "architecture arch of " << entityName << " is" << endl << endl
-		<< "type " << entityName << "_img_type is array (M*2 downto 0) of std_logic_vector(N downto 0);" << endl
+		<< "type " << entityName << "_img_type is array (M*2 - 1 downto 0) of std_logic_vector(N - 1 downto 0);" << endl
 		<< "signal " << entityName <<"_img : " << entityName << "_img_type := (" << endl;
 	for (int i = 0; i < height; i++){
 	for (int k = 0; k < 2; k++){
@@ -85,7 +85,7 @@ void createVHD(){
 		<< "begin" << endl
 		<< "\t" << "if hcnt - hcnt_aux > N or vcnt - vcnt_aux > M*2 then" << endl
 		<< "\t\t" << "pintar <= '0';" << endl
-		<< "\t" << "else pintar <= image(conv_integer(vcnt - vcnt_aux))(conv_integer(hcnt - hcnt_aux));" << endl
+		<< "\t" << "else pintar <= " << entityName << "_img(conv_integer(M*2 - 1 - vcnt + vcnt_aux))(conv_integer(N - 1 - hcnt + hcnt_aux));" << endl
 		<< "\t" << "end if;" << endl << endl
 		<< "end process;" << endl << endl
 		<< "end arch;";
