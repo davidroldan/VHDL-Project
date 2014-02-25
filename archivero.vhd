@@ -141,6 +141,7 @@ begin
 		if reset = '1' then
 			baudcnt <= (others => '0');
 			baudclk <= '0';
+
 		elsif reloj'event and reloj = '1' then
 			if baudcnt = conv_std_logic_vector(325, 5) then
 				baudcnt <= (others => '0');
@@ -156,9 +157,11 @@ begin
 		if reset = '1' then
 			estransa <= reposo;
 			addr_trans <= (others => '0');
+
 		elsif reloj'event and reloj = '1' then
 			estransa <= estranssig;
 			addr_trans <= addr_trans_sig;
+
 		end if;
 	end process sinc_trans;
 	
@@ -192,52 +195,9 @@ begin
 								'0'	when reproduciendo = '1' and fin_repr = '1' else
 								
 								reproduciendo;
-	
-	-- TODO: Conexiones tempoles del comunicador por el puerto serie
-	transfiriendo <= '1' when estransa /= reposo or estransa /= saludando else
-							'1' when estransa /= espbloqlec or estransa /= espbloqesc else
-							'0';
-	
-	addr_trans_sig <= addr_trans + 1 when rx_done = '1' and transfiriendo = '1' else
-							conv_std_logic_vector(0, addr_trans'length) when estransa = reposo else
-							addr_trans;
-					
-	tx_start <= '1' when estransa = reposo and dtx = petSaludo	and rx_done = '1' else
-					'1' when estransa = espbloqlec and rx_done = '1' else
-					'1' when estransa = espbloqesc and rx_done = '1' else
-					'1' when (estransa = enviandoh or estransa = enviandol) and tx_done = '1' else
-					'0';
-					
-	dtx <= respSaludo when estransa = reposo and dtx = petSaludo	and rx_done = '1' else
-					respOcup when estransa = espbloqlec and mem_repr = drx  and (reproduciendo = '1' or grabando = '1') else
-					respOcup when estransa = espbloqesc and mem_repr = drx and (reproduciendo = '1' or grabando = '1') else
-					do_trans(15 downto 8) when estransa = enviandoh else
-					do_trans(7 downto 0) when estransa = enviandol else
-					respAdmit;
-	di_trans <= drxh & drx;
-	
-	we_trans <= '1'  when estransa = recibiendol and rx_done = '1' else
-					'0';
-	mem_trans_sig <= conv_integer(drx) when estransa = espbloqlec and rx_done = '1' else
-							conv_integer(drx)	when estransa = espbloqesc and rx_done = '1' else
-							mem_trans;
-							
-	estranssig <= saludando when estransa = reposo and dtx = petSaludo and rx_done = '1' else
-					  espbloqlec when estransa = reposo and dtx = petOrdFpga and rx_done = '1' else
-					  espbloqesc when estransa = reposo and dtx = petFpgaOrd and rx_done = '1' else
-					  saludando when (estransa = espbloqlec or estransa = espbloqesc) and mem_repr = drx and (reproduciendo = '1' or grabando = '1') else
-					  enviandoh when estransa = espbloqlec and rx_done = '1' else
-					  enviandoult when estransa = enviandoh and rx_done = '1' and do_trans = 0 else
-					  enviandol when estransa = enviandoh and tx_done = '1' else
-					  enviandoh when estransa = enviandol and rx_done = '1' else
-					  recibiendoh when estransa = espbloqesc and rx_done = '1' else
-					  recibiendoult when estransa = recibiendoh and rx_done = '1' and drx = 0 else
-					  recibiendol when estransa = recibiendoh and rx_done ='1' else
-					  recibiendoh when estransa = recibiendol and rx_done ='1' else
-					  reposo when estransa = enviandoult and tx_done ='1' else
-					  reposo when estransa = saludando else
-					  estransa;
-					 	-- Salidas informativas de este estado
+
+
+	-- Señales informativas exteriores del estado
 	en_reproducion	 <= reproduciendo;
 	en_grabacion	 <= grabando;
 	en_transferencia <= transfiriendo;
@@ -362,5 +322,63 @@ begin
 							we_trans		when i = mem_trans and transfiriendo = '1' else
 							'0';
 	end generate we_gen;
+
+
+	--
+	-- ## Transmisor ##
+	--
+
+	-- Señal activa sólo cuando el transmisor está interactuando con la memoria
+	transfiriendo <= '1' when estransa /= reposo and estransa /= saludando and estransa /= espbloqlec and estransa /= espbloqesc else
+							'0';
+	
+	-- Dirección de lectura/escritura en la memoria (TODO: está mal)
+	addr_trans_sig <= addr_trans + 1 when rx_done = '1' and transfiriendo = '1' else
+							conv_std_logic_vector(0, addr_trans'length) when estransa = reposo else
+							addr_trans;
+	
+	-- Señal de activación del emisor
+	tx_start <= '1' when estransa = reposo and dtx = petSaludo	and rx_done = '1' else
+					'1' when estransa = espbloqlec and rx_done = '1' else
+					'1' when estransa = espbloqesc and rx_done = '1' else
+					'1' when (estransa = enviandoh or estransa = enviandol) and tx_done = '1' else
+					'0';
+	
+	-- Fuente de datos del transmisor (un byte)
+	dtx <= respSaludo when estransa = reposo and dtx = petSaludo	and rx_done = '1' else
+					respOcup when estransa = espbloqlec and mem_repr = drx  and (reproduciendo = '1' or grabando = '1') else
+					respOcup when estransa = espbloqesc and mem_repr = drx and (reproduciendo = '1' or grabando = '1') else
+					do_trans(15 downto 8) when estransa = enviandoh else
+					do_trans(7 downto 0) when estransa = enviandol else
+					respAdmit;
+
+	-- Entrada de escritura de la memoria para el transmisor 
+	di_trans <= drxh & drx;
+	
+	-- Capacitación de escritura para el transmisor
+	we_trans <= '1'  when estransa = recibiendol and rx_done = '1' else
+					'0';
+
+	-- Bloque de memoria de transmisor
+	mem_trans_sig <= conv_integer(drx) when estransa = espbloqlec and rx_done = '1' else
+							conv_integer(drx)	when estransa = espbloqesc and rx_done = '1' else
+							mem_trans;
+	
+	-- Estado del transmisor
+	estranssig <= saludando when estransa = reposo and dtx = petSaludo and rx_done = '1' else
+					  espbloqlec when estransa = reposo and dtx = petOrdFpga and rx_done = '1' else
+					  espbloqesc when estransa = reposo and dtx = petFpgaOrd and rx_done = '1' else
+					  saludando when (estransa = espbloqlec or estransa = espbloqesc) and mem_repr = drx and (reproduciendo = '1' or grabando = '1') else
+					  enviandoh when estransa = espbloqlec and rx_done = '1' else
+					  enviandoult when estransa = enviandoh and rx_done = '1' and do_trans = 0 else
+					  enviandol when estransa = enviandoh and tx_done = '1' else
+					  enviandoh when estransa = enviandol and rx_done = '1' else
+					  recibiendoh when estransa = espbloqesc and rx_done = '1' else
+					  recibiendoult when estransa = recibiendoh and rx_done = '1' and drx = 0 else
+					  recibiendol when estransa = recibiendoh and rx_done ='1' else
+					  recibiendoh when estransa = recibiendol and rx_done ='1' else
+					  reposo when estransa = enviandoult and tx_done ='1' else
+					  reposo when estransa = saludando else
+					  estransa;
 
 end architecture archivero_arq;

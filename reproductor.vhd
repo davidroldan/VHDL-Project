@@ -81,8 +81,8 @@ begin
 
 	estadosig <=	reproduciendo	when estadoa = esperando and play = '1' else
 						esperando	when play = '0' or memdata = 0 else
-						reproduciendo	when estadoa = leyendo else
 						leyendo		when tiempo = 0 else
+						reproduciendo	when estadoa = leyendo else
 						estadoa;
 	
 	-- Señal de fin que dura un 
