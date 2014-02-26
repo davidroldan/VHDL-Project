@@ -111,7 +111,8 @@ end process;
 ----------------------------------------------------------------------------
 --
 -- Ejemplo
-que_pintar: process(hcnt, vcnt, sharp, nota, octave, c_o_teclado, p_teclado, c_o_barras, p_barras, p_rec, c_o_rec)
+que_pintar: process(hcnt, vcnt, sharp, nota, octave, c_o_teclado, p_teclado, c_o_barras, p_barras, p_rec,
+	c_o_rec, en_grabacion, en_reproduccion, p_play, c_o_play, p_stop, c_o_stop)
 begin
 	pintar<='0';
    currentobject <= borde;

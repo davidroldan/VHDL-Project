@@ -110,7 +110,7 @@ begin
 	-- Señal de fin (bloque completo recibido)
 	-- Obs: activa durante el primer ciclo de reposo
 	-- tras una recepción
-	fin_sig <=	'1'	when bitstop and frac = (SB_TICK-1) else '0';
+	fin_sig <=	'1'	when estado = bitstop and frac = (SB_TICK-1) else '0';
 
 	fin <= fin_reg;
 

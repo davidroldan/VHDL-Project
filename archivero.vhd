@@ -169,7 +169,7 @@ begin
 		elsif reloj'event and reloj = '1' then
 			estransa <= estrans_sig;
 			addr_trans <= addr_trans_sig;
-			rdxh <= rdxh_sig;
+			drxh <= drxh_sig;
 
 		end if;
 	end process sinc_trans;
@@ -376,7 +376,7 @@ begin
 	dtx <=	respSaludo	when estransa = reposo		and dtx = petSaludo else
 				respOcup		when estransa = bloque_env and mem_repr = drx 	and (reproduciendo = '1' or grabando = '1') else
 				respOcup		when estransa = bloque_rec and mem_repr = drx	and (reproduciendo = '1' or grabando = '1') else
-				do_trans(15 downto 9)	when estransa = confirmando_env else
+				do_trans(15 downto 8)	when estransa = confirmando_env else
 				do_trans(15 downto 8)	when estransa = enviando_l else
 				do_trans(7 downto 0)		when estransa = enviando_h else
 				respAdmit;
@@ -395,14 +395,14 @@ begin
 
 	-- Bloque de memoria de transmisor
 	mem_trans_sig <=	conv_integer(drx)	when estransa = bloque_env and rx_done = '1' else
-							conv_integer(drx)	when estransa = bloque_lec and rx_done = '1' else
+							conv_integer(drx)	when estransa = bloque_rec and rx_done = '1' else
 							mem_trans;
 	
 	-- Transiciones del estado del transmisor
 	estrans_sig <=	-- Inicio de operación en función de la petición
 						terminando	when estransa = reposo	and rx_done = '1' and dtx = petSaludo else
-						bloque_lec	when estransa = reposo	and rx_done = '1' and dtx = petOrdFpga else
-						bloque_esc	when estransa = reposo	and rx_done = '1' and dtx = petFpgaOrd else
+						bloque_rec	when estransa = reposo	and rx_done = '1' and dtx = petOrdFpga else
+						bloque_env	when estransa = reposo	and rx_done = '1' and dtx = petFpgaOrd else
 						-- Espera del envío de mensajes de denegación (por memoria ocupada)
 						terminando	when estransa = bloque_env	and rx_done = '1' and mem_repr = drx
 							and (reproduciendo = '1' or grabando = '1') else
@@ -418,7 +418,7 @@ begin
 						-- # Estados de espera de envíos o recepciones
 						-- Termina el envío tras enviar un carácter de final (está bien: es _h)
 						terminando		when estransa = enviando_h	and tx_done = '1' and mem_trans = 0 else
-						reposo			when estransa = recibiendo_l and rx_done = '1' and (dtxh & dtx) = 0 else
+						reposo			when estransa = recibiendo_l and rx_done = '1' and drxh = 0 and drx = 0 else
 						enviando_l		when estransa = enviando_h		and tx_done = '1' else
 						recibiendo_l	when estransa = recibiendo_h	and rx_done = '1' else
 						enviando_h		when estransa = enviando_l		and tx_done = '1' else

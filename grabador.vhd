@@ -93,9 +93,9 @@ begin
 	mem_dir <= dir;
 	
 	-- Contador de duración del cuadro
-	contador_sig <=	contador + 1						when estadoa = activo and rjdiv_ant /= rjdiv else
-							conv_std_logic_vector(1, 8)	when estadoa = activo and cambio = '1' else
+	contador_sig <=   conv_std_logic_vector(1, 8)	when estadoa = activo and cambio = '1' else
 							conv_std_logic_vector(1, 8)	when estadoa = parado else
+							contador + 1						when estadoa = activo and rjdiv_ant /= rjdiv and rjdiv = '1' else
 							contador;
 
 	-- Dirección de la memoria
