@@ -1,4 +1,3 @@
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.std_logic_arith.all;
@@ -88,10 +87,10 @@ begin
 	-- Señal de fin que dura un 
 	fin <=	'1' when memdata = 0 else
 				'0';
-				
-				
+
+
 	onota <= memdata(14 downto 12);
 	ooctava <= memdata (11 downto 9);
 	osos <= memdata(8);
-	
+
 end Behavioral;

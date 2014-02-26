@@ -60,22 +60,29 @@ architecture archivero_arq of archivero is
 	-- Número de bloques de RAM
 	constant NRam	: Positive	:= 20;
 	
-	constant petOrdFpga: std_logic_vector(7 downto 0) := "10000001";
-	constant petFpgaOrd: std_logic_vector(7 downto 0) := "10000010";
-	constant petSaludo : std_logic_vector(7 downto 0) := "10000011";
-	constant respAdmit : std_logic_vector(7 downto 0) := "10001000";
-	constant respOcup : std_logic_vector(7 downto 0)  := "10001001";
-	constant respSaludo: std_logic_vector(7 downto 0) := "10001011";
+	-- Constantes del transmisor
+	constant petOrdFpga	: std_logic_vector(7 downto 0) := "10000001";
+	constant petFpgaOrd	: std_logic_vector(7 downto 0) := "10000010";
+	constant petSaludo	: std_logic_vector(7 downto 0) := "10000011";
+	constant respAdmit	: std_logic_vector(7 downto 0) := "10001000";
+	constant respOcup		: std_logic_vector(7 downto 0) := "10001001";
+	constant respSaludo	: std_logic_vector(7 downto 0) := "10001011";
 	
+	-- Estado del transmisor
+	type EstadosTransmisor is (reposo, terminando, bloque_env, bloque_rec, confirmando_env,
+		confirmando_rec, enviando_h, enviando_l, recibiendo_h, recibiendo_l);
+	signal estransa, estrans_sig : EstadosTransmisor;
 	
-	type EstadosTransmisor is (reposo, saludando, espbloqlec, espbloqesc, enviandoh, enviandol, enviandoult, recibiendoh, recibiendol, recibiendoult);
-	signal estransa, estranssig : EstadosTransmisor;
-	
+	-- Buses de datos del transmisor y receptor de la UART
 	signal dtx, drx : std_logic_vector(7 downto 0);
-	signal drxh :std_logic_vector(7 downto 0);
+	-- Registro para la parte superior del cuadro del formato
+	signal drxh, drxh_sig :std_logic_vector(7 downto 0);
+	-- Contador del divisor para el reloj de la UART
 	signal baudcnt : std_logic_vector (4 downto 0);
+	-- Reloj de la UART
 	signal baudclk : std_logic;
 	
+	-- Señales de activación y notificación
 	signal rx_done, tx_start, tx_done : std_logic;
 	
 	-- Tipos array de datos (del tamaño de datos de la memoria)
@@ -152,15 +159,17 @@ begin
 		end if;
 	end process baud_gen;
 	
-	sinc_trans: process (reloj, reset, estranssig, addr_trans_sig)
+	-- Parte síncrona del transmisor
+	sinc_trans: process (reloj, reset, estrans_sig, addr_trans_sig)
 	begin
 		if reset = '1' then
 			estransa <= reposo;
 			addr_trans <= (others => '0');
 
 		elsif reloj'event and reloj = '1' then
-			estransa <= estranssig;
+			estransa <= estrans_sig;
 			addr_trans <= addr_trans_sig;
+			rdxh <= rdxh_sig;
 
 		end if;
 	end process sinc_trans;
@@ -329,56 +338,94 @@ begin
 	--
 
 	-- Señal activa sólo cuando el transmisor está interactuando con la memoria
-	transfiriendo <= '1' when estransa /= reposo and estransa /= saludando and estransa /= espbloqlec and estransa /= espbloqesc else
-							'0';
+	with estransa select
+		transfiriendo <=	'1' when enviando_h,
+								'1' when enviando_l,
+								'1' when recibiendo_l,
+								'1' when recibiendo_h,
+								'0' when others;
 	
-	-- Dirección de lectura/escritura en la memoria (TODO: está mal)
-	addr_trans_sig <= addr_trans + 1 when rx_done = '1' and transfiriendo = '1' else
-							conv_std_logic_vector(0, addr_trans'length) when estransa = reposo else
+	-- Dirección de lectura/escritura en la memoria
+
+	-- Obs: al recibir datos incrementa en el flanco en el que se escribe en la memoria,
+	-- al enviar incrementa después de la última lectura de la dirección, es decir,
+	-- al enviar la parte menos significativa, para anticiparse a la próxima lectura.
+	addr_trans_sig <= addr_trans + 1		when estransa = recibiendo_l and rx_done = '1' else
+							addr_trans + 1		when estransa = enviando_h and rx_done = '1' else 
+							(others => '0')	when estransa = reposo else
 							addr_trans;
 	
 	-- Señal de activación del emisor
-	tx_start <= '1' when estransa = reposo and dtx = petSaludo	and rx_done = '1' else
-					'1' when estransa = espbloqlec and rx_done = '1' else
-					'1' when estransa = espbloqesc and rx_done = '1' else
-					'1' when (estransa = enviandoh or estransa = enviandol) and tx_done = '1' else
+	tx_start <=	-- Contestación del saludo
+					'1'	when estransa = reposo		and rx_done = '1'	and dtx = petSaludo else
+					-- Envío de respuesta (aceptación/ocupado) sobre la transferencia
+					'1'	when estransa = bloque_env and rx_done = '1' else
+					'1'	when estransa = bloque_rec and rx_done = '1' else
+					-- Envío del contenido de la memoria (en el modo de envío)
+					'1'	when estransa = enviando_h and tx_done = '1' else
+					'1'	when estransa = enviando_l and tx_done = '1' else
 					'0';
 	
-	-- Fuente de datos del transmisor (un byte)
-	dtx <= respSaludo when estransa = reposo and dtx = petSaludo	and rx_done = '1' else
-					respOcup when estransa = espbloqlec and mem_repr = drx  and (reproduciendo = '1' or grabando = '1') else
-					respOcup when estransa = espbloqesc and mem_repr = drx and (reproduciendo = '1' or grabando = '1') else
-					do_trans(15 downto 8) when estransa = enviandoh else
-					do_trans(7 downto 0) when estransa = enviandol else
-					respAdmit;
+	-- Fuente de datos del emisor (un byte)
+	-- Obs: no hay que mantener en el emisor el mensaje a transmitir más allá
+	-- del ciclo inicial de carga.
+
+	-- Obs: aunque parezca raro dtx tiene la parte h (de high) en l y viceversa
+	-- pues "enviando_?" es un estado de espera para finalizar el envío pero se
+	-- inicia en el ciclo inmediatamente anterior. 
+	dtx <=	respSaludo	when estransa = reposo		and dtx = petSaludo else
+				respOcup		when estransa = bloque_env and mem_repr = drx 	and (reproduciendo = '1' or grabando = '1') else
+				respOcup		when estransa = bloque_rec and mem_repr = drx	and (reproduciendo = '1' or grabando = '1') else
+				do_trans(15 downto 9)	when estransa = confirmando_env else
+				do_trans(15 downto 8)	when estransa = enviando_l else
+				do_trans(7 downto 0)		when estransa = enviando_h else
+				respAdmit;
 
 	-- Entrada de escritura de la memoria para el transmisor 
 	di_trans <= drxh & drx;
-	
+
+	-- Registro temporal para la parte superior del cuadro del formato
+	with estransa select
+		drxh_sig <=	drx	when recibiendo_h,
+						drxh	when others;
+
 	-- Capacitación de escritura para el transmisor
-	we_trans <= '1'  when estransa = recibiendol and rx_done = '1' else
+	we_trans <= '1'  when estransa = recibiendo_l and rx_done = '1' else
 					'0';
 
 	-- Bloque de memoria de transmisor
-	mem_trans_sig <= conv_integer(drx) when estransa = espbloqlec and rx_done = '1' else
-							conv_integer(drx)	when estransa = espbloqesc and rx_done = '1' else
+	mem_trans_sig <=	conv_integer(drx)	when estransa = bloque_env and rx_done = '1' else
+							conv_integer(drx)	when estransa = bloque_lec and rx_done = '1' else
 							mem_trans;
 	
-	-- Estado del transmisor
-	estranssig <= saludando when estransa = reposo and dtx = petSaludo and rx_done = '1' else
-					  espbloqlec when estransa = reposo and dtx = petOrdFpga and rx_done = '1' else
-					  espbloqesc when estransa = reposo and dtx = petFpgaOrd and rx_done = '1' else
-					  saludando when (estransa = espbloqlec or estransa = espbloqesc) and mem_repr = drx and (reproduciendo = '1' or grabando = '1') else
-					  enviandoh when estransa = espbloqlec and rx_done = '1' else
-					  enviandoult when estransa = enviandoh and rx_done = '1' and do_trans = 0 else
-					  enviandol when estransa = enviandoh and tx_done = '1' else
-					  enviandoh when estransa = enviandol and rx_done = '1' else
-					  recibiendoh when estransa = espbloqesc and rx_done = '1' else
-					  recibiendoult when estransa = recibiendoh and rx_done = '1' and drx = 0 else
-					  recibiendol when estransa = recibiendoh and rx_done ='1' else
-					  recibiendoh when estransa = recibiendol and rx_done ='1' else
-					  reposo when estransa = enviandoult and tx_done ='1' else
-					  reposo when estransa = saludando else
-					  estransa;
+	-- Transiciones del estado del transmisor
+	estrans_sig <=	-- Inicio de operación en función de la petición
+						terminando	when estransa = reposo	and rx_done = '1' and dtx = petSaludo else
+						bloque_lec	when estransa = reposo	and rx_done = '1' and dtx = petOrdFpga else
+						bloque_esc	when estransa = reposo	and rx_done = '1' and dtx = petFpgaOrd else
+						-- Espera del envío de mensajes de denegación (por memoria ocupada)
+						terminando	when estransa = bloque_env	and rx_done = '1' and mem_repr = drx
+							and (reproduciendo = '1' or grabando = '1') else
+						terminando	when estransa = bloque_rec	and rx_done = '1' and mem_repr = drx
+							and (reproduciendo = '1' or grabando = '1') else
+						-- En caso contrario, espera del envío de respuesta afirmativa
+						confirmando_env	when estransa = bloque_env and rx_done = '1' else
+						confirmando_rec	when estransa = bloque_rec and rx_done = '1' else
+						-- Inicia las operaciones con la memoria (envío o recepción)
+						enviando_h		when estransa = confirmando_env	and rx_done = '1' else
+						recibiendo_h	when estransa = confirmando_rec	and rx_done = '1' else
+
+						-- # Estados de espera de envíos o recepciones
+						-- Termina el envío tras enviar un carácter de final (está bien: es _h)
+						terminando		when estransa = enviando_h	and tx_done = '1' and mem_trans = 0 else
+						reposo			when estransa = recibiendo_l and rx_done = '1' and (dtxh & dtx) = 0 else
+						enviando_l		when estransa = enviando_h		and tx_done = '1' else
+						recibiendo_l	when estransa = recibiendo_h	and rx_done = '1' else
+						enviando_h		when estransa = enviando_l		and tx_done = '1' else
+						recibiendo_h	when estransa = recibiendo_l	and rx_done = '1' else
+ 
+						-- Vuelve al estado de reposo tras terminar la transmisión
+						reposo			when estransa = terminando and tx_done = '1' else
+						estransa;
 
 end architecture archivero_arq;

@@ -27,13 +27,16 @@ end entity uart_rx;
 
 architecture uart_rx_arq of uart_rx is
 	-- Tipo estado
-	type TEstado is (reposo, inicio, datos, parado);
+	type TEstado is (reposo, inicio, datos, bitstop);
 
 	-- Registro de estado
 	signal estado, estado_sig : TEstado;
 
 	-- Registro de dato recibido
 	signal dato, dato_sig : std_logic_vector(DBIT-1 downto 0);
+
+	-- Señal de finalización
+	signal fin_reg, fin_sig : std_logic;
 
 	-- Número de bits de datos recibidos
 	signal nbr, nbr_sig	: Integer range 0 to DBIT-1;
@@ -56,6 +59,7 @@ begin
 			nbr	 <= 0;
 			frac 		<= 0;
 			rbaud_ant <= '0';
+			fin_reg <= '0';
 
 		elsif reloj'event and reloj = '1' then
 			-- Actualiza el valor de rbaud_ant
@@ -65,6 +69,7 @@ begin
 			dato	 <= dato_sig;
 			nbr	 <= nbr_sig;
 			frac	 <= frac_sig;
+			fin_reg <= fin_sig;
 
 		end if;			
 	end process sec_proc;
@@ -95,17 +100,19 @@ begin
 	-- Transición de estado
 	estado_sig <=	inicio	when estado = reposo and rx = '0' else
 			datos	when estado = inicio and frac = 7 else
-			parado	when estado = datos  and nbr = (DBIT-1) else
-			reposo	when estado = parado and frac = (SB_TICK-1) else
+			bitstop	when estado = datos  and nbr = (DBIT-1) else
+			reposo	when estado = bitstop and frac = (SB_TICK-1) else
 			estado;	
 
 
 	-- # Salidas
 	
 	-- Señal de fin (bloque completo recibido)
-	with estado select
-		fin <=	'1'	when parado,
-			'0'	when others;
+	-- Obs: activa durante el primer ciclo de reposo
+	-- tras una recepción
+	fin_sig <=	'1'	when bitstop and frac = (SB_TICK-1) else '0';
+
+	fin <= fin_reg;
 
 	-- Salida de datos
 	dout	<= dato;
