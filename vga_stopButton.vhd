@@ -44,7 +44,7 @@ currentobject <= colorAmarillo; --Modificar el objeto para el color que se neces
 
 pintar_vga_stopButton: process(hcnt, vcnt)
 begin
-	if hcnt - hcnt_aux > N or vcnt - vcnt_aux > M*2 then
+	if hcnt - hcnt_aux > N - 1 or vcnt - vcnt_aux > M*2 - 1 then
 		pintar <= '0';
 	else pintar <= vga_stopButton_img(conv_integer(M*2 - 1 - vcnt + vcnt_aux))(conv_integer(N - 1 - hcnt + hcnt_aux));
 	end if;
