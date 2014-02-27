@@ -93,8 +93,8 @@ begin
 	mem_dir <= dir;
 	
 	-- Contador de duración del cuadro
-	contador_sig <=   conv_std_logic_vector(1, 8)	when estadoa = activo and cambio = '1' else
-							conv_std_logic_vector(1, 8)	when estadoa = parado else
+	contador_sig <=   conv_std_logic_vector(0, 8)	when estadoa = activo and cambio = '1' else
+							conv_std_logic_vector(0, 8)	when estadoa = parado else
 							contador + 1						when estadoa = activo and rjdiv_ant /= rjdiv and rjdiv = '1' else
 							contador;
 
@@ -104,9 +104,9 @@ begin
 					dir;
 
 	-- Dato de entrada para la memoria
-	with estadoa select
-		mem_dat <=	'1' & r_nota & r_octava & r_sos & contador	when activo,
-						(others => '0')					when others;
+	mem_dat <=	'1' & r_nota & r_octava & r_sos & x"01"		when estadoa = activo and contador = 0 else
+					'1' & r_nota & r_octava & r_sos & contador	when estadoa = activo else
+					(others => '0')					when others;
 
 	-- Escritura en la memoria
 	mem_we <=	'1'	when estadoa = cierre else

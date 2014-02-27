@@ -62,7 +62,7 @@ architecture Behavioral of teclado is
 	signal cableBloqueAct : std_logic_vector(7 downto 0);
 
 	-- Contador del divisor de la señal del reloj
-	signal contdivisor : std_logic_vector(24 downto 0);
+	signal contdivisor : std_logic_vector(20 downto 0);
 
 	-- Reloj dividido (para el archivero)
 	signal relojdiv	: std_logic;
@@ -91,7 +91,7 @@ begin
 	end process divisor_clk;
 
 	-- Señal de reloj dividida
-	relojdiv <= contdivisor(24);
+	relojdiv <= contdivisor(20);
 	
 	-- Señales divididas para pantalla
 	vga_clk <= contdivisor(2);
