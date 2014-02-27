@@ -17,6 +17,9 @@
 
 using namespace std;
 
+// Factor de duración de las unidades de tiempo del formato
+const double FACTOR_DURACION = (4096.0 / 390625) * 1000; // milisegundos
+
 /**
  * @brief Convierte de la representación interna para las notas
  * (por semitonos) a NotaMus.
@@ -65,7 +68,7 @@ bool convSostenido(int nota) {
 	}
 }
 
-LyLector::LyLector(istream &in) : _fuente(in), _linea(1), _col(0), _ccar(' '), _eof(false), _tempo(60), _octava(2), _ligada(false) { }
+LyLector::LyLector(istream &in) : _fuente(in), _linea(1), _col(0), _ccar(' '), _eof(false), _tempo(60), _octava(1), _ligada(false) { }
 
 
 void LyLector::iniciar() throw (ErrorFormato) {
@@ -222,7 +225,7 @@ void LyLector::leerNota() throw (ErrorFormato) {
 	if (_duracion != 1 && _duracion != 2 && _duracion != 4 && _duracion != 8 && _duracion != 16 && _duracion != 32)
 		throw ErrorFormato(_elinea, _ecol, "indicador de duración no soportado");
 
-	_duracion = (((5.9605 * 60) / _tempo) * 4) / _duracion;
+	_duracion = ((((1000.0 / FACTOR_DURACION) * 60) / _tempo) * 4) / _duracion;
 
 	// Aplica el puntillo
 	if (snota[snota.length()-1] == '.')

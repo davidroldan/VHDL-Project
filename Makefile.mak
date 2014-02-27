@@ -19,7 +19,7 @@ MOD_OPS = obj/op_leer.obj obj/op_escalar.obj obj/op_convertir.obj
 MOD_PA	= obj/op_reproducir.obj obj/ondaseno.obj
 
 # Modificadores de enlace para PA
-PAFLAGS	= portaudio_x64.lib
+PAFLAGS	= portaudio_x64.lib portaudiocpp_x64.lib
 
 
 ## Reglas ##
