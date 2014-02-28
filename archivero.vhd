@@ -78,7 +78,7 @@ architecture archivero_arq of archivero is
 	-- Registro para la parte superior del cuadro del formato
 	signal drxh, drxh_sig :std_logic_vector(7 downto 0);
 	-- Contador del divisor para el reloj de la UART
-	signal baudcnt : std_logic_vector (4 downto 0);
+	signal baudcnt : std_logic_vector (9 downto 0);
 	-- Reloj de la UART
 	signal baudclk : std_logic;
 	
@@ -150,7 +150,7 @@ begin
 			baudclk <= '0';
 
 		elsif reloj'event and reloj = '1' then
-			if baudcnt = conv_std_logic_vector(325, 5) then
+			if baudcnt = conv_std_logic_vector(325, 10) then
 				baudcnt <= (others => '0');
 				baudclk <= not baudclk;
 			else
@@ -363,7 +363,7 @@ begin
 	
 	-- Señal de activación del emisor
 	tx_start <=	-- Contestación del saludo
-					'1'	when estransa = reposo		and rx_done = '1'	and dtx = petSaludo else
+					'1'	when estransa = reposo		and rx_done = '1'	and drx = petSaludo else
 					-- Envío de respuesta (aceptación/ocupado) sobre la transferencia
 					'1'	when estransa = bloque_env and rx_done = '1' else
 					'1'	when estransa = bloque_rec and rx_done = '1' else
@@ -379,7 +379,7 @@ begin
 	-- Obs: aunque parezca raro dtx tiene la parte h (de high) en l y viceversa
 	-- pues "enviando_?" es un estado de espera para finalizar el envío pero se
 	-- inicia en el ciclo inmediatamente anterior. 
-	dtx <=	respSaludo	when estransa = reposo		and dtx = petSaludo else
+	dtx <=	respSaludo	when estransa = reposo		and drx = petSaludo else
 				respOcup		when estransa = bloque_env and mem_repr = drx 	and (reproduciendo = '1' or grabando = '1') else
 				respOcup		when estransa = bloque_rec and mem_repr = drx	and (reproduciendo = '1' or grabando = '1') else
 				do_trans(15 downto 8)	when estransa = confirmando_env else
@@ -406,9 +406,9 @@ begin
 	
 	-- Transiciones del estado del transmisor
 	estrans_sig <=	-- Inicio de operación en función de la petición
-						terminando	when estransa = reposo	and rx_done = '1' and dtx = petSaludo else
-						bloque_rec	when estransa = reposo	and rx_done = '1' and dtx = petOrdFpga else
-						bloque_env	when estransa = reposo	and rx_done = '1' and dtx = petFpgaOrd else
+						terminando	when estransa = reposo	and rx_done = '1' and drx = petSaludo else
+						bloque_rec	when estransa = reposo	and rx_done = '1' and drx = petOrdFpga else
+						bloque_env	when estransa = reposo	and rx_done = '1' and drx = petFpgaOrd else
 						-- Espera del envío de mensajes de denegación (por memoria ocupada)
 						terminando	when estransa = bloque_env	and rx_done = '1' and mem_repr = drx
 							and (reproduciendo = '1' or grabando = '1') else
