@@ -51,7 +51,7 @@ architecture uart_rx_arq of uart_rx is
 	-- Flanco de subida de rbaud (por legibilidad)
 	signal rbaud_event	: std_logic;
 begin
-	sec_proc : process (reloj, reset, estado_sig, dato_sig, nbr_sig, frac_sig)
+	sec_proc : process (reloj, rbaud, reset, estado_sig, dato_sig, nbr_sig, frac_sig)
 	begin
 		if reset = '1' then
 			estado	 <= reposo;
@@ -74,7 +74,6 @@ begin
 		end if;			
 	end process sec_proc;
 
-
 	-- # Actualización de valores en registro
 
 	-- Señal auxiliar que hace de evento de reloj de rbaud
@@ -91,18 +90,21 @@ begin
 			nbr;
 
 	-- Fracción del periodo de transmisión
-	frac_sig <=	frac + 1 when estado = datos and rbaud_event = '1' else
-			frac + 1 when estado = inicio and rbaud_event = '1' else
-			0	 when estado = datos and frac = 15 else
-			0	 when estado = reposo else
-			frac;
+	frac_sig <=	0	 when estado = datos and frac = 15 and rbaud_event = '1' else
+					frac + 1 when estado = datos and rbaud_event = '1' else
+					0			when estado = inicio and frac = 7 and rbaud_event = '1' else
+					frac + 1 when estado = inicio and rbaud_event = '1' else
+					frac + 1 when estado = bitstop and rbaud_event = '1' else
+					0	 when estado = reposo else
+					frac;
 	
 	-- Transición de estado
 	estado_sig <=	inicio	when estado = reposo and rx = '0' else
-			datos	when estado = inicio and frac = 7 else
-			bitstop	when estado = datos  and nbr = (DBIT-1) else
-			reposo	when estado = bitstop and frac = (SB_TICK-1) else
-			estado;	
+						datos		when estado = inicio and frac = 7 and rbaud_event = '1' else
+						bitstop	when estado = datos  and nbr = (DBIT-1) and frac = 15 and
+							rbaud_event = '1' else
+						reposo	when estado = bitstop and frac = (SB_TICK-1) else
+						estado;	
 
 
 	-- # Salidas
