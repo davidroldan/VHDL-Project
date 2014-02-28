@@ -106,7 +106,7 @@ begin
 	-- Dato de entrada para la memoria
 	mem_dat <=	'1' & r_nota & r_octava & r_sos & x"01"		when estadoa = activo and contador = 0 else
 					'1' & r_nota & r_octava & r_sos & contador	when estadoa = activo else
-					(others => '0')					when others;
+					(others => '0');
 
 	-- Escritura en la memoria
 	mem_we <=	'1'	when estadoa = cierre else
