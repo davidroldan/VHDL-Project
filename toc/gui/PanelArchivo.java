@@ -130,7 +130,7 @@ public class PanelArchivo extends JPanel {
 	 * Carga los bloques de BRAM en el selector.
 	 */
 	private void cargarBloques(){
-		for (int i = 1; i <= 20; i++)
+		for (int i = 0; i <= 19; i++)
 			_bloque.addItem(i);
 	}
 
