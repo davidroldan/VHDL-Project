@@ -3,10 +3,13 @@
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{palatino}
-\usepackage[spanish]{babel}
+\usepackage[spanish, es-noquoting]{babel}
 \usepackage{anysize}
 \usepackage{tabu}
 \usepackage{graphicx}
+\usepackage{tikz}
+
+\usetikzlibrary{positioning}
 
 \PrerenderUnicode{é}
 \PrerenderUnicode{í}
@@ -31,6 +34,36 @@
 		\caption{Esquema de módulos e interconexión}
 		\label{fig:esquema}
 	\end{figure}
+
+\begin{center}
+\begin{tikzpicture}[modulo/.style={fill=yellow!80!black}, lineamus/.style={draw=green!80!black, thick}, node distance=5mm and 5mm]
+	\node (UC) [modulo] {unidad central};
+	\node (Gen) [above left= -1mm and 1cm of UC.north west, modulo] {gensonido};
+	\node (Codec) [below left= -1mm and 1cm of UC.south west, modulo] {códec de audio};
+	\node (Vga) [below=1 cm of UC, modulo] {vga};
+	\node (VgaBarra) [below left=of Vga, modulo] {vga\_barra};
+	\node (VgaTeclado) [below right=of Vga, modulo] {vga\_teclado};
+	\node (Recon) [above=1cm of UC, modulo] {reconocedor}; 
+	\node (Arch) [right=1.5 cm of UC, modulo] {archivero};
+	\node (Mem) [above =of Arch, modulo] {(memoria)};
+	\node (UART) [below=of Arch, modulo] {UART};
+	\node (Grab) [above right= 0mm and 4mm of Arch.north east, modulo] {grabador};
+	\node (Repr) [below right= 0mm and 4mm of Arch.south east, modulo] {reproductor};
+
+	\draw [->] (UC) -- (Gen);
+	\draw [<->, lineamus] (UC) -- (Arch);
+	\draw (Arch) -- (Grab);
+	\draw (Arch) -- (Repr);
+	\draw (Arch) -- (Mem);
+	\draw (Arch) -- (UART);
+	\draw [->] (UC) -- (Vga);
+	\draw (Vga) -- (VgaBarra);
+	\draw (Vga) -- (VgaTeclado);
+	\draw (UC) -- (Codec);
+	\draw [->, lineamus]  (Recon) -- (UC);
+	\draw [->] (Recon)-- (UC);
+\end{tikzpicture}
+\end{center}
 
 	En la figura \ref{fig:esquema} las líneas gruesas verdes indican el paso de los ``parámetros musicales'': nota (3 bits), octava (3 bits) y sostenido (3 bits).
 
