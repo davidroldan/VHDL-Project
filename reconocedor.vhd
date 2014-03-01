@@ -231,9 +231,9 @@ begin
 		btn_bant <=	'1' and senbin	when x"7D",
 						'0'				when others;
 
-	-- Botones de cambio de octava (falta senbin)
-	octava_sig <=	octava_act + 1 when tecla = x"75" and octava_act /= "101" else
-						octava_act - 1 when tecla = x"72" and octava_act /= "000" else
+	-- Botones de cambio de octava
+	octava_sig <=	octava_act + 1 when tecla = x"75" and octava_act /= "101" and senbin = '1' else
+						octava_act - 1 when tecla = x"72" and octava_act /= "000" and senbin = '1' else
 						octava_act;
 						
 end Behavioral;

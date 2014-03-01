@@ -102,8 +102,8 @@ architecture archivero_arq of archivero is
 	-- Array de salidas de datos para los puertos A y B de las memorias
 	signal adoa, adob : ArrayDatos;
 
-	-- Capacitación de escritura (B)
-	signal aweb : std_logic_vector(0 to NRam-1);
+	-- Capacitación de escritura
+	signal awea, aweb : std_logic_vector(0 to NRam-1);
 	signal we_grab, we_trans : std_logic;
 
 	-- Señales booleanas grabando y reproduciendo
@@ -249,7 +249,7 @@ begin
 			enb 	=> '1',
 			ssra 	=> '0',
 			ssrb	=> '0',
-			wea 	=> '0',
+			wea 	=> awea(i),
 			web 	=> aweb(i),
 			clka	=> reloj,
 			clkb	=> reloj
@@ -331,11 +331,15 @@ begin
 	
 	-- Activa la escritura sólo en la memoria ocupada
 	-- por el grabador o por el transmisor
-	we_gen : for i in aweb'Range generate
-			aweb(i) <=	we_trans		when i = mem_trans and transfiriendo = '1' else
-							we_grab		when i = mem_grab else
+	wea_gen : for i in awea'Range generate
+			awea(i) <=	we_trans		when i = mem_trans else
 							'0';
-	end generate we_gen;
+	end generate wea_gen;
+
+	web_gen : for i in aweb'Range generate
+			aweb(i) <=	we_grab		when i = mem_grab else
+							'0';
+	end generate web_gen;
 
 
 	--
@@ -356,7 +360,7 @@ begin
 	-- al enviar incrementa después de la última lectura de la dirección, es decir,
 	-- al enviar la parte menos significativa, para anticiparse a la próxima lectura.
 	addr_trans_sig <= addr_trans + 1		when estransa = recibiendo_l and rx_done = '1' else
-							addr_trans + 1		when estransa = enviando_h and rx_done = '1' else 
+							addr_trans + 1		when estransa = enviando_h and tx_done = '1' else 
 							(others => '0')	when estransa = reposo else
 							addr_trans;
 	
@@ -422,7 +426,7 @@ begin
 
 						-- # Estados de espera de envíos o recepciones
 						-- Termina el envío tras enviar un carácter de final (está bien: es _h)
-						terminando		when estransa = enviando_h	and tx_done = '1' and mem_trans = 0 else
+						terminando		when estransa = enviando_h	and tx_done = '1' and do_trans = 0 else
 						reposo			when estransa = recibiendo_l and rx_done = '1' and drxh = 0 and drx = 0 else
 						enviando_l		when estransa = enviando_h		and tx_done = '1' else
 						recibiendo_l	when estransa = recibiendo_h	and rx_done = '1' else
