@@ -7,7 +7,6 @@ use work.tipos.all;
 
 library unisim;
 use unisim.vcomponents.RAMB16_S18_S18;
-use unisim.vcomponents.RAMB16_S4;
 
 entity archivero is
 	port (
@@ -43,10 +42,8 @@ entity archivero is
 		octava 	: in std_logic_vector(2 downto 0);
 		sos	: in std_logic;
 		
-		-- Puerto de serie (entrada)
+		-- Puerto serie
 		rx : in std_logic;
-		
-		-- Puerto de serie (salida)
 		tx : out std_logic;
 		
 		-- Salida de datos
@@ -85,7 +82,7 @@ architecture archivero_arq of archivero is
 	-- Señales de activación y notificación
 	signal rx_done, tx_start, tx_done : std_logic;
 	
-	-- Tipos array de datos (del tamaño de datos de la memoria)
+	-- Tipos array de datos y direcciones (del tamaño de la memoria)
 	type ArrayDatos is array (0 to NRam-1) of std_logic_vector(15 downto 0);
 	type ArrayDirs is array (0 to NRam-1) of std_logic_vector(9 downto 0);
 	
@@ -352,6 +349,8 @@ begin
 								'1' when enviando_l,
 								'1' when recibiendo_l,
 								'1' when recibiendo_h,
+								'1' when confirmando_env,
+								'1' when confirmando_rec,
 								'0' when others;
 	
 	-- Dirección de lectura/escritura en la memoria
@@ -371,6 +370,7 @@ begin
 					'1'	when estransa = bloque_env and rx_done = '1' else
 					'1'	when estransa = bloque_rec and rx_done = '1' else
 					-- Envío del contenido de la memoria (en el modo de envío)
+					'1'	when estransa = confirmando_env and tx_done = '1' else
 					'1'	when estransa = enviando_h and tx_done = '1' else
 					'1'	when estransa = enviando_l and tx_done = '1' else
 					'0';
@@ -421,8 +421,8 @@ begin
 						confirmando_env	when estransa = bloque_env and rx_done = '1' else
 						confirmando_rec	when estransa = bloque_rec and rx_done = '1' else
 						-- Inicia las operaciones con la memoria (envío o recepción)
-						enviando_h		when estransa = confirmando_env	and rx_done = '1' else
-						recibiendo_h	when estransa = confirmando_rec	and rx_done = '1' else
+						enviando_h		when estransa = confirmando_env	and tx_done = '1' else
+						recibiendo_h	when estransa = confirmando_rec	and tx_done = '1' else
 
 						-- # Estados de espera de envíos o recepciones
 						-- Termina el envío tras enviar un carácter de final (está bien: es _h)

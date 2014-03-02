@@ -72,7 +72,7 @@ architecture Behavioral of reconocedor is
 	signal ps2clk_ant : std_logic;
 
 	-- Biestable para desactivar las señales binarias pasado un ciclo
-	signal senbin, senbin_sig : std_logic;
+	signal senbin : std_logic;
 begin
 	
 	-- Estabiliza la señal del reloj del teclado
@@ -153,13 +153,13 @@ begin
 					senbin <= '1';
 				
 				end if;
-				
-				-- Modifica el valor de la octava actual
-				octava_act	<= octava_sig;
 
 				-- Ya la anterior lectura es historia
 				bitsleidos <= (others => '0');
 			end if;
+			
+			-- Modifica el valor de la octava actual
+			octava_act	<= octava_sig;
 		end if;
 	end process;
 	
