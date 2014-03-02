@@ -11,6 +11,8 @@
 
 \usetikzlibrary{positioning}
 
+\tikzset{modulo/.style={fill=yellow!80!black}, lineamus/.style={draw=green!80!black, thick}}
+
 \PrerenderUnicode{é}
 \PrerenderUnicode{í}
 \PrerenderUnicode{ó}
@@ -19,6 +21,9 @@
 	/Title (Teclado: manual técnico)
 	/Subject (Tecnología y Organización de Computadores)
 }
+
+\hyphenpenalty=5000
+\tolerance=1000
 
 \title{Teclado: manual técnico}
 \author{Juan Andrés Claramunt Pérez, David Roldán Santos y Rubén Rafael Rubio Cuéllar}
@@ -36,10 +41,11 @@
 	\end{figure}
 
 \begin{center}
-\begin{tikzpicture}[modulo/.style={fill=yellow!80!black}, lineamus/.style={draw=green!80!black, thick}, node distance=5mm and 5mm]
+\begin{tikzpicture}[node distance=5mm and 5mm]
+	% Módulos de diseño del proyecto
 	\node (UC) [modulo] {unidad central};
 	\node (Gen) [above left= -1mm and 1cm of UC.north west, modulo] {gensonido};
-	\node (Codec) [below left= -1mm and 1cm of UC.south west, modulo] {códec de audio};
+	\node (Codec) [below left= 1mm and 1cm of UC.south west, modulo] {códec de audio};
 	\node (Vga) [below=1 cm of UC, modulo] {vga};
 	\node (VgaBarra) [below left=of Vga, modulo] {vga\_barra};
 	\node (VgaTeclado) [below right=of Vga, modulo] {vga\_teclado};
@@ -50,30 +56,84 @@
 	\node (Grab) [above right= 0mm and 4mm of Arch.north east, modulo] {grabador};
 	\node (Repr) [below right= 0mm and 4mm of Arch.south east, modulo] {reproductor};
 
-	\draw [->] (UC) -- (Gen);
+	% Conexiones entre los módulos
+	\draw [<-] (UC.180) -- (Gen);
+	\draw [->, lineamus] (UC.north west) -- (Gen.5);
 	\draw [<->, lineamus] (UC) -- (Arch);
 	\draw (Arch) -- (Grab);
 	\draw (Arch) -- (Repr);
 	\draw (Arch) -- (Mem);
 	\draw (Arch) -- (UART);
-	\draw [->] (UC) -- (Vga);
+	\draw [->, lineamus] (UC) -- (Vga);
 	\draw (Vga) -- (VgaBarra);
 	\draw (Vga) -- (VgaTeclado);
-	\draw (UC) -- (Codec);
-	\draw [->, lineamus]  (Recon) -- (UC);
-	\draw [->] (Recon)-- (UC);
+	\draw [<->] (UC.south west) -- (Codec.0);
+	\draw [->, lineamus]  (Recon.-40) -- (UC.40);
+	\draw [->] (Recon.-140)-- (UC.140);
 \end{tikzpicture}
 \end{center}
 
-	En la figura \ref{fig:esquema} las líneas gruesas verdes indican el paso de los ``parámetros musicales'': nota (3 bits), octava (3 bits) y sostenido (3 bits).
+
+\begin{figure}[ht]\centering
+	\begin{tikzpicture}
+		% Módulos interconectados
+		\node (UC) [modulo, minimum width=10cm] {unidad central};
+		\node (Recon) [above=1cm of UC, modulo, minimum width=6cm] {reconocedor}; 
+
+		% Conexiones
+		\draw [->] (UC.174) -- node[left]{\small reloj/reset} (Recon.-174); % reloj/reset
+		\draw [->, lineamus] (Recon.-170) -- (UC.170);
+		\draw [->] (Recon.-7) -- (UC.7);		% botón octava+
+		\draw [->] (Recon.-8) -- (UC.8);		% botón octava-
+		\draw [->] (Recon.-10) -- (UC.10);	% botón parada
+		\draw [->] (Recon.-12) -- (UC.12);	% botón reproducción
+		\draw [->] (Recon.-15) -- node[left]{\small activadores} (UC.15); % botón grabación
+
+		\draw [->, thick] (Recon.-6) -- node[right] {\small octava base} (UC.6);
+	\end{tikzpicture}
+
+	\caption{Conexiones del reconocedor}
+	\label{fig:reconocedor}
+\end{figure}
+
+
+	En la figura \ref{fig:esquema} las líneas gruesas verdes indican el paso de los ``parámetros musicales'': nota (3 bits), octava (3 bits) y sostenido (3 bits). Este es el dato principal del diseño. Se origina en el {\itshape reconocedor} como resultado de la interacción del usuario o en el {\itshape archivero} por la reproducción de un archivo grabado. La unidad central selecciona la fuente activa en cada momento. Su destino es el  generador de sonidos ({\itshape gensonido}) que produce una onda cuadrada; también llega al controlador de pantalla que muestra una recreación del teclado y una animación, y al archivero para la grabación.
+
+\begin{figure}\centering
+	\begin{tikzpicture}
+		% Módulos interconectados
+		\node (UC) [modulo, minimum width=10cm] {unidad central\strut};
+		\node (Gen) [above=1cm of UC, modulo, minimum width=6cm] {gensonido\strut};
+		\node (Tab) [above left=2em and -8em of Gen, modulo] {tablanotas};
+		\node (TabS) [above right=2em and -8em of Gen, modulo] {tablanotassos};
+
+		% Conexiones
+		\draw [->] (UC.172) -- node[left]{\small reloj/reset} (Gen.-172); % reloj/reset
+		\draw [->, lineamus] (UC.150) -- (Gen.-150);
+		\draw [->] (Gen.-30) -- node[right]{\small onda} (UC.30);
+
+		% Conexiones con las ROM
+		\draw [->] (Gen.168) -- node[left]{\small nota} (Tab.-150);
+		\draw [<-] (Gen.153) -- (Tab.-29);
+		\draw [->] (Gen.30) -- (TabS.-162);
+		\draw [<-] (Gen.9) -- node[right]{\small semiperiodo} (TabS.-19);
+	\end{tikzpicture}
+
+	\caption{Conexiones del generador de sonidos}
+	\label{fig:gensonido}
+\end{figure}
+
+	\medskip La señal sonora generada por {\itshape gensonido} se dirige a un pin de salida de la FPGA para ser conectada a un zumbador o semejante, pero también se conecta al códec de audio que produce una señal analógica por el puerto de salida jack de 3,5mm del dispositivo.
+
+	\medskip La memoria se gestiona en el módulo archivero. Se organiza en 20 bloques RAM de doble puerto y anchura 16 bits compartidos por el grabador, el reproductor y el transmisor. El reproductor lee desde el puerto A, el grabador escribe en el puerto B y el transmisor realiza sendas operaciones en los puertos cruzados. La reproducción y la grabación no pueden darse simultáneamente\footnote{Técnicamente sería posible en memorias diferentes con ligeras modificaciones.}, sin embargo la carga o descarga de datos por el transmisor pueden acontecer concurrentemente con aquellas si involucran a bloques distintos. El control de la compartición se maneja en el módulo.
 
 \section{Controladores}
 
 \begin{enumerate}
-	\item {\itshape Controlador de teclado}: 
+	\item {\itshape Controlador de teclado}: maneja la entrada por teclado. Las pulsaciones permiten tocar las notas musicales y activar ciertos comandos comandos de la máquina. El controlador recibe datos a través de la línea \verb|PS2DATA| con reloj \verb|PS2CLK| en serie desde el teclado. En base a ello establece valores acordes para los parámetros musicales o activa señales que desencadenarán acciones en otros componentes externos.
 	\item {\itshape Controlador de pantalla}:
-	\item {\itshape Controlador de comunicación serie}:
-	\item {\itshape Controlador del códec de audio}:
+	\item {\itshape Controlador de comunicación serie}: maneja la comunicación bidireccional con el ordenador mediante el puerto serie. El protocolo de comunicación permite enviar y recibir archivos de audio para ser cargados en la memoria.
+	\item {\itshape Controlador del códec de audio}: este controlador establece las señales de reloj y convierte una onda cuadrada en un valor estéreo de 20 bits apto para el códec de audio {\itshape AK4551} de la FPGA.
 \end{enumerate}
 
 \end{document}

@@ -11,6 +11,8 @@
 \usepackage{tikz}
 \usetikzlibrary{trees}
 
+\usepackage[colorlinks]{hyperref}
+
 \PrerenderUnicode{í}
 \PrerenderUnicode{ó}
 
@@ -18,6 +20,9 @@
 	/Title (Teclado: manual de uso)
 	/Subject (Tecnología y Organización de Computadores)
 }
+
+\hyphenpenalty=5000
+\tolerance=1000
 
 \title{Teclado: manual de uso}
 \author{Juan Andrés Claramunt Pérez, David Roldán Santos y Rubén Rafael Rubio Cuéllar}
@@ -238,14 +243,24 @@
 	\label{fig:teclado}
 \end{figure}
 
-	\item {\itshape Modo reproducción y grabación}: la fila central del teclado numérico permite activar o desactivar la reproducción o la grabación de pistas almacenadas en los bloques de memoria de la FPGA. Se cuenta con 20 bloques activos que permiten almacenar cada uno hasta 12 horas de grabación (en silencio) con una sensibilidad de 167,77 ms. Para cambiar de bloque de memoria se dispone de las teclas {\itshape AvPág} y {\itshape RePág} del teclado numérico. El display de 7 segmentos mostrará en reposo el bloque de memoria seleccionado.
+	\item {\itshape Modo reproducción y grabación}: la fila central del teclado numérico permite activar o desactivar la reproducción o la grabación de pistas almacenadas en los bloques de memoria de la FPGA. Se cuenta con 20 bloques activos que permiten almacenar cada uno hasta 8 minutos de grabación (en silencio) con una sensibilidad de 10,49 ms. Para cambiar de bloque de memoria se dispone de las teclas {\itshape AvPág} y {\itshape RePág} del teclado numérico. El display de 7 segmentos mostrará en reposo el bloque de memoria seleccionado.
 
 		Durante la reproducción sonará el contenido del bloque de memoria seleccionado mostrándose en la pantalla como si se tocase a mano. Las pulsaciones en la parte sonora del teclado serán ignoradas.
 
 		En la grabación se registrará aquello que se esté tocando con el teclado.
 
-	\item {\itshape Modo transmisión}: en todo momento se podrán transferir archivos de audio desde y hasta los bloques de memoria de la FPGA, siempre que el bloque requerido no esté ocupado por por una grabación o reproducción. Se dispone de un programa para el ordenador que permite escoger archivos y enviarlos o generarlos a partir de los datos recibidos.
+	\item {\itshape Modo transmisión}: en todo momento se podrán transferir archivos de audio desde y hasta los bloques de memoria de la FPGA, siempre que el bloque requerido no esté ocupado por una grabación o reproducción.
 
+		Se incluye un repertorio de canciones de muestra en un formato humanamente legible semejante al del programa de composición tipográfica de partituras \href{http://lilypond.org/}{Lilypond}. El programa {\itshape MFlan} convierte archivos en este formato al formato {\itshape FLAN}. Además permite leer y reproducir las grabaciones obtenidas desde la FPGA.
+
+		Para la transferencia de canciones entre la FPGA y el ordenador se dispone del programa {\itshape Eurotas}. Su manejo no requiere mayor explicación.
+
+\begin{figure}[ht] \centering
+	\includegraphics[scale=.55]{eurotas.png}
+
+	\caption{La interfaz del transmisor {\itshape Eurotas}}
+	\label{fig:eurotas}
+\end{figure}
 	\end{enumerate}
 \section{¿Qué espero ver?}
 
