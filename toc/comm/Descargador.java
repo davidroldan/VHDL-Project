@@ -113,18 +113,35 @@ public class Descargador extends Comunicador {
 					throw new ErrorComunicacion("Se recibió una respuesta desconocida: " + respuesta + ".");
 			}
 
-			informeTarea("Enviando contenido", 10);
+			informeTarea("Recibiendo contenido", 10);
 
 			// Descarga el archivo desde el puerto
 			int benv = 0;
-			int btam = 1024;
+			int btam = 1024 * 2;
+			
+			// Bytes recibidos
+			byte hchar = 1, lchar;
+			
+			lchar = (byte) sin.read();
 
-			while (sin.available() > 0){
-				destino.write(sin.read());
+			while ((hchar != 0 || lchar != 0) && lchar != -1 && benv < btam){
+				destino.write(lchar);
 
 				informeTarea("Recibiendo contenido", (int)(10 + 90 * (double)(benv++) /
 						btam));
+				
+				hchar = lchar;
+				lchar = (byte) sin.read();
 			}
+			
+			if (lchar == 0)
+				destino.write(lchar);
+			
+			// Avisos de depuración
+			if (lchar != -1)
+				System.err.println("Aviso: la descarga ha terminado sin encontrar señal de fin.");
+			else if (benv >= btam)
+				System.err.println("Aviso: la descarga ha terminado por exceso de longitud.");
 
 			informeTarea("Tarea completada", 100);
 
