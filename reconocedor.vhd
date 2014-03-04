@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    12:50:01 10/15/2013 
+-- Create Date:
 -- Design Name: 
--- Module Name:    reconocedor - Behavioral 
+-- Module Name:
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -50,7 +50,7 @@ architecture Behavioral of reconocedor is
 	signal estadoa : Estado;
 
 	-- Registro de desplazamiento con la última transmisión entrante en reposo
-	-- TODO: cambiar a 10 downto 1 pues el primer bit nunca se lee
+	-- Obs: se puede eliminar el bit 0 pues nunca se lee
 	signal mensaje : std_logic_vector (10 downto 0);
 	
 	-- Número de bits leídos en una misma transmisión

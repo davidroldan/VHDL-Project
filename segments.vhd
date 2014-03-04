@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    20:29:24 10/16/2013 
+-- Create Date:
 -- Design Name: 
--- Module Name:    segments - Behavioral 
+-- Module Name:
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -19,15 +19,6 @@
 ----------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 entity segments is
 	port (

@@ -129,4 +129,3 @@ NET rx LOC=G5;	# Recepción de datos
 	# salidas
 #NET rs232_rts	LOC=F4;	# Control de flujo
 NET tx	LOC=J2;	# Transmisión de datos
- 

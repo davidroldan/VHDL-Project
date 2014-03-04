@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    14:05:58 11/18/2013 
+-- Create Date:
 -- Design Name: 
--- Module Name:    teclado - Behavioral 
+-- Module Name:
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -43,6 +43,7 @@ entity teclado is
 		-- y la transferencia
 		led_repr, led_grab, led_trans : out std_logic;
 		
+		-- Puerto serie
 		rx : in std_logic;
 		tx : out std_logic;
 		
@@ -188,7 +189,7 @@ begin
 	
 	
 	-- Conecta adecuadamente los datos a reproducir dependiendo
-	-- de si se está grabando o no
+	-- de si se está grabando/reproduciendo o no
 	with en_reproduccion select
 		cableNota	<= notaRepr		when '1',
 							notaTeclado	when others;

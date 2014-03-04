@@ -16,11 +16,12 @@ entity uart_tx is
 		-- Bit de datos
 		tx_start : in std_logic;
 	
-		rbaud: in std_logic ;
+		rbaud	: in std_logic ;
 		-- Entrada de datos enviado en paralelo
-		din: in std_logic_vector ( 7 downto 0) ;
-		tx_done_tick: out std_logic;
-		tx: out std_logic) ;
+		din : in std_logic_vector ( 7 downto 0) ;
+		tx_done_tick : out std_logic;
+		tx : out std_logic
+	);
 end uart_tx;
 
 architecture arch of uart_tx is
