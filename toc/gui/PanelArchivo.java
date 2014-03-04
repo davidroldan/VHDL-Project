@@ -92,12 +92,21 @@ public class PanelArchivo extends JPanel {
 			}
 		});
 
-
 		// Acción principal del panel
 		_btnActuar.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {				
 				if (_oyente != null)
+					_oyente.accionDesencadenada(PanelArchivo.this, _ruta.getText(),
+							(Integer) _bloque.getSelectedItem());
+			}
+		});
+		
+		// Misma acción desencadenada al pulsar Intro
+		_ruta.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (_ruta.getDocument().getLength() != 0 && _oyente != null)
 					_oyente.accionDesencadenada(PanelArchivo.this, _ruta.getText(),
 							(Integer) _bloque.getSelectedItem());
 			}

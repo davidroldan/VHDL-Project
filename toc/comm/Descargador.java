@@ -138,7 +138,7 @@ public class Descargador extends Comunicador {
 				destino.write(lchar);
 			
 			// Avisos de depuración
-			if (lchar != -1)
+			if (lchar == -1)
 				System.err.println("Aviso: la descarga ha terminado sin encontrar señal de fin.");
 			else if (benv >= btam)
 				System.err.println("Aviso: la descarga ha terminado por exceso de longitud.");
