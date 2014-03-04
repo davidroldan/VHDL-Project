@@ -32,6 +32,8 @@ architecture arch of uart_tx is
 	signal tx_reg , tx_next : std_logic ;
 	signal s_tick, rbaud_ant : std_logic;
 	
+	signal tx_done_tick_reg, tx_done_tick_next : std_logic;
+	
 begin
 process (reloj, reset)
 begin
@@ -41,6 +43,7 @@ begin
 		n_reg <= (others => '0') ;
 		b_reg <= (others => '0') ;
 		tx_reg <= '1';
+		tx_done_tick_reg <= '0';
 		rbaud_ant <= '0';
 
 	elsif (reloj'event and reloj = '1') then
@@ -50,6 +53,7 @@ begin
 		n_reg <= n_next;
 		b_reg <= b_next;
 		tx_reg <= tx_next;
+		tx_done_tick_reg <= tx_done_tick_next;
 	end if;
 end process;
 
@@ -62,7 +66,6 @@ begin
 	n_next <= n_reg;
 	b_next <= b_reg;
 	tx_next <= tx_reg ;
-	tx_done_tick <= '0';
 	
 	case state_reg is
 		when idle =>
@@ -107,7 +110,6 @@ begin
 		if s_tick = '1' then
 			if s_reg = (SB_TICK - 1) then
 				state_next <= idle;
-				tx_done_tick <= '1';
 			else
 				s_next <= s_reg + 1;
 
@@ -116,6 +118,12 @@ begin
 
 end case;
 end process;
+
+tx_done_tick <= tx_done_tick_reg;
+
+tx_done_tick_next <= '1' when state_reg = stop and s_reg = (SB_TICK - 1) and s_tick = '1' else
+							'0';
+
 tx <= tx_reg;
 s_tick <= 	'1' when rbaud /= rbaud_ant and rbaud = '1' else
 				'0';
