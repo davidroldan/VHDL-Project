@@ -17,7 +17,7 @@ using namespace std;
 using namespace ops;
 
 // Factor de duración de las unidades de tiempo del formato
-const double FACTOR_DURACION = 167.7722; // segundos
+const double FACTOR_DURACION = (8192.0 / 390625) * 1000; // segundos
 
 Leer::Leer() : _detallado(false) {
 	_nombreNota[DO] = "do";
