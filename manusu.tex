@@ -38,8 +38,26 @@
 
 % TODO: faltan archivos ¿sobran?
 
-\begin{tabu}{| >{\itshape}X[2, l] | X[7, l] |}
-	\multicolumn{2}{c}{\bfseries Archivos principales} \\ \sep
+\begin{tabu}{| >{\itshape}X[5, l] | X[14, l] |}
+	\multicolumn{2}{c}{{\bfseries Archivos resultado} en {\itshape bin}} \\ \sep
+	teclado.bit & Archivo de programación del proyecto \\ \sep
+	eurotas/eurotas.bat & Archivo de comandos de Windows para iniciar {\itshape Eurotas} \\ \sep
+	eurotas/eurotas.jar & Cargador de archivos {\itshape Eurotas} \\ \sep
+	eurotas/RXTXcomm.jar & Biblioteca Java RxTx \\ \sep
+	eurotas/rxtxSerial.dll & Biblioteca Java RxTx (parte nativa para Windows x86\_64) \\ \sep
+	mflan/mflan.exe & Manipulador de archivos FLAN \\ \sep
+	mflan/libportaudio\_x64.dll & Biblioteca PortAudio (para Windows x86\_64) \\ \sep
+
+	\multicolumn{2}{c}{} \\
+	\multicolumn{2}{c}{{\bfseries Repertorio de muestra} en {\itshape repertorio}} \\ \sep
+	mentiras.txt & Vamos a contar mentiras (tradicional) \\ \sep
+	tamborilero.txt & El tamborilero (Katherine Kennicott Daves) \\ \sep
+	theentertainer.txt & The Entertainer (Scott Joplin) \\ \sep
+	paraelisa.txt & Para Elisa (L.W. Beethoven) \\ \sep
+	tetris\_remix.txt & Tetris \\ \sep
+
+	\multicolumn{2}{c}{} \\
+	\multicolumn{2}{c}{{\bfseries Código fuente de descripción hardware} en {\itshape src/vhdl}} \\ \sep
 	archivero.vhd & Archivero (reproductor, grabador, memoria y comunicación serie) \\ \sep
 	audiocod.vhd & Controlador del códec de audio \\ \sep
 	display.vhd & Controlador del display de 7 segmentos \\ \sep
@@ -54,42 +72,15 @@
 	tablanotassos.vhd & Tabla de semiperiodos de nota (con sostenido) \\ \sep
 	teclado.vhd & Entidad principal \\ \sep
 	tipos.vhd & Paquete de tipos y definiciones comunes \\ \sep
-	uart\_rx.vhd & Transistor de la UART (comunicación serie) \\ \sep
-	uart\_tx.vhd & Receptor de la UART (comunicación serie) \\ \sep
+	uart\_rx.vhd & Receptor de la UART (comunicación serie) \\ \sep
+	uart\_tx.vhd & Emisor de la UART (comunicación serie) \\ \sep
 	vga.vhd & Controlador de pantalla \\ \sep
 	vga\_barras.vhd & Componente de barras (pantalla) \\ \sep
 	vga\_recButton.vhd & Señal de grabación (pantalla) \\ \sep
 	vga\_teclado.vhd & Componente teclado (pantalla) \\ \sep
-
-	% ¿Incluimos estos archivos?
-	\multicolumn{2}{c}{} \\
-	\multicolumn{2}{c}{{\bfseries Simulaciones} en {\itshape pruebas}} \\ \sep
-	sim\_archivero.vhd & Simulación del archivero \\ \sep
-	sim\_codec.vhd & Simulación del códec \\ \sep
-	sim\_grab.vhd & Simulación del grabador \\ \sep
-	sim\_repr.vhd & Simulación del reproductor \\ \sep
-
-	\multicolumn{2}{c}{} \\
-	\multicolumn{2}{c}{{\bfseries Conversor BMP a VHD} en {\itshape conversorBMPtoVHD}} \\ \sep
-	converter.cpp & Archivo principal \\ \sep
 \end{tabu}
 
-\vspace*{1cm}
-
-\begin{figure}[ht] \centering
-\begin{tikzpicture}[level 1/.style={sibling distance=20mm}]
-
-	\node {archivero} [style=edge from parent fork down]
-		child { node {reproductor} }
-		child { node {grabador} }
-		child { node {uart\_rx} }
-		child { node {uart\_tx} }
-	;
-\end{tikzpicture}
-\caption{Árbol de dependencias de los archivos de la descripción {\itshape hardware} (archivero)}
-\end{figure}
-
-\begin{figure}[ht] \centering
+\begin{figure}[t] \centering
 \begin{tikzpicture}[level 1/.style={sibling distance=20mm}]
 
 	\node {teclado} [style=edge from parent fork down]
@@ -119,8 +110,24 @@
 \caption{Árbol de dependencias de los archivos de la descripción {\itshape hardware}}
 \end{figure}
 
+\vspace*{-3em}
+
 \begin{tabu}{| >{\itshape}X[3, l] | X[5, l] |}
-	\multicolumn{2}{c}{{\bfseries Manipulador de archivos FLAN} en {\itshape mflan}} \\ \sep
+	\multicolumn{2}{c}{} \\
+	\multicolumn{2}{c}{{\bfseries Simulaciones} en {\itshape src/vhdl/pruebas}} \\ \sep
+	sim\_archivero.vhd & Simulación del archivero \\ \sep
+	sim\_codec.vhd & Simulación del códec \\ \sep
+	sim\_grab.vhd & Simulación del grabador \\ \sep
+	sim\_repr.vhd & Simulación del reproductor \\ \sep
+	sim\_rx.vhd & Simulación del receptor de la UART \\ \sep
+	sim\_tx.vhd & Simulación del emisor de la UART \\ \sep
+
+	\multicolumn{2}{c}{} \\
+	\multicolumn{2}{c}{{\bfseries Códigos de utilidad} en {\itshape src/util}} \\ \sep
+	bmptovhd.cpp & Conversor de BMP a VHDL \\ \sep
+
+	\multicolumn{2}{c}{} \\
+	\multicolumn{2}{c}{{\bfseries Manipulador de archivos FLAN} en {\itshape src/mflan}} \\ \sep
 	Léeme.txt & Instrucciones de compilación \\ \sep
 	Makefile & Archivo de construcción (GNU Makefile) \\ \sep
 	Makefile.mak & Archivo de construcción (Microsoft NMake) \\ \sep
@@ -143,10 +150,23 @@
 	ops/op\_leer.h & \\ \sep
 	ops/op\_reproducir.cpp & Operación de reproducción \\ \sep
 	ops/op\_reproducir.h & \\ \sep
-	tamborilero.txt & Archivo de partitura de ejemplo \\ \sep
+\end{tabu}
 
-	\multicolumn{2}{c}{} \\
-	\multicolumn{2}{c}{{\bfseries Cargador/descargador de archivos} en {\itshape eurotas}} \\ \sep
+\begin{figure}[ht] \centering
+\begin{tikzpicture}[level 1/.style={sibling distance=20mm}]
+
+	\node {archivero} [style=edge from parent fork down]
+		child { node {reproductor} }
+		child { node {grabador} }
+		child { node {uart\_rx} }
+		child { node {uart\_tx} }
+	;
+\end{tikzpicture}
+\caption{Árbol de dependencias de los archivos de la descripción {\itshape hardware} (archivero)}
+\end{figure}
+
+\begin{tabu}{| >{\itshape}X[3, l] | X[5, l] |}
+	\multicolumn{2}{c}{{\bfseries Cargador/descargador de archivos} en {\itshape src/eurotas}} \\ \sep
 	Léeme.txt & Intrucciones de compilación y uso \\ \sep
 	toc/Main.java & Clase principal \\ \sep
 	toc/OyenteTarea.java & Interfaz de oyente de tarea \\ \sep
@@ -164,7 +184,6 @@
 	toc/gui/package-info.java & Información del paquete {\itshape toc.gui} \\ \sep
 	toc/package-info.java & Información del paquete {\itshape toc} \\ \sep
 \end{tabu}
-
 \section{Pines}
 
 \begin{tabu}{|>{\bfseries}X[1, l] | >{\tt}X[2, l] | >{\itshape}X[1, l] |X[10, l] |}
@@ -207,7 +226,7 @@
 
 \section{Inicialización}
 
-	Antes de comenzar, es necesario conectar un teclado al puerto PS2 de la FPGA. Si se dispone de un zumbador o semejante (como por ejemplo el de la placa de pruebas del laboratorio) se puede utilizar como altavoz conectándolo al pin {\color{blue} D15}. Si por el contrario, se pretende escuchar utilizando auriculares u otros dispositivos que cuenten con conector compatible se podrán conectar estos al puerto a tal efecto de la FPGA, aunque su funcionamiento puede depender de la FPGA utilizada. Para ello la disposición de los {\itshape jumper} JP2-JP5 ha de ser la que indica la figura \ref{fig:jump}.
+	Antes de comenzar, es necesario conectar un teclado al puerto PS2 de la FPGA. Si se dispone de un zumbador o semejante (como por ejemplo el de la placa de pruebas del laboratorio) se puede utilizar como altavoz conectándolo al pin {\color{blue} D15}. Si por el contrario, se pretende escuchar utilizando auriculares u otros dispositivos que cuenten con conector compatible se podrán conectar estos al puerto a tal efecto de la FPGA. Para ello la disposición de los {\itshape jumper} JP2-JP5 ha de ser la que indica la figura \ref{fig:jump}.
 
 \begin{figure}[ht] \centering
 	\includegraphics[scale=.3]{poscodec.png}
@@ -243,7 +262,7 @@
 	\label{fig:teclado}
 \end{figure}
 
-	\item {\itshape Modo reproducción y grabación}: la fila central del teclado numérico permite activar o desactivar la reproducción o la grabación de pistas almacenadas en los bloques de memoria de la FPGA. Se cuenta con 20 bloques activos que permiten almacenar cada uno hasta 8 minutos de grabación (en silencio) con una sensibilidad de 10,49 ms. Para cambiar de bloque de memoria se dispone de las teclas {\itshape AvPág} y {\itshape RePág} del teclado numérico. El display de 7 segmentos mostrará en reposo el bloque de memoria seleccionado.
+	\item {\itshape Modo reproducción y grabación}: la fila central del teclado numérico permite activar o desactivar la reproducción o la grabación de pistas almacenadas en los bloques de memoria de la FPGA. Se cuenta con 20 bloques activos que permiten almacenar cada uno hasta 1 hora y media grabación (en silencio) con una sensibilidad de 20,97 ms. Para cambiar de bloque de memoria se dispone de las teclas {\itshape AvPág} y {\itshape RePág} del teclado numérico. El display de 7 segmentos mostrará en reposo el bloque de memoria seleccionado.
 
 		Durante la reproducción sonará el contenido del bloque de memoria seleccionado mostrándose en la pantalla como si se tocase a mano. Las pulsaciones en la parte sonora del teclado serán ignoradas.
 
@@ -253,7 +272,7 @@
 
 		Se incluye un repertorio de canciones de muestra en un formato humanamente legible semejante al del programa de composición tipográfica de partituras \href{http://lilypond.org/}{Lilypond}. El programa {\itshape MFlan} convierte archivos en este formato al formato {\itshape FLAN}. Además permite leer y reproducir las grabaciones obtenidas desde la FPGA.
 
-		Para la transferencia de canciones entre la FPGA y el ordenador se dispone del programa {\itshape Eurotas}. Su manejo no requiere mayor explicación.
+		Para la transferencia de canciones entre la FPGA y el ordenador se dispone del programa {\itshape Eurotas}\footnote{{\itshape Eurotas} es el nombre del río que pasaba por la antigua Esparta. El modelo de la FPGA es {\itshape Spartan 3}.}. Su manejo no requiere mayor explicación.
 
 \begin{figure}[ht] \centering
 	\includegraphics[scale=.55]{eurotas.png}
@@ -264,25 +283,27 @@
 	\end{enumerate}
 \section{¿Qué espero ver?}
 
-	Nada más cargar el fichero {\itshape .bit} en la FPGA, se mostrará un piano por pantalla. El modo del teclado se indicará a través de una imagen en la parte superior derecha de la pantalla, (el modo por defecto es el modo teclado, luego inicialmente habrá una imagen de {\itshape stop}).\\
+	Nada más cargar el fichero {\itshape .bit} en la FPGA, se mostrará un piano por pantalla. El modo del teclado se indicará a través de una imagen en la parte superior derecha de la pantalla, (el modo por defecto es el modo teclado, luego inicialmente habrá una imagen de {\itshape stop}).
 
-	Cada vez que se genere una nota, tanto al tocarla en el modo teclado o grabación, o al reproducirla en el modo de reproducción, se generará el sonido correspondiente a esa nota, que se podrá escuchar o bien con un zumbador o al conectar unos cascos por el puerto de salida jack de 3,5mm del dispositivo. Simultáneamente, en el piano mostrado por la pantalla se iluminará de color rojo la nota correspondiente, y aparecerá una barra azul que indicará la duración de la nota tocada. También se mostrará la nota tocada por el display de 7 segmentos.\\
+	\medskip Cada vez que se genere una nota, tanto al tocarla en el modo teclado o grabación, o al reproducirla en el modo de reproducción, se generará el sonido correspondiente a esa nota, que se podrá escuchar o bien con un zumbador o al conectar unos cascos por el puerto de salida jack de 3,5mm del dispositivo. Simultáneamente, en el piano mostrado por la pantalla, se iluminará de color rojo la nota correspondiente y aparecerá una barra azul que indicará su duración. También se mostrará la nota tocada en el display de 7 segmentos.
 
-	Ahora describiremos cómo deberían comportarse cada uno de los modos del teclado: \\
+	\medskip Ahora describiremos lo que se podrá observar en cada uno de los modos del teclado:
+
 	\begin{enumerate}
 	\item {\itshape Modo teclado (o reposo)}: cuando este modo está activado, habrá una imagen de {\itshape stop} en la parte superior derecha de la pantalla. En este modo se permite tocar las notas a través del teclado, y cambiar de octava.
 
-	\item {\itshape Modo reproducción}: al activar el modo de reproducción, aparecerá una imagen de {\itshape play} en la parte superior derecha de la pantalla. También se indicará que este modo esta activo por medio del led 0 de la placa extendida. En ese momento se reproducirá la canción o secuencia de notas almacenada en el bloque de memoria activo en ese momento. Esta secuencia de notas será la que ha sido grabada en el modo grabación, cargada mediante el modo transmisor, o bien una canción por defecto. Cuando la reproducción finaliza, el teclado pasa a estar en modo reposo (o modo teclado).  Para no tener problemas con el cambio de octava, en el modo reproducción las notas se mostrarán siempre en la primera octava del piano de la pantalla, y esta solo se indicará en el display de 7 segmentos.
+	\item {\itshape Modo reproducción}: al activar el modo de reproducción, aparecerá una imagen de {\itshape play} en la parte superior derecha de la pantalla. También se indicará que este modo esta activo por medio del led 0 de la placa extendida. En ese momento se reproducirá la canción o secuencia de notas almacenada en el bloque de memoria activo en ese momento. Esta secuencia de notas será la que ha sido grabada en el modo grabación, cargada por el puerto serie, o bien una canción por defecto. Cuando la reproducción finaliza, el teclado pasa a estar en modo reposo (o modo teclado).  Para no tener problemas con el cambio de octava, en el modo reproducción las notas se mostrarán siempre en la primera octava del piano de la pantalla, y esta solo se indicará en el display de 7 segmentos.
 
 	\item {\itshape Modo grabación}: al activar el modo de grabación, aparecerá una imagen de {\itshape rec} en la parte superior derecha de la pantalla. También se indicará que este modo está activo por medio del led 1 de la placa extendida. El funcionamiento es similar al modo de reposo, pero adicionalmente se irá almacenando en memoria la secuencia de notas tocadas en el teclado, reemplazando así la canción anterior que estuviese almacenada en ese bloque de memoria. El modo de grabación finaliza cuando la memoria está llena o cuando se pulsa el botón de stop.
 
+	\begin{figure}[ht] \centering
+	\includegraphics[scale=.35]{posleds.png} \\
+	{\small (1 indica reproducción, 2 grabación y 3 transferencia)}
+	\caption{Disposición de los LED de la placa extendida}
+	\end{figure}
+
 	\item {\itshape Modo transmisión}: tras cargar una cancion en la FPGA, podremos reproducirla con el modo reproducción. Al transferir una canción desde la FPGA al ordenador, se generará un archivo de formato {\itshape FLAN}.
-
-
-
 	\end{enumerate}
-
-
 	
 
 \end{document}
