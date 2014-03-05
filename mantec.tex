@@ -104,6 +104,59 @@
 
 	\medskip La memoria se gestiona en el módulo {\itshape archivero}. Se organiza en 20 bloques RAM de doble puerto y anchura 16 bits compartidos por el grabador, el reproductor y el transmisor. El reproductor lee desde el puerto A, el grabador escribe en el puerto B y el transmisor realiza sendas operaciones en los puertos cruzados. La reproducción y la grabación no pueden darse simultáneamente\footnote{Técnicamente sería posible en memorias diferentes con ligeras modificaciones.}, sin embargo la carga o descarga de datos por el transmisor pueden acontecer concurrentemente con aquellas si involucran a bloques distintos. El control de la compartición se maneja en el módulo.
 
+\medskip \begin{figure}[ht]\centering
+	\begin{tikzpicture}
+		% Módulos interconectados
+		\node (Arch) [modulo, minimum width=10cm] {archivero};
+		\node (UC) [left=1em of Arch, modulo] {UC};
+		\node (Mem) [right=1em of Arch, modulo] {(mem)};
+		\node (Urx) [above left=2em and -12em of Arch, modulo, minimum width=4cm] {uart\_rx};
+		\node (Utx) [above right=2em and -12em of Arch, modulo, minimum width=4cm] {uart\_tx};
+		\node (Repr) [below left=2em and -12em of Arch, modulo, minimum width=4cm] {reproductor};
+		\node (Grab) [below right=2em and -12em of Arch, modulo, minimum width=4cm] {grabador};
+
+		% Conexiones
+		\draw [<->, lineamus] (UC) -- (Arch);
+		\draw [<->, thick] (Arch) -- (Mem);
+
+		% Comunicación con el grabador y reproductor		
+		\draw [->, lineamus] (Repr.north) -- ($(Arch.south west) !.221! (Arch.south east)$);
+		\draw [<-, lineamus] (Grab.north) -- ($(Arch.south west) !.779! (Arch.south east)$);
+
+		\draw [<-] ($(Repr.north west) !.1! (Repr.north east)$) -- node[left]{\small r/r} ($(Arch.south west) !.06! (Arch.south east)$); % reloj
+		\draw [<-] ($(Repr.north west) !.2! (Repr.north east)$) -- ($(Arch.south west) !.101! (Arch.south east)$); % reloj div
+		\draw [<-, thick] ($(Repr.north west) !.7! (Repr.north east)$) -- node[left]{\small mm} ($(Arch.south west) !.30! (Arch.south east)$); % datos memoria
+		\draw [->, thick] ($(Repr.north west) !.75! (Repr.north east)$) -- ($(Arch.south west) !.32! (Arch.south east)$); % dirección
+		\draw [<-] ($(Repr.north west) !.85! (Repr.north east)$) -- ($(Arch.south west) !.36! (Arch.south east)$); % activación
+		\draw [->] ($(Repr.north west) !.9! (Repr.north east)$) -- node[right]{\small act} ($(Arch.south west) !.38! (Arch.south east)$); % fin
+
+		\draw [<-] ($(Grab.north west) !.1! (Grab.north east)$) -- node[left]{\small r/r} ($(Arch.south west) !.618! (Arch.south east)$); % reloj
+		\draw [<-] ($(Grab.north west) !.2! (Grab.north east)$) -- ($(Arch.south west) !.658! (Arch.south east)$); % reloj div
+		\draw [->, thick] ($(Grab.north west) !.7! (Grab.north east)$) -- ($(Arch.south west) !.86! (Arch.south east)$); % datos memoria
+		\draw [->, thick] ($(Grab.north west) !.75! (Grab.north east)$) -- ($(Arch.south west) !.88! (Arch.south east)$); % dirección
+		\draw [->] ($(Grab.north west) !.8! (Grab.north east)$) -- ($(Arch.south west) !.90! (Arch.south east)$); % we
+		\draw [<-] ($(Grab.north west) !.9! (Grab.north east)$) -- node[right]{\small act} ($(Arch.south west) !.94! (Arch.south east)$); % fin
+
+		% Comunicación con el puerto serie
+		\draw [->, thick] (Urx.south) -- ($(Arch.north west) !.221! (Arch.north east)$);
+		\draw [<-, thick] (Utx.south) -- ($(Arch.north west) !.779! (Arch.north east)$);
+
+
+		\draw [<-] ($(Urx.south west) !.1! (Urx.south east)$) -- node[left]{\small r/r} ($(Arch.north west) !.06! (Arch.north east)$); % reloj
+		\draw [<-] ($(Urx.south west) !.2! (Urx.south east)$) -- ($(Arch.north west) !.101! (Arch.north east)$); % reloj div
+		\draw [->] ($(Urx.south west) !.9! (Urx.south east)$) -- node[right]{\small fin} ($(Arch.north west) !.382! (Arch.north east)$); % done
+
+		\draw [<-] ($(Utx.south west) !.1! (Utx.south east)$) -- node[left]{\small r/r} ($(Arch.north west) !.618! (Arch.north east)$); % reloj
+		\draw [<-] ($(Utx.south west) !.2! (Utx.south east)$) -- ($(Arch.north west) !.658! (Arch.north east)$); % reloj div
+		\draw [->] ($(Utx.south west) !.852! (Utx.south east)$) -- node[left]{\small done} ($(Arch.north west) !.92! (Arch.north east)$); % done
+		\draw [<-] ($(Utx.south west) !.9! (Utx.south east)$) -- node[right]{\small start} ($(Arch.north west) !.94! (Arch.north east)$); % start
+		
+	\end{tikzpicture}
+
+	\caption{Conexiones del archivero}
+	\label{fig:archivero}
+\end{figure}
+
 \subsection{Controladores}
 
 \begin{enumerate}
@@ -185,25 +238,6 @@ Sin embargo a pesar de ello y gracias al tiempo invertido, hemos aumentado signi
 \subsection{Distribución del trabajo}
 
 \subsection{Reivindicación}
-
-\begin{figure}[ht]\centering
-	\begin{tikzpicture}
-		% Módulos interconectados
-		\node (Arch) [modulo, minimum width=10cm] {archivero};
-		\node (UC) [left=1em of Arch, modulo] {UC};
-		\node (Mem) [right=1em of Arch, modulo] {(mem)};
-		\node (Urx) [above left=2em and -8em of Arch, modulo] {uart\_tx};
-		\node (Utx) [above right=2em and -8em of Arch, modulo] {uart\_rx};
-		\node (Repr) [below left=2em and -8em of Arch, modulo] {reproductor};
-		\node (Grab) [below right=2em and -8em of Arch, modulo] {grabador};
-
-		% Conexiones
-		
-	\end{tikzpicture}
-
-	\caption{Conexiones del archivero}
-	\label{fig:archivero}
-\end{figure}
 
 \newpage
 \phantomsection \addcontentsline{toc}{section}{Referencias}
