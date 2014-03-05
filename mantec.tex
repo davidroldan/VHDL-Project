@@ -107,7 +107,7 @@
 \subsection{Controladores}
 
 \begin{enumerate}
-	\item {\itshape Controlador de teclado}: maneja la entrada por teclado. Las pulsaciones permiten tocar las notas musicales y activar ciertos comandos comandos de la máquina. El controlador recibe datos a través de la línea \verb|PS2DATA| con reloj \verb|PS2CLK| en serie desde el teclado. En base a ello establece valores acordes para los parámetros musicales o activa señales que desencadenarán acciones en otros componentes externos.
+	\item {\itshape Controlador de teclado}: maneja la entrada por teclado. Las pulsaciones permiten tocar las notas musicales y activar ciertos comandos de la máquina. El controlador recibe datos a través de la línea \verb|PS2DATA| con reloj \verb|PS2CLK| en serie desde el teclado. En base a ello establece valores acordes para los parámetros musicales o activa señales que desencadenarán acciones en otros componentes externos.
 
 \begin{figure}[ht]\centering
 	\begin{tikzpicture}
@@ -160,7 +160,16 @@
 	\medskip El esquema del teclado del manual de usuario es una modificación un gráfico de Bruno Coudoin obtenido de \href{http://openclipart.org}{\nolinkurl{openclipart.org}}. Los esquemas de conexiones del mismo manual se han extraído del manual de la placa.
 
 \subsection{Dificultades}
-
+	Durante el desarrollo del proyecto hemos tenido que salvar dificultades varias, superando la mayoría de ellas con éxito. Podemos clasificarlas respecto al desarrollo de diversos componentes.
+\begin{enumerate}
+	\item {\itshape Códec de audio}: La escasa documentación y dificultad para encontrarla referente al Códec de audio de la FPGA, así como la aparente aleatoriedad del comportamiento de la misma en lo referente al códec supuso un gran esfuerzo en el desarrollo así como una constante sensación de insatisfacción, el resultado final, es audible, pero sólo correctamente en algunas de las FPGA.
+	\item {\itshape Teclado}: Debido a la respuesta natural del teclado cuando se mantiene una tecla pulsada un periodo de tiempo (envía repeticiones de la misma), invertimos gran cantidad de tiempo intentando establecer una comunicación bidireccional con el teclado a través del protocolo PS/2 para reconfigurar el comportamiento del teclado y su respuesta cómo nos convenía. Finalmente después de muchos intentos y pruebas con proyectos ya existentes, todas ellas acabadas en fracaso, posiblemente por que la placa no esté preparada para transmitir por el puerto PS/2, optamos por corregir este comportamiento desde el lado de la FPGA ignorando las repeticiones de una tecla pulsada.
+	\item {\itshape Comunicación puerto serie}:
+	Debido a la complejidad y delicadez del sistema, encontramos en el desarrollo de los componentes para la comunicación bidireccional a través del puerto de serie entre el ordenador y la FPGA diversos problemas, referentes a sincronización de relojes y a la detección de fallos a través de pruebas en tiempo real, así como también con las librerías necesarias para el software dedicado del ordenador.
+	Todas las dificultades referentes han sido resueltas satisfactoriamente, permitiendo almacenar y leer de memoria de la FPGA desde el ordenador a través del puerto de serie.
+\end{enumerate}
+Además de lo anteriormente mencionado, nos encontramos con varias dificultades, tales como inexplicables comportamientos de la placa, conflictos entre puertos y componentes usados de la FPGA.
+Sin embargo a pesar de ello y gracias al tiempo invertido, hemos aumentado significativamente el conocimiento del lenguaje y del dispositivo, quedando mejor preparado para el desarrollo de futuros proyectos.
 \subsection{Distribución del trabajo}
 
 \subsection{Reivindicación}
