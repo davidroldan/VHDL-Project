@@ -1,7 +1,23 @@
+---------------------------------------------------------------------------------
+-- Company: Equipo 1
+-- Engineer:
+-- 
+-- Design Name: Controlador de pantalla
+-- Module Name: vga
+-- Project Name: Proyecto de TOC
+-- Target Devices: Xilinx Spartan 3
+-- Tool versions: Xilinx ISE 14.1
+--
+-- Dependencies: vga_barras, vga_teclado, vga_playButton, vga_recButton,
+--		vga_stopButton
+--
+-- Description:
+----------------------------------------------------------------------------------
+
 library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
-use IEEE.STD_LOGIC_ARITH.ALL;
+use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.std_logic_arith.all;
 
 use work.tipos.all;
 

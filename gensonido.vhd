@@ -1,6 +1,17 @@
+----------------------------------------------------------------------------------
+-- Company: Equipo 1
+-- Engineer:
+-- 
+-- Design Name: Generador de sonidos
+-- Module Name: gensonido
+-- Project Name: Proyecto de TOC
+-- Target Devices: Xilinx Spartan 3
+-- Tool versions: Xilinx ISE 14.1
 --
--- Generador de sonidos
+-- Dependencies: tablanotas, tablanotassos
 --
+-- Description:
+----------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;

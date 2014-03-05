@@ -1,12 +1,23 @@
+---------------------------------------------------------------------------------
+-- Company: Equipo 1
+-- Engineer:
+-- 
+-- Design Name: Tabla de semiperiodos de nota en la séptima octava (con
+--		sostenido)
+-- Module Name: tablanotassos
+-- Project Name: Proyecto de TOC
+-- Target Devices: Xilinx Spartan 3
+-- Tool versions: Xilinx ISE 14.1
 --
--- Tabla de notas en la séptima octava (con sostenido)
--- De los apuntes de J.M. Mendías
+-- Dependencies:
 --
+-- Description: (de los apuntes de J.M. Mendías)
+----------------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
-use ieee.std_logic_unsigned.ALL;
+use ieee.std_logic_unsigned.all;
 
 -- Tipos locales
 use work.tipos.all;

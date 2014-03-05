@@ -1,54 +1,37 @@
---------------------------------------------------------------------------------
--- Company: 
+---------------------------------------------------------------------------------
+-- Company: Equipo 1
 -- Engineer:
+-- 
+-- Design Name: Prueba del receptor de la UART
+-- Module Name: sim_rx
+-- Project Name: Proyecto de TOC
+-- Target Devices: Xilinx Spartan 3
+-- Tool versions: Xilinx ISE 14.1 
+-- 
+-- VHDL Test Bench Created by ISE for module: sim_rx
 --
--- Create Date:   16:53:17 02/28/2014
--- Design Name:   
--- Module Name:   C:/hlocal/pruebas/sim_rx.vhd
--- Project Name:  pruebas
--- Target Device:  
--- Tool versions:  
--- Description:   
--- 
--- VHDL Test Bench Created by ISE for module: uart_rx
--- 
--- Dependencies:
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
---
--- Notes: 
--- This testbench has been automatically generated using types std_logic and
--- std_logic_vector for the ports of the unit under test.  Xilinx recommends
--- that these types always be used for the top-level I/O of a design in order
--- to guarantee that the testbench will bind correctly to the post-implementation 
--- simulation model.
 --------------------------------------------------------------------------------
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
+
+library ieee;
+use ieee.std_logic_1164.all;
+
+entity sim_rx is
+end sim_rx;
  
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---USE ieee.numeric_std.ALL;
- 
-ENTITY sim_rx IS
-END sim_rx;
- 
-ARCHITECTURE behavior OF sim_rx IS 
+architecture behavior of sim_rx is 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
-    COMPONENT uart_rx
-    PORT(
-         reloj : IN  std_logic;
-         reset : IN  std_logic;
-         rx : IN  std_logic;
-         rbaud : IN  std_logic;
-         fin : OUT  std_logic;
-         dout : OUT  std_logic_vector(7 downto 0)
+    component uart_rx
+    port(
+         reloj : in  std_logic;
+         reset : in  std_logic;
+         rx : in  std_logic;
+         rbaud : in  std_logic;
+         fin : out  std_logic;
+         dout : out  std_logic_vector(7 downto 0)
         );
-    END COMPONENT;
+    end component;
     
 
    --Inputs
@@ -67,7 +50,7 @@ ARCHITECTURE behavior OF sim_rx IS
 	constant rbaud_period : time := 100 ns;
 	
 	signal indicador : std_logic := '0';
-BEGIN
+begin
  
 	-- Instantiate the Unit Under Test (UUT)
    uut: uart_rx PORT MAP (
@@ -140,4 +123,4 @@ BEGIN
       wait;
    end process;
 
-END;
+end;

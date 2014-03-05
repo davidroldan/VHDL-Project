@@ -1,22 +1,18 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
+---------------------------------------------------------------------------------
+-- Company: Equipo 1
+-- Engineer:
 -- 
--- Create Date:
--- Design Name: 
--- Module Name:
--- Project Name: 
--- Target Devices: 
--- Tool versions: 
--- Description: 
+-- Design Name: Módulo principal del diseño
+-- Module Name: teclado
+-- Project Name: Proyecto de TOC
+-- Target Devices: Xilinx Spartan 3
+-- Tool versions: Xilinx ISE 14.1
 --
--- Dependencies: 
+-- Dependencies:
 --
--- Revision: 
--- Revision 0.01 - File Created
--- Additional Comments: 
---
+-- Description: conecta los diferentes componentes y centraliza los divisores.
 ----------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;

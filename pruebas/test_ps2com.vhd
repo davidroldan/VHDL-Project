@@ -1,6 +1,17 @@
+---------------------------------------------------------------------------------
+-- Company: Equipo 1
+-- Engineer:
+-- 
+-- Design Name: Prueba de comunicación con el teclado
+-- Module Name: test_ps2com
+-- Project Name: Proyecto de TOC
+-- Target Devices: Xilinx Spartan 3
+-- Tool versions: Xilinx ISE 14.1 
+-- 
+-- VHDL Test Bench Created by ISE for module: test_ps2com
+--
 --------------------------------------------------------------------------------
--- Prueba de comunicación con el teclado
---------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
  

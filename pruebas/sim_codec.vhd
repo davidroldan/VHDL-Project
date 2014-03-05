@@ -1,22 +1,17 @@
---------------------------------------------------------------------------------
--- Company: 
+---------------------------------------------------------------------------------
+-- Company: Equipo 1
 -- Engineer:
---
--- Create Date:
--- Design Name:   
--- Module Name:
--- Project Name:
--- Target Device:  
--- Tool versions:  
--- Description:
 -- 
--- Dependencies:
+-- Design Name: Prueba del códec de audio
+-- Module Name: sim_codec
+-- Project Name: Proyecto de TOC
+-- Target Devices: Xilinx Spartan 3
+-- Tool versions: Xilinx ISE 14.1 
 -- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
+-- VHDL Test Bench Created by ISE for module: codec
 --
 --------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use std.textio.all;

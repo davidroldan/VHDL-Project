@@ -1,55 +1,38 @@
---------------------------------------------------------------------------------
--- Company: 
+---------------------------------------------------------------------------------
+-- Company: Equipo 1
 -- Engineer:
+-- 
+-- Design Name: Prueba del emisor de la UART
+-- Module Name: sim_tx
+-- Project Name: Proyecto de TOC
+-- Target Devices: Xilinx Spartan 3
+-- Tool versions: Xilinx ISE 14.1 
+-- 
+-- VHDL Test Bench Created by ISE for module: sim_tx
 --
--- Create Date:   16:37:17 02/28/2014
--- Design Name:   
--- Module Name:   C:/hlocal/pruebas/sim_tx.vhd
--- Project Name:  pruebas
--- Target Device:  
--- Tool versions:  
--- Description:   
--- 
--- VHDL Test Bench Created by ISE for module: uart_tx
--- 
--- Dependencies:
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
---
--- Notes: 
--- This testbench has been automatically generated using types std_logic and
--- std_logic_vector for the ports of the unit under test.  Xilinx recommends
--- that these types always be used for the top-level I/O of a design in order
--- to guarantee that the testbench will bind correctly to the post-implementation 
--- simulation model.
 --------------------------------------------------------------------------------
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
+
+library ieee;
+use ieee.std_logic_1164.all;
  
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---USE ieee.numeric_std.ALL;
+entity sim_tx is
+end sim_tx;
  
-ENTITY sim_tx IS
-END sim_tx;
- 
-ARCHITECTURE behavior OF sim_tx IS 
+architecture behavior of sim_tx is 
  
     -- Component Declaration for the Unit Under Test (UUT)
  
-    COMPONENT uart_tx
-    PORT(
-         reloj : IN  std_logic;
-         reset : IN  std_logic;
-         tx_start : IN  std_logic;
-         rbaud : IN  std_logic;
-         din : IN  std_logic_vector(7 downto 0);
-         tx_done_tick : OUT  std_logic;
-         tx : OUT  std_logic
+    component uart_tx
+    port(
+         reloj : in  std_logic;
+         reset : in  std_logic;
+         tx_start : in  std_logic;
+         rbaud : in  std_logic;
+         din : in  std_logic_vector(7 downto 0);
+         tx_done_tick : out  std_logic;
+         tx : out  std_logic
         );
-    END COMPONENT;
+    end component;
     
 
    --Inputs
@@ -68,7 +51,7 @@ ARCHITECTURE behavior OF sim_tx IS
    constant reloj_period : time := 10 ns;
 	constant rbaud_period : time := 20 ns;
  
-BEGIN
+begin
 	-- Instantiate the Unit Under Test (UUT)
    uut: uart_tx PORT MAP (
           reloj => reloj,
@@ -118,4 +101,4 @@ BEGIN
       wait;
    end process;
 
-END;
+end;

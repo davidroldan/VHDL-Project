@@ -1,3 +1,19 @@
+----------------------------------------------------------------------------------
+-- Company: Equipo 1
+-- Engineer:
+-- 
+-- Design Name: Archivero
+-- Module Name: archivero
+-- Project Name: Proyecto de TOC
+-- Target Devices: Xilinx Spartan 3
+-- Tool versions: Xilinx ISE 14.1
+--
+-- Dependencies: reproductor, grabador, uart_rx, uart_tx, RAMB16_S18_S18
+--
+-- Description: memoria, reproducción, grabación y transferencia por el puerto
+--		serie.
+----------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;

@@ -1,3 +1,19 @@
+----------------------------------------------------------------------------------
+-- Company: Equipo 1
+-- Engineer:
+-- 
+-- Design Name: Display
+-- Module Name: display
+-- Project Name: Proyecto de TOC
+-- Target Devices: Xilinx Spartan 3
+-- Tool versions: Xilinx ISE 14.1
+--
+-- Dependencies: segments
+--
+-- Description: muestra la nota pulsada o el número de bloque de memoria activa
+--		en dos displays de 7 segmentos.
+----------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 
