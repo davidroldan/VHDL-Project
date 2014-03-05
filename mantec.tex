@@ -3,25 +3,26 @@
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{palatino}
-\usepackage[spanish, es-noquoting]{babel}
+\usepackage[english, spanish, es-noquoting]{babel}
+\usepackage{babelbib}
 \usepackage{anysize}
 \usepackage{tabu}
 \usepackage{graphicx}
 \usepackage{tikz}
+\usepackage{url}
+\usepackage[colorlinks]{hyperref}
 
+% Configuración TikZ
 \usetikzlibrary{positioning}
-
 \tikzset{modulo/.style={fill=yellow!80!black}, lineamus/.style={draw=green!80!black, thick}}
 
-\PrerenderUnicode{é}
-\PrerenderUnicode{í}
-\PrerenderUnicode{ó}
-
-\pdfinfo{
-	/Title (Teclado: manual técnico)
-	/Subject (Tecnología y Organización de Computadores)
+% Metadatos del PDF
+\hypersetup{
+	pdftitle={Teclado: manual técnico},
+	pdfsubject={Tecnología y Organización de Computadores}
 }
 
+% Ajuste de rotura de palabras en salto de línea
 \hyphenpenalty=5000
 \tolerance=1000
 
@@ -32,74 +33,50 @@
 
 \maketitle
 
-\section{Ruta de datos}
+\tableofcontents
 
-	\begin{figure}[ht]\centering
-		\includegraphics[scale=.62]{esquema.pdf}
-		\caption{Esquema de módulos e interconexión}
-		\label{fig:esquema}
-	\end{figure}
+\section{Descripción del diseño}
 
-\begin{center}
-\begin{tikzpicture}[node distance=5mm and 5mm]
-	% Módulos de diseño del proyecto
-	\node (UC) [modulo] {unidad central};
-	\node (Gen) [above left= -1mm and 1cm of UC.north west, modulo] {gensonido};
-	\node (Codec) [below left= 1mm and 1cm of UC.south west, modulo] {códec de audio};
-	\node (Vga) [below=1 cm of UC, modulo] {vga};
-	\node (VgaBarra) [below left=of Vga, modulo] {vga\_barra};
-	\node (VgaTeclado) [below right=of Vga, modulo] {vga\_teclado};
-	\node (Recon) [above=1cm of UC, modulo] {reconocedor}; 
-	\node (Arch) [right=1.5 cm of UC, modulo] {archivero};
-	\node (Mem) [above =of Arch, modulo] {(memoria)};
-	\node (UART) [below=of Arch, modulo] {UART};
-	\node (Grab) [above right= 0mm and 4mm of Arch.north east, modulo] {grabador};
-	\node (Repr) [below right= 0mm and 4mm of Arch.south east, modulo] {reproductor};
-
-	% Conexiones entre los módulos
-	\draw [<-] (UC.180) -- (Gen);
-	\draw [->, lineamus] (UC.north west) -- (Gen.5);
-	\draw [<->, lineamus] (UC) -- (Arch);
-	\draw (Arch) -- (Grab);
-	\draw (Arch) -- (Repr);
-	\draw (Arch) -- (Mem);
-	\draw (Arch) -- (UART);
-	\draw [->, lineamus] (UC) -- (Vga);
-	\draw (Vga) -- (VgaBarra);
-	\draw (Vga) -- (VgaTeclado);
-	\draw [<->] (UC.south west) -- (Codec.0);
-	\draw [->, lineamus]  (Recon.-40) -- (UC.40);
-	\draw [->] (Recon.-140)-- (UC.140);
-\end{tikzpicture}
-\end{center}
-
+\subsection{Ruta de datos}
 
 \begin{figure}[ht]\centering
-	\begin{tikzpicture}
-		% Módulos interconectados
-		\node (UC) [modulo, minimum width=10cm] {unidad central};
-		\node (Recon) [above=1cm of UC, modulo, minimum width=6cm] {reconocedor}; 
+	\begin{tikzpicture}[node distance=5mm and 5mm]
+		% Módulos de diseño del proyecto
+		\node (UC) [modulo] {unidad central};
+		\node (Gen) [above left= -1mm and 1cm of UC.north west, modulo] {gensonido};
+		\node (Codec) [below left= 1mm and 1cm of UC.south west, modulo] {códec de audio};
+		\node (Vga) [below=1 cm of UC, modulo] {vga};
+		\node (VgaBarra) [below left=of Vga, modulo] {vga\_barra};
+		\node (VgaTeclado) [below right=of Vga, modulo] {vga\_teclado};
+		\node (Recon) [above=1cm of UC, modulo] {reconocedor}; 
+		\node (Arch) [right=1.5 cm of UC, modulo] {archivero};
+		\node (Mem) [above =of Arch, modulo] {(memoria)};
+		\node (UART) [below=of Arch, modulo] {UART};
+		\node (Grab) [above right= 0mm and 4mm of Arch.north east, modulo] {grabador};
+		\node (Repr) [below right= 0mm and 4mm of Arch.south east, modulo] {reproductor};
 
-		% Conexiones
-		\draw [->] (UC.174) -- node[left]{\small reloj/reset} (Recon.-174); % reloj/reset
-		\draw [->, lineamus] (Recon.-170) -- (UC.170);
-		\draw [->] (Recon.-7) -- (UC.7);		% botón octava+
-		\draw [->] (Recon.-8) -- (UC.8);		% botón octava-
-		\draw [->] (Recon.-10) -- (UC.10);	% botón parada
-		\draw [->] (Recon.-12) -- (UC.12);	% botón reproducción
-		\draw [->] (Recon.-15) -- node[left]{\small activadores} (UC.15); % botón grabación
-
-		\draw [->, thick] (Recon.-6) -- node[right] {\small octava base} (UC.6);
+		% Conexiones entre los módulos
+		\draw [<-] (UC.180) -- (Gen);
+		\draw [->, lineamus] (UC.north west) -- (Gen.5);
+		\draw [<->, lineamus] (UC) -- (Arch);
+		\draw (Arch) -- (Grab);
+		\draw (Arch) -- (Repr);
+		\draw (Arch) -- (Mem);
+		\draw (Arch) -- (UART);
+		\draw [->, lineamus] (UC) -- (Vga);
+		\draw (Vga) -- (VgaBarra);
+		\draw (Vga) -- (VgaTeclado);
+		\draw [<->] (UC.south west) -- (Codec.0);
+		\draw [->, lineamus]  (Recon.-40) -- (UC.40);
+		\draw [->] (Recon.-140)-- (UC.140);
 	\end{tikzpicture}
-
-	\caption{Conexiones del reconocedor}
-	\label{fig:reconocedor}
+	\caption{Esquema de módulos e interconexión}
+	\label{fig:esquema}
 \end{figure}
 
+	En la figura \ref{fig:esquema} las líneas gruesas verdes indican el paso de los ``parámetros musicales'': nota (3 bits), octava (3 bits) y sostenido (3 bits). Esta terna es el dato principal del diseño. Se origina en el {\itshape reconocedor} como resultado de la interacción del usuario o en el {\itshape archivero} por la reproducción de un archivo grabado. La unidad central selecciona la fuente activa en cada momento. Su destino es el  generador de sonidos ({\itshape gensonido}) que produce una onda cuadrada; también llega al controlador de pantalla y al archivero para la grabación.
 
-	En la figura \ref{fig:esquema} las líneas gruesas verdes indican el paso de los ``parámetros musicales'': nota (3 bits), octava (3 bits) y sostenido (3 bits). Este es el dato principal del diseño. Se origina en el {\itshape reconocedor} como resultado de la interacción del usuario o en el {\itshape archivero} por la reproducción de un archivo grabado. La unidad central selecciona la fuente activa en cada momento. Su destino es el  generador de sonidos ({\itshape gensonido}) que produce una onda cuadrada; también llega al controlador de pantalla que muestra una recreación del teclado y una animación, y al archivero para la grabación.
-
-\begin{figure}\centering
+\begin{figure}[ht]\centering
 	\begin{tikzpicture}
 		% Módulos interconectados
 		\node (UC) [modulo, minimum width=10cm] {unidad central\strut};
@@ -123,17 +100,71 @@
 	\label{fig:gensonido}
 \end{figure}
 
-	\medskip La señal sonora generada por {\itshape gensonido} se dirige a un pin de salida de la FPGA para ser conectada a un zumbador o semejante, pero también se conecta al códec de audio que produce una señal analógica por el puerto de salida jack de 3,5mm del dispositivo.
+	\medskip La señal sonora generada por {\itshape gensonido} se dirige a un pin de salida de la FPGA para ser conectada a un zumbador o semejante. Sin embargo se conecta también al códec de audio que produce una señal analógica por el puerto de salida jack de 3,5mm del dispositivo.
 
-	\medskip La memoria se gestiona en el módulo archivero. Se organiza en 20 bloques RAM de doble puerto y anchura 16 bits compartidos por el grabador, el reproductor y el transmisor. El reproductor lee desde el puerto A, el grabador escribe en el puerto B y el transmisor realiza sendas operaciones en los puertos cruzados. La reproducción y la grabación no pueden darse simultáneamente\footnote{Técnicamente sería posible en memorias diferentes con ligeras modificaciones.}, sin embargo la carga o descarga de datos por el transmisor pueden acontecer concurrentemente con aquellas si involucran a bloques distintos. El control de la compartición se maneja en el módulo.
+	\medskip La memoria se gestiona en el módulo {\itshape archivero}. Se organiza en 20 bloques RAM de doble puerto y anchura 16 bits compartidos por el grabador, el reproductor y el transmisor. El reproductor lee desde el puerto A, el grabador escribe en el puerto B y el transmisor realiza sendas operaciones en los puertos cruzados. La reproducción y la grabación no pueden darse simultáneamente\footnote{Técnicamente sería posible en memorias diferentes con ligeras modificaciones.}, sin embargo la carga o descarga de datos por el transmisor pueden acontecer concurrentemente con aquellas si involucran a bloques distintos. El control de la compartición se maneja en el módulo.
 
-\section{Controladores}
+\subsection{Controladores}
 
 \begin{enumerate}
 	\item {\itshape Controlador de teclado}: maneja la entrada por teclado. Las pulsaciones permiten tocar las notas musicales y activar ciertos comandos comandos de la máquina. El controlador recibe datos a través de la línea \verb|PS2DATA| con reloj \verb|PS2CLK| en serie desde el teclado. En base a ello establece valores acordes para los parámetros musicales o activa señales que desencadenarán acciones en otros componentes externos.
+
+\begin{figure}[ht]\centering
+	\begin{tikzpicture}
+		% Módulos interconectados
+		\node (UC) [modulo, minimum width=10cm] {unidad central};
+		\node (Recon) [above=1cm of UC, modulo, minimum width=6cm] {reconocedor}; 
+
+		% Conexiones
+		\draw [->] (UC.174) -- node[left]{\small reloj/reset} (Recon.-174); % reloj/reset
+		\draw [->, lineamus] (Recon.-170) -- (UC.170);
+		\draw [->] (Recon.-7) -- (UC.7);		% botón octava+
+		\draw [->] (Recon.-8) -- (UC.8);		% botón octava-
+		\draw [->] (Recon.-10) -- (UC.10);	% botón parada
+		\draw [->] (Recon.-12) -- (UC.12);	% botón reproducción
+		\draw [->] (Recon.-15) -- node[left]{\small activadores} (UC.15); % botón grabación
+
+		\draw [->, thick] (Recon.-6) -- node[right] {\small octava base} (UC.6);
+	\end{tikzpicture}
+
+	\caption{Conexiones del reconocedor}
+	\label{fig:reconocedor}
+\end{figure}
+
 	\item {\itshape Controlador de pantalla}: se encarga de la salida por pantalla. El controlador lee las distintas señales que contienen la información sobre lo que se desea visualizar. A través de dos contadores que recorren la pantalla (\verb|hsync| y \verb|vsync|), se enviará la información al puerto VGA píxel a píxel.
 	\item {\itshape Controlador de comunicación serie}: maneja la comunicación bidireccional con el ordenador mediante el puerto serie. El protocolo de comunicación permite enviar y recibir archivos de audio para ser cargados en la memoria.
+
+	\begin{figure}[ht] \centering
+		\begin{tabular}{| l | l | l | l | l | l | l | l | l | l | l | l | l | l | l | l |}
+			\hline esp & \multicolumn{3}{c|}{nota} & \multicolumn{3}{c|}{octava} & sos & \multicolumn{8}{c|}{duración} \\ \hline
+			& & & & & & & & & & & & & & & \\ \hline
+		\end{tabular}
+
+		\caption{Esquema del formato de representación FLAN}
+	\end{figure}
+
 	\item {\itshape Controlador del códec de audio}: este controlador establece las señales de reloj y convierte una onda cuadrada en un valor estéreo de 20 bits apto para el códec de audio {\itshape AK4551} de la FPGA.
 \end{enumerate}
 
+\section{Desarrollo del proyecto}
+
+\subsection{Bibliografía}
+	Para la elaboración del generador de sonidos y el códec de audio ha sido de gran utilidad la documentación de la asignatura {\itshape Diseño Automático de Sistemas} de José Manuel Mendías, en \url{www.dacya.ucm.es/mendias/DAS/DAS.html}.
+
+	\medskip La referencia principal para el diseño del sistema de comunicación entre el ordenador y la FPGA por el puerto serie es el libro \cite{PCHU} de Pong P. Chu. Adaptaciones de su transmisor y receptor de la UART se han utilizado en el proyecto. Del lado del ordenador se ha empleado la biblioteca de {\itshape Java} {\itshape RxTx} (una implementación de {\itshape Java Communications API}) disponible en \href{http://rxtx.qbang.org}{\nolinkurl{rxtx.qbang.org}}.
+
+	\medskip El formato de del lenguaje convertible a formato FLAN por el programa {\itshape MFlan} está inspirado y es compatible con la sintaxis del programa de composición tipográfica de partituras Lilypond (\href{http://lilypond.org}{\nolinkurl{lilypond.org}}). En el reproductor de archivos FLAN desde el ordenador se ha recurrido a la biblioteca multiplataforma {\itshape PortAudio} disponible en \url{www.portaudio.com}.
+
+	\medskip El esquema del teclado del manual de usuario es una modificación un gráfico de Bruno Coudoin obtenido de \href{http://openclipart.org}{\nolinkurl{openclipart.org}}. Los esquemas de conexiones del mismo manual se han extraído del manual de la placa.
+
+\subsection{Dificultades}
+
+\subsection{Distribución del trabajo}
+
+\subsection{Reivindicación}
+
+\newpage
+\phantomsection \addcontentsline{toc}{section}{Referencias}
+\bibliography{toc}
+\bibliographystyle{babalpha}
 \end{document}
