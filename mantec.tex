@@ -13,7 +13,7 @@
 \usepackage[colorlinks]{hyperref}
 
 % Configuración TikZ
-\usetikzlibrary{positioning}
+\usetikzlibrary{positioning, calc}
 \tikzset{modulo/.style={fill=yellow!80!black}, lineamus/.style={draw=green!80!black, thick}}
 
 % Metadatos del PDF
@@ -107,7 +107,7 @@
 \subsection{Controladores}
 
 \begin{enumerate}
-	\item {\itshape Controlador de teclado}: maneja la entrada por teclado. Las pulsaciones permiten tocar las notas musicales y activar ciertos comandos de la máquina. El controlador recibe datos a través de la línea \verb|PS2DATA| con reloj \verb|PS2CLK| en serie desde el teclado. En base a ello establece valores acordes para los parámetros musicales o activa señales que desencadenarán acciones en otros componentes externos.
+	\item {\itshape Controlador de teclado}: maneja la entrada por teclado. Las pulsaciones permiten tocar las notas musicales y activar ciertos comandos comandos de la máquina. El controlador recibe datos a través de la línea \verb|PS2DATA| con reloj \verb|PS2CLK| en serie desde el teclado. En base a ello establece valores acordes para los parámetros musicales o activa señales que desencadenarán acciones en otros componentes externos.
 
 \begin{figure}[ht]\centering
 	\begin{tikzpicture}
@@ -132,7 +132,8 @@
 \end{figure}
 
 	\item {\itshape Controlador de pantalla}: se encarga de la salida por pantalla. El controlador lee las distintas señales que contienen la información sobre lo que se desea visualizar. A través de dos contadores que recorren la pantalla (\verb|hsync| y \verb|vsync|), se enviará la información al puerto VGA píxel a píxel.
-	\item {\itshape Controlador de comunicación serie}: maneja la comunicación bidireccional con el ordenador mediante el puerto serie. El protocolo de comunicación permite enviar y recibir archivos de audio para ser cargados en la memoria.
+
+	\item {\itshape Grabador/reproductor}: registra o reproduce una sucesión de notas musicales con su duración, siguiendo el formato FLAN ({\itshape Formato Lineal de Audible Notación}) que se compone de cuadros de 16 bits que representan notas musicales o comandos especiales (si el campo \verb|esp| está a 0). El campo nota toma valores \verb|000| para silencio, \verb|001| para la nota do y así sucesivamente hasta \verb|111| para la nota si. El campo \verb|octava| indica la octava numerada del 0 al 7 y \verb|sos| activa a 1 el sostenido. Se reservan 8 bits para la duración. El único comando especial reconocido es la marca de fin, totalmente nula. 
 
 	\begin{figure}[ht] \centering
 		\begin{tabular}{| l | l | l | l | l | l | l | l | l | l | l | l | l | l | l | l |}
@@ -140,8 +141,15 @@
 			& & & & & & & & & & & & & & & \\ \hline
 		\end{tabular}
 
+		\label{fig:flan}
 		\caption{Esquema del formato de representación FLAN}
 	\end{figure}
+
+	Tanto el grabador como el reproductor utilizan señales de reloj dividido a $2^{21}$ veces el reloj de la FPGA.
+
+	\item {\itshape Controlador de comunicación serie}: maneja la comunicación bidireccional con el ordenador mediante el puerto serie RS232. El protocolo de comunicación permite enviar y recibir archivos de audio para ser cargados en la memoria.
+
+	Las dos modalidades comparten una estructura común: el ordenador envía una código de petición seguido de un número de bloque, en consecuencia la FPGA devuelve una confirmación o una denegación en caso de estar ocupado. A continuación se recorre la memoria enviando o recibiendo byte a byte el contenido de un archivo FLAN hasta encontrar la marca de finalización. Además dispone de una petición de saludo para comprobar la conexión.
 
 	\item {\itshape Controlador del códec de audio}: este controlador establece las señales de reloj y convierte una onda cuadrada en un valor estéreo de 20 bits apto para el códec de audio {\itshape AK4551} de la FPGA.
 \end{enumerate}
@@ -155,24 +163,47 @@
 
 	\medskip Para el diseño del controlador VGA, se ha utilizado como base el fichero {\itshape vhdl} del campus virtual.
 
-	\medskip El formato de del lenguaje convertible a formato FLAN por el programa {\itshape MFlan} está inspirado y es compatible con la sintaxis del programa de composición tipográfica de partituras Lilypond (\href{http://lilypond.org}{\nolinkurl{lilypond.org}}). En el reproductor de archivos FLAN desde el ordenador se ha recurrido a la biblioteca multiplataforma {\itshape PortAudio} disponible en \url{www.portaudio.com}.
+	\medskip El formato del lenguaje convertible a formato FLAN por el programa {\itshape MFlan} está inspirado y es compatible con la sintaxis del programa de composición tipográfica de partituras Lilypond (\href{http://lilypond.org}{\nolinkurl{lilypond.org}}). En el reproductor de archivos FLAN desde el ordenador se ha recurrido a la biblioteca multiplataforma {\itshape PortAudio} disponible en \url{www.portaudio.com}.
 
 	\medskip El esquema del teclado del manual de usuario es una modificación un gráfico de Bruno Coudoin obtenido de \href{http://openclipart.org}{\nolinkurl{openclipart.org}}. Los esquemas de conexiones del mismo manual se han extraído del manual de la placa.
 
 \subsection{Dificultades}
 	Durante el desarrollo del proyecto hemos tenido que salvar dificultades varias, superando la mayoría de ellas con éxito. Podemos clasificarlas respecto al desarrollo de diversos componentes.
+
 \begin{enumerate}
-	\item {\itshape Códec de audio}: La escasa documentación y dificultad para encontrarla referente al Códec de audio de la FPGA, así como la aparente aleatoriedad del comportamiento de la misma en lo referente al códec supuso un gran esfuerzo en el desarrollo así como una constante sensación de insatisfacción, el resultado final, es audible, pero sólo correctamente en algunas de las FPGA.
-	\item {\itshape Teclado}: Debido a la respuesta natural del teclado cuando se mantiene una tecla pulsada un periodo de tiempo (envía repeticiones de la misma), invertimos gran cantidad de tiempo intentando establecer una comunicación bidireccional con el teclado a través del protocolo PS/2 para reconfigurar el comportamiento del teclado y su respuesta cómo nos convenía. Finalmente después de muchos intentos y pruebas con proyectos ya existentes, todas ellas acabadas en fracaso, posiblemente por que la placa no esté preparada para transmitir por el puerto PS/2, optamos por corregir este comportamiento desde el lado de la FPGA ignorando las repeticiones de una tecla pulsada.
-	\item {\itshape Comunicación puerto serie}:
-	Debido a la complejidad y delicadez del sistema, encontramos en el desarrollo de los componentes para la comunicación bidireccional a través del puerto de serie entre el ordenador y la FPGA diversos problemas, referentes a sincronización de relojes y a la detección de fallos a través de pruebas en tiempo real, así como también con las librerías necesarias para el software dedicado del ordenador.
+	\item {\itshape Códec de audio}: la escasa documentación y dificultad para encontrarla referente al códec de audio de la FPGA, así como la aparente aleatoriedad del comportamiento de la misma en lo referente al códec supuso un gran esfuerzo en el desarrollo así como una constante sensación de insatisfacción, el resultado final, es audible, pero sólo correctamente en algunas de las FPGA.
+
+	\item {\itshape Teclado}: debido a la respuesta natural del teclado cuando se mantiene una tecla pulsada un periodo de tiempo (envía repeticiones de la misma), invertimos gran cantidad de tiempo intentando establecer una comunicación bidireccional con el teclado a través del protocolo PS/2 para reconfigurar el comportamiento del teclado y su respuesta cómo nos convenía. Finalmente después de muchos intentos y pruebas con proyectos ya existentes, todas ellas acabadas en fracaso, posiblemente por que la placa no esté preparada para transmitir por el puerto PS/2, optamos por corregir este comportamiento desde el lado de la FPGA ignorando las repeticiones de una tecla pulsada.
+
+	\item {\itshape Comunicación puerto serie}: debido a la complejidad y delicadeza del sistema, encontramos en el desarrollo de los componentes para la comunicación bidireccional a través del puerto de serie entre el ordenador y la FPGA diversos problemas, referentes a sincronización de relojes y a la detección de fallos a través de pruebas en tiempo real, así como también con las librerías necesarias para el software dedicado del ordenador.
 	Todas las dificultades referentes han sido resueltas satisfactoriamente, permitiendo almacenar y leer de memoria de la FPGA desde el ordenador a través del puerto de serie.
 \end{enumerate}
+
 Además de lo anteriormente mencionado, nos encontramos con varias dificultades, tales como inexplicables comportamientos de la placa, conflictos entre puertos y componentes usados de la FPGA.
 Sin embargo a pesar de ello y gracias al tiempo invertido, hemos aumentado significativamente el conocimiento del lenguaje y del dispositivo, quedando mejor preparado para el desarrollo de futuros proyectos.
+
 \subsection{Distribución del trabajo}
 
 \subsection{Reivindicación}
+
+\begin{figure}[ht]\centering
+	\begin{tikzpicture}
+		% Módulos interconectados
+		\node (Arch) [modulo, minimum width=10cm] {archivero};
+		\node (UC) [left=1em of Arch, modulo] {UC};
+		\node (Mem) [right=1em of Arch, modulo] {(mem)};
+		\node (Urx) [above left=2em and -8em of Arch, modulo] {uart\_tx};
+		\node (Utx) [above right=2em and -8em of Arch, modulo] {uart\_rx};
+		\node (Repr) [below left=2em and -8em of Arch, modulo] {reproductor};
+		\node (Grab) [below right=2em and -8em of Arch, modulo] {grabador};
+
+		% Conexiones
+		
+	\end{tikzpicture}
+
+	\caption{Conexiones del archivero}
+	\label{fig:archivero}
+\end{figure}
 
 \newpage
 \phantomsection \addcontentsline{toc}{section}{Referencias}

@@ -16,9 +16,9 @@
 \PrerenderUnicode{í}
 \PrerenderUnicode{ó}
 
-\pdfinfo{
-	/Title (Teclado: manual de uso)
-	/Subject (Tecnología y Organización de Computadores)
+\hypersetup{
+	pdftitle={Teclado: manual de uso},
+	pdfsubject={Tecnología y Organización de Computadores}
 }
 
 \hyphenpenalty=5000
@@ -211,8 +211,8 @@
 	M3 & led\_trans & out & Indica si se están transmitiendo datos por el puerto serie \\ \sep
 
 	\multicolumn{4}{c}{\bfseries Puerto serie} \\ \sep
-	G5 & rs232\_rd & in & Entrada de datos \\ \sep
-	J2 & rs232\_td & out & Salida de datos \\ \sep
+	G5 & rx & in & Entrada de datos \\ \sep
+	J2 & tx & out & Salida de datos \\ \sep
 \end{tabu}
 
 	\bigskip Otros conjuntos de pines son:
@@ -253,10 +253,10 @@
 	El teclado funciona en diferentes modos:
 
 	\begin{enumerate}
-		\item {\itshape Modo teclado}: por defecto el sistema funciona como un piano cuyo teclado es el teclado conectado a la FPGA. Las diferentes notas (dos octavas y media simultáneamente) se distribuyen de acuerdo al esquema de la figura \ref{fig:teclado}. Se puede variar la octava con las flechas verticales del teclado numérico. El número de octava se muestra en el display de 7 segmentos al pulsar un nota natural.
+		\item {\itshape Modo teclado}: por defecto el sistema funciona como un piano cuyo teclado es el teclado conectado a la FPGA. Las diferentes notas (dos octavas y media simultáneamente) se distribuyen de acuerdo al esquema de la figura \ref{fig:teclado}. Se puede variar la octava con las flechas verticales del teclado numérico. El número de octava se muestra en el display de 7 segmentos al pulsar una nota natural.
 
 \begin{figure}[ht] \centering
-	\includegraphics[scale=1.8]{keyboard.pdf}
+	\includegraphics[scale=1.7]{keyboard.pdf}
 
 	\caption{Disposición del teclado}
 	\label{fig:teclado}
