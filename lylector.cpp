@@ -18,7 +18,7 @@
 using namespace std;
 
 // Factor de duración de las unidades de tiempo del formato
-const double FACTOR_DURACION = (4096.0 / 390625) * 1000; // milisegundos
+const double FACTOR_DURACION = (8192.0 / 390625) * 1000; // milisegundos
 
 /**
  * @brief Convierte de la representación interna para las notas
