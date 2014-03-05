@@ -234,7 +234,7 @@
 	El teclado funciona en diferentes modos:
 
 	\begin{enumerate}
-		\item {\itshape Modo teclado}: por defecto el sistema funciona como un piano cuyo teclado es el teclado conectado a la FPGA. Las diferentes notas (dos octavas y media simultáneamente) se distribuyen de acuerdo al esquema de la figura \ref{fig:teclado}. Se puede variar la octava con las flechas verticales del teclado numérico. El número de octava se muestra en el display de 7 segmentos al pulsar un nota natural. Al pulsar las teclas se produce sonido y simultáneamente se muestran diversas animaciones en la pantalla.
+		\item {\itshape Modo teclado}: por defecto el sistema funciona como un piano cuyo teclado es el teclado conectado a la FPGA. Las diferentes notas (dos octavas y media simultáneamente) se distribuyen de acuerdo al esquema de la figura \ref{fig:teclado}. Se puede variar la octava con las flechas verticales del teclado numérico. El número de octava se muestra en el display de 7 segmentos al pulsar un nota natural.
 
 \begin{figure}[ht] \centering
 	\includegraphics[scale=1.8]{keyboard.pdf}
@@ -263,5 +263,26 @@
 \end{figure}
 	\end{enumerate}
 \section{¿Qué espero ver?}
+
+	Nada más cargar el fichero {\itshape .bit} en la FPGA, se mostrará un piano por pantalla. El modo del teclado se indicará a través de una imagen en la parte superior derecha de la pantalla, (el modo por defecto es el modo teclado, luego inicialmente habrá una imagen de {\itshape stop}).\\
+
+	Cada vez que se genere una nota, tanto al tocarla en el modo teclado o grabación, o al reproducirla en el modo de reproducción, se generará el sonido correspondiente a esa nota, que se podrá escuchar o bien con un zumbador o al conectar unos cascos por el puerto de salida jack de 3,5mm del dispositivo. Simultáneamente, en el piano mostrado por la pantalla se iluminará de color rojo la nota correspondiente, y aparecerá una barra azul que indicará la duración de la nota tocada. También se mostrará la nota tocada por el display de 7 segmentos.\\
+
+	Ahora describiremos cómo deberían comportarse cada uno de los modos del teclado: \\
+	\begin{enumerate}
+	\item {\itshape Modo teclado (o reposo)}: cuando este modo está activado, habrá una imagen de {\itshape stop} en la parte superior derecha de la pantalla. En este modo se permite tocar las notas a través del teclado, y cambiar de octava.
+
+	\item {\itshape Modo reproducción}: al activar el modo de reproducción, aparecerá una imagen de {\itshape play} en la parte superior derecha de la pantalla. También se indicará que este modo esta activo por medio del led 0 de la placa extendida. En ese momento se reproducirá la canción o secuencia de notas almacenada en el bloque de memoria activo en ese momento. Esta secuencia de notas será la que ha sido grabada en el modo grabación, cargada mediante el modo transmisor, o bien una canción por defecto. Cuando la reproducción finaliza, el teclado pasa a estar en modo reposo (o modo teclado).  Para no tener problemas con el cambio de octava, en el modo reproducción las notas se mostrarán siempre en la primera octava del piano de la pantalla, y esta solo se indicará en el display de 7 segmentos.
+
+	\item {\itshape Modo grabación}: al activar el modo de grabación, aparecerá una imagen de {\itshape rec} en la parte superior derecha de la pantalla. También se indicará que este modo está activo por medio del led 1 de la placa extendida. El funcionamiento es similar al modo de reposo, pero adicionalmente se irá almacenando en memoria la secuencia de notas tocadas en el teclado, reemplazando así la canción anterior que estuviese almacenada en ese bloque de memoria. El modo de grabación finaliza cuando la memoria está llena o cuando se pulsa el botón de stop.
+
+	\item {\itshape Modo transmisión}: tras cargar una cancion en la FPGA, podremos reproducirla con el modo reproducción. Al transferir una canción desde la FPGA al ordenador, se generará un archivo de formato {\itshape FLAN}.
+
+
+
+	\end{enumerate}
+
+
+	
 
 \end{document}
